@@ -9,8 +9,8 @@
     </div>
 
     <div class="row mb-3 text-center">
-        <h1>NOMBRE DE CARTES : {{total|format_number(locale='fr')}}</h1>
-        <h1 class="text-success">MONTANT TOTAL : {{ totalAmount }}</h1>
+        <h1>NOMBRE DE CARTES : {{total.total|format_number(locale='fr')}}</h1>
+        <h1 class="text-success">MONTANT TOTAL : {{ total.totalAmount|format_currency('EUR', locale='fr') }}</h1>
     </div>
     {# Link to card form #}
     <div class="row">
@@ -99,6 +99,10 @@
                 {% endif %}
             </tbody>
         </table>
+
+        <div class="navigation">
+            {{ knp_pagination_render(cards) }}
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -6,6 +6,7 @@ use App\Entity\Game;
 use App\Form\GameType;
 use App\Repository\GameRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,24 +14,30 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class GameController extends AbstractController
 {
-    public function __construct(private GameRepository $gameRepository, private EntityManagerInterface $em) {}
+    public function __construct(private GameRepository $gameRepository, private EntityManagerInterface $em)
+    {
+    }
 
     #[Route('/game', name: 'app_game')]
-    public function index(): Response
+    public function index(PaginatorInterface $paginator, Request $request): Response
     {
-        $games = $this->gameRepository->findBy([], ['price' => 'DESC']);
+        $games = $this->gameRepository->createQueryBuilder('g')
+            ->orderBy('g.price', 'DESC')
+        ;
 
-        $total = count($games);
-        $totalAmount = 0;
-        foreach ($games as $game) {
-            $price = $game->getPrice() * $game->getNumber();
-            $totalAmount += $price;
-        }
+        $games = $paginator->paginate(
+            $games,
+            $request->query->get('page', 1),
+            10
+        );
+
+        $total = $this->gameRepository->createQueryBuilder('game')
+            ->select('SUM(game.price * game.number) AS totalAmount, SUM(game.number) AS total')
+        ;
 
         return $this->render('game/index.html.twig', [
             'games' => $games,
-            'total' => $total,
-            'totalAmount' => $totalAmount
+            'total' => $total->getQuery()->getOneOrNullResult()
         ]);
     }
 

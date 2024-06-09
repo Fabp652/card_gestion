@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\CardRepository;
 use App\Repository\RarityRepository;
+use Knp\Component\Pager\PaginatorInterface;
 use NumberFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,33 +18,41 @@ class GestionController extends AbstractController
     }
 
     #[Route('/', name: 'app_gestion')]
-    public function index(Request $request): Response
+    public function index(Request $request, PaginatorInterface $paginator): Response
     {
-        $orderBy = ['price' => 'DESC'];
-        $params = [];
-        if ($request->query->get('rarity')) {
-            $params['rarity'] = $request->query->get('rarity');
+        // $cards = $this->cardRepo->findBy($params, $orderBy);
+        $cards = $this->cardRepo->createQueryBuilder('c')
+            ->orderBy('c.price', 'DESC')
+        ;
+
+        if ($rarityId = $request->query->get('rarity')) {
+            $cards->andWhere('c.rarity = :rarity')
+                ->setParameter('rarity', $rarityId)
+            ;
         }
 
-        $numberFormatter = new NumberFormatter('fr-FR', NumberFormatter::CURRENCY);
-        $cards = $this->cardRepo->findBy($params, $orderBy);
+        $cards = $paginator->paginate(
+            $cards,
+            $request->query->get('page', 1),
+            10
+        );
 
-        $total = count($cards);
-        $totalAmount = 0;
-        foreach ($cards as $card) {
-            $price = $card->getPrice() * $card->getNumber();
-            $totalAmount += $price;
+        $total = $this->cardRepo->createQueryBuilder('card')
+            ->select('SUM(card.price * card.number) AS totalAmount, SUM(card.number) AS total')
+        ;
+
+        if ($rarityId = $request->query->get('rarity')) {
+            $total->andWhere('c.rarity = :rarity')
+                ->setParameter('rarity', $rarityId)
+            ;
         }
-
-        $totalAmount = $numberFormatter->format($totalAmount);
 
         $rarities = $this->rRepo->findAll();
 
         return $this->render('gestion/index.html.twig', [
             'cards' => $cards,
-            'totalAmount' => $totalAmount,
             'rarities' => $rarities,
-            'total' => $total
+            'total' => $total->getQuery()->getOneOrNullResult()
         ]);
     }
 }
