@@ -2,11 +2,8 @@
 
 namespace App\Form;
 
-use App\Entity\Card;
-use App\Entity\Rarity;
-use App\Repository\RarityRepository;
+use App\Entity\Game;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -15,29 +12,13 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CardType extends AbstractType
+class GameType extends AbstractType
 {
     private const LABEL_CLASS = 'form-label';
     private const ATTR_CLASS = 'form-control mb-3';
 
-    /** @var RarityRepository $rarittyRepo */
-    private RarityRepository $rarityRepo;
-
-    public function __construct(RarityRepository $rarityRepo)
-    {
-        $this->rarityRepo = $rarityRepo;
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $rarities = $this->rarityRepo->findAll();
-        $choices = [
-            'Bonne',
-            'Légèrement usée',
-            'Usée',
-            'Abimé'
-        ];
-
         $builder
             ->add(
                 'name',
@@ -49,34 +30,8 @@ class CardType extends AbstractType
                 ]
             )
             ->add(
-                'reference',
-                TextType::class,
-                [
-                    'label' => 'Référence',
-                    'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
-                ]
-            )
-            ->add(
-                'rarity',
-                ChoiceType::class,
-                [
-                    'label' => 'Rareté',
-                    'choices' => $rarities,
-                    'choice_value' => 'id',
-                    'choice_label' => function (?Rarity $rarity): string {
-                        return $rarity ? $rarity->getName() : '';
-                    },
-                    'choice_attr' => function (?Rarity $rarity): array {
-                        return $rarity ? ['class' => 'rarity_' . strtolower($rarity->getName())] : [];
-                    },
-                    'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
-                ]
-            )
-            ->add(
-                'price',
-                NumberType::class,
+                'price', 
+                NumberType::class, 
                 [
                     'label' => 'Prix',
                     'scale' => 2,
@@ -92,17 +47,13 @@ class CardType extends AbstractType
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
                     'widget' => 'single_text',
-                    'data' => new \DateTime('now')
+                    
                 ]
             )
             ->add(
                 'quality',
-                ChoiceType::class,
+                TextType::class,
                 [
-                    'choices' => $choices,
-                    'choice_label' => function (?string $choice): string {
-                        return $choice;
-                    },
                     'label' => 'Qualité',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
@@ -118,12 +69,22 @@ class CardType extends AbstractType
                 ]
             )
             ->add(
+                'console',
+                TextType::class,
+                [
+                    'label' => 'Console',
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS],
+                ]
+            )
+            ->add(
                 'link',
                 UrlType::class,
                 [
                     'label' => 'Lien',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
+                    'required' => false
                 ]
             );
     }
@@ -131,7 +92,7 @@ class CardType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Card::class,
+            'data_class' => Game::class,
         ]);
     }
 }

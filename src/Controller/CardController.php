@@ -6,6 +6,7 @@ use App\Entity\Card;
 use App\Form\CardType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -39,7 +40,7 @@ class CardController extends AbstractController
             }
             $this->em->flush();
 
-            return $this->redirectToRoute('app_gestion');
+            return $this->redirect($this->generateUrl('app_gestion'));
         }
 
         return $this->render('card/index.html.twig', [
@@ -47,7 +48,7 @@ class CardController extends AbstractController
             'id' => $card->getId()
         ]);
     }
-    
+
     #[Route('/card/delete/{id}', name: 'delete_card')]
     public function delete(int $id): Response
     {

@@ -11,23 +11,22 @@
 {% block body %}
     <div class="container">
         {% if id %}
-            <h1 class="text-center my-5">Modifier une carte</h1>
+            <h1 class="text-center my-5">Modifier un jeu</h1>
         {% else %}
-            <h1 class="text-center my-5">Ajouter une carte</h1>
+            <h1 class="text-center my-5">Ajouter un jeu</h1>
         {% endif %}
         
         <div class="row w-50 mx-auto border p-4 bg-white">
             {{ form_start(form) }}
                 {{ form_row(form.name) }}
-                {{ form_row(form.reference) }}
-                {{ form_row(form.rarity) }}
+                {{ form_row(form.console) }}
                 {{ form_row(form.price) }}
                 {{ form_row(form.date) }}
                 {{ form_row(form.quality) }}
                 {{ form_row(form.number) }}
                 {{ form_row(form.link) }}
                 <div>
-                    <a href="{{ path('app_gestion') }}" class="btn btn-secondary">Annuler</a>
+                    <a href="{{ path('app_game') }}" class="btn btn-secondary">Annuler</a>
                     {% if id %}
                         <button type="submit" class="btn btn-primary">Modifier</button>
                     {% else %}

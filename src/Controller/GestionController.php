@@ -3,32 +3,47 @@
 namespace App\Controller;
 
 use App\Repository\CardRepository;
+use App\Repository\RarityRepository;
+use NumberFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class GestionController extends AbstractController
 {
-    /**
-     * @var CardRepository
-     */
-    private CardRepository $cardRepo;
-
-    /**
-     * @param CardRepository $cardRepo
-     */
-    public function __construct(CardRepository $cardRepo)
+    public function __construct(private CardRepository $cardRepo, private RarityRepository $rRepo)
     {
-        $this->cardRepo = $cardRepo;
     }
 
     #[Route('/', name: 'app_gestion')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $cards = $this->cardRepo->findAll();
+        $orderBy = ['price' => 'DESC'];
+        $params = [];
+        if ($request->query->get('rarity')) {
+            $params['rarity'] = $request->query->get('rarity');
+        }
+
+        $numberFormatter = new NumberFormatter('fr-FR', NumberFormatter::CURRENCY);
+        $cards = $this->cardRepo->findBy($params, $orderBy);
+
+        $total = count($cards);
+        $totalAmount = 0;
+        foreach ($cards as $card) {
+            $price = $card->getPrice() * $card->getNumber();
+            $totalAmount += $price;
+        }
+
+        $totalAmount = $numberFormatter->format($totalAmount);
+
+        $rarities = $this->rRepo->findAll();
 
         return $this->render('gestion/index.html.twig', [
-            'cards' => $cards
+            'cards' => $cards,
+            'totalAmount' => $totalAmount,
+            'rarities' => $rarities,
+            'total' => $total
         ]);
     }
 }
