@@ -10,7 +10,7 @@
 
     <div class="row mb-3 text-center">
         <h1>NOMBRE DE JEUX : {{total.total|format_number(locale='fr')}}</h1>
-        <h1 class="text-success">MONTANT TOTAL : {{ total.totalAmount|format_currency('EUR', locale='fr') }} €</h1>
+        <h1 class="text-success">MONTANT TOTAL : {{ total.totalAmount|format_currency('EUR', locale='fr') }}</h1>
     </div>
 
     <a href="{{ path('app_game_new') }}" class="btn btn-primary">Ajouter</a>
@@ -20,12 +20,12 @@
         <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
             <thead>
                 <tr class="table-dark border-black">
-                    <th scope="col">Nom</th>
+                    <th>{{ knp_pagination_sortable(games, 'Nom', 'g.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th scope="col">Console</th>
-                    <th style="width:5%;" scope="col">Prix</th>
-                    <th scope="col">Date</th>
+                    <th>{{ knp_pagination_sortable(games, 'Prix', 'g.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(games, 'Date', 'g.date', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th scope="col">Qualité</th>
-                    <th scope="col">Nombre</th>
+                    <th style="width:10%;">{{ knp_pagination_sortable(games, 'Nombre', 'g.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th scope="col">Action</th>
                 </tr>
             </thead>

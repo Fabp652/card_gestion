@@ -1,4 +1,7 @@
 {% extends 'base.html.twig' %}
+{% block head %}
+{{ knp_pagination_rel_links(cards) }}
+{% endblock %}
 
 {% block title %}Gestion{% endblock %}
 
@@ -34,15 +37,15 @@
         <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
             <thead>
                 <tr class="table-dark border-black">
-                    <th scope="col">Nom</th>
-                    <th scope="col">Référence</th>
-                    <th scope="col">Rareté</th>
-                    <th scope="col">Prix</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Qualité</th>
-                    <th style="width:2%;" scope="col">Nombre</th>
-                    <th scope="col">Lien</th>
-                    <th scope="col">Action</th>
+                    <th>{{ knp_pagination_sortable(cards, 'Nom', 'c.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(cards, 'Référence', 'c.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(cards, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(cards, 'Prix', 'c.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(cards, 'Date', 'c.date', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>Qualité</th>
+                    <th style="width:10%;">{{ knp_pagination_sortable(cards, 'Nombre', 'c.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>Lien</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody class="table-group-divider">

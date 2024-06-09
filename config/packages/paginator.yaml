@@ -10,5 +10,5 @@ knp_paginator:
     template:
         pagination: '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig'     # sliding pagination controls template
         rel_links: '@KnpPaginator/Pagination/rel_links.html.twig'     # <link rel=...> tags template
-        sortable: '@KnpPaginator/Pagination/bootstrap_v5_md_sortable_link.html.twig' # sort link template
+        sortable: '@KnpPaginator/Pagination/bootstrap_v5_fa_sortable_link.html.twig' # sort link template
         filtration: '@KnpPaginator/Pagination/filtration.html.twig'  # filters template

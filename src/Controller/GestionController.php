@@ -22,7 +22,7 @@ class GestionController extends AbstractController
     {
         // $cards = $this->cardRepo->findBy($params, $orderBy);
         $cards = $this->cardRepo->createQueryBuilder('c')
-            ->orderBy('c.price', 'DESC')
+            ->leftJoin('c.rarity', 'r')
         ;
 
         if ($rarityId = $request->query->get('rarity')) {
