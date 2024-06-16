@@ -2,40 +2,41 @@
 
 namespace App\Entity;
 
-use App\Repository\RarityRepository;
+use App\Repository\CollectionsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RarityRepository::class)]
-class Rarity
+#[ORM\Entity(repositoryClass: CollectionsRepository::class)]
+class Collections
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 100)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?int $grade = null;
+    #[ORM\ManyToOne(inversedBy: 'collections')]
+    private ?Category $category = null;
 
-    private Collection $cards;
-
-    #[ORM\ManyToOne(inversedBy: 'rarities')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Collections $collection = null;
+    /**
+     * @var Collection<int, Rarity>
+     */
+    #[ORM\OneToMany(targetEntity: Rarity::class, mappedBy: 'collection')]
+    private Collection $rarities;
 
     /**
      * @var Collection<int, Item>
      */
-    #[ORM\OneToMany(targetEntity: Item::class, mappedBy: 'rarity')]
+    #[ORM\OneToMany(targetEntity: Item::class, mappedBy: 'collection')]
     private Collection $items;
 
     public function __construct()
     {
-        $this->cards = new ArrayCollection();
+        $this->rarities = new ArrayCollection();
+        $this->items = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,56 +56,44 @@ class Rarity
         return $this;
     }
 
-    public function getGrade(): ?int
+    public function getCategory(): ?Category
     {
-        return $this->grade;
+        return $this->category;
     }
 
-    public function setGrade(int $grade): static
+    public function setCategory(?Category $category): static
     {
-        $this->grade = $grade;
+        $this->category = $category;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Card>
+     * @return Collection<int, Rarity>
      */
-    public function getCards(): Collection
+    public function getRarities(): Collection
     {
-        return $this->cards;
+        return $this->rarities;
     }
 
-    public function addCard(Card $card): static
+    public function addRarity(Rarity $rarity): static
     {
-        if (!$this->cards->contains($card)) {
-            $this->cards->add($card);
-            $card->setRarity($this);
+        if (!$this->rarities->contains($rarity)) {
+            $this->rarities->add($rarity);
+            $rarity->setCollection($this);
         }
 
         return $this;
     }
 
-    public function removeCard(Card $card): static
+    public function removeRarity(Rarity $rarity): static
     {
-        if ($this->cards->removeElement($card)) {
+        if ($this->rarities->removeElement($rarity)) {
             // set the owning side to null (unless already changed)
-            if ($card->getRarity() === $this) {
-                $card->setRarity(null);
+            if ($rarity->getCollection() === $this) {
+                $rarity->setCollection(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getCollection(): ?Collections
-    {
-        return $this->collection;
-    }
-
-    public function setCollection(?Collections $collection): static
-    {
-        $this->collection = $collection;
 
         return $this;
     }
@@ -121,7 +110,7 @@ class Rarity
     {
         if (!$this->items->contains($item)) {
             $this->items->add($item);
-            $item->setRarity($this);
+            $item->setCollection($this);
         }
 
         return $this;
@@ -131,8 +120,8 @@ class Rarity
     {
         if ($this->items->removeElement($item)) {
             // set the owning side to null (unless already changed)
-            if ($item->getRarity() === $this) {
-                $item->setRarity(null);
+            if ($item->getCollection() === $this) {
+                $item->setCollection(null);
             }
         }
 
