@@ -2,41 +2,39 @@
 
 namespace App\Form;
 
-use App\Entity\Card;
+use App\Entity\Category;
+use App\Entity\Collections;
+use App\Entity\Item;
 use App\Entity\Rarity;
+use App\Repository\CategoryRepository;
+use App\Repository\CollectionsRepository;
 use App\Repository\RarityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CardType extends AbstractType
+class ItemType extends AbstractType
 {
     private const LABEL_CLASS = 'form-label';
     private const ATTR_CLASS = 'form-control mb-3';
 
-    /** @var RarityRepository $rarittyRepo */
-    private RarityRepository $rarityRepo;
-
-    public function __construct(RarityRepository $rarityRepo)
-    {
-        $this->rarityRepo = $rarityRepo;
+    public function __construct(
+        private RarityRepository $rarityRepo,
+        private CategoryRepository $categoryRepo,
+        private CollectionsRepository $collectionRepo
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $rarities = $this->rarityRepo->findAll();
-        $choices = [
-            'Bonne',
-            'Légèrement usée',
-            'Usée',
-            'Abimé'
-        ];
+        $categories = $this->categoryRepo->findAll();
+        $collections = $this->collectionRepo->findAll();
 
         $builder
             ->add(
@@ -85,24 +83,9 @@ class CardType extends AbstractType
                 ]
             )
             ->add(
-                'date',
-                DateType::class,
-                [
-                    'label' => 'Date',
-                    'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
-                    'widget' => 'single_text',
-                    'data' => new \DateTime('now')
-                ]
-            )
-            ->add(
                 'quality',
-                ChoiceType::class,
+                IntegerType::class,
                 [
-                    'choices' => $choices,
-                    'choice_label' => function (?string $choice): string {
-                        return $choice;
-                    },
                     'label' => 'Qualité',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
@@ -125,13 +108,48 @@ class CardType extends AbstractType
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
                 ]
-            );
+            )
+            ->add(
+                'category',
+                ChoiceType::class,
+                [
+                    'label' => 'Category',
+                    'choices' => $categories,
+                    'choice_value' => 'id',
+                    'choice_label' => function (?Category $category): string {
+                        return $category ? $category->getName() : '';
+                    },
+                    'choice_attr' => function (?Category $category): array {
+                        return $category ? ['class' => 'rarity_' . strtolower($category->getName())] : [];
+                    },
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS],
+                ]
+            )
+            ->add(
+                'collection',
+                ChoiceType::class,
+                [
+                    'label' => 'Collection',
+                    'choices' => $collections,
+                    'choice_value' => 'id',
+                    'choice_label' => function (?Collections $collection): string {
+                        return $collection ? $collection->getName() : '';
+                    },
+                    'choice_attr' => function (?Collections $collection): array {
+                        return $collection ? ['class' => 'rarity_' . strtolower($collection->getName())] : [];
+                    },
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS],
+                ]
+            )
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Card::class,
+            'data_class' => Item::class,
         ]);
     }
 }

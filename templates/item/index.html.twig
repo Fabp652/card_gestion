@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+{% block head %}
+{{ knp_pagination_rel_links(cards) }}
+{% endblock %}
+
+{% block title %}{{ collection.name }}{% endblock %}
+
+{% block body %}
+<div class="container">
+    {{ parent() }}
+    <div class="row mt-5">
+        <h1 class="text-center my-5">{{ collection.name|upper }}</h1>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            {# <a href="{{ path('app_card') }}" class="btn btn-primary col">Ajouter</a> #}
+        </div>
+    </div>
+    
+    <div class="row mt-2">
+        <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
+            <thead>
+            {% set hasRarities = collection.rarities|length > 0 %}
+                <tr class="table-dark border-black">
+                    <th>{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(items, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    {% if hasRarities %}
+                        <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    {% endif %}
+                    <th>{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié le', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(items, 'Qualité', 'i.quality', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th style="width:10%;">{{ knp_pagination_sortable(items, 'Nombre', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>Lien</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for item in items %}
+                    {% if item.quality == 10 %}
+                        {% set qualityName = 'Excellente' %}
+                    {% endif %}
+                    {% if item.quality in range(8,9) %}
+                        {% set qualityName = 'Très bonne' %}
+                    {% endif %}
+                    {% if item.quality in range(6,7) %}
+                        {% set qualityName = 'Bonne' %}
+                    {% endif %}
+                    {% if item.quality == 5 %}
+                        {% set qualityName = 'Passable' %}
+                    {% endif %}
+                    {% if item.quality in range(3,4) %}
+                        {% set qualityName = 'Légèrement usée' %}
+                    {% endif %}
+                    {% if item.quality in range(1,2) %}
+                        {% set qualityName = 'Usée' %}
+                    {% endif %}
+                    {% if item.quality == 0 %}
+                        {% set qualityName = 'Abimé' %}
+                    {% endif %}
+                    
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.reference }}</td>
+                        {% if hasRarities %}
+                            <td>{{ item.rarity.name }}</td>
+                        {% endif %}
+                        <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
+                        <td>{{ item.updatedAt ? item.updatedAt|date('d/m/Y') : item.createdAt|date('d/m/Y') }}</td>
+                        <td><p  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top">{{ qualityName }}</p></td>
+                        <td style="width:2%;">{{ item.number }}</td>
+                        <td>
+                            <a href="{{ item.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link" viewBox="0 0 16 16">
+                                <path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9q-.13 0-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/>
+                                <path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4 4 0 0 1-.82 1H12a3 3 0 1 0 0-6z"/>
+                                </svg>
+                            </a>
+                        </td>
+                        <td>
+                            {# <a href="{{ path('app_item_update', {id: item.id}) }}" class="btn btn-primary btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                                </svg>
+                            </a>
+                            <a href="{{ path('delete_item', {id: item.id}) }}" class="btn btn-danger btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                </svg>
+                            </a> #}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="9">Il n'y a pas de carte.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="navigation">
+            {{ knp_pagination_render(items) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
