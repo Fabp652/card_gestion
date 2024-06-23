@@ -6,23 +6,16 @@
 {% block title %}{{ collection.name }}{% endblock %}
 
 {% block body %}
-<div class="container">
+<div class="mx-5">
     {{ parent() }}
     <div class="row mt-5">
         <h1 class="text-center my-5">{{ collection.name|upper }}</h1>
     </div>
-
-    <div class="row">
-        <div class="col">
-            {# <a href="{{ path('app_card') }}" class="btn btn-primary col">Ajouter</a> #}
-        </div>
-    </div>
-    
     <div class="row mt-2">
         <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
-            <thead>
-            {% set hasRarities = collection.rarities|length > 0 %}
-                <tr class="table-dark border-black">
+            <thead class="table-dark border-dark">
+                {% set hasRarities = collection.rarities|length > 0 %}
+                <tr>
                     <th>{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     {% if hasRarities %}
@@ -34,6 +27,62 @@
                     <th style="width:10%;">{{ knp_pagination_sortable(items, 'Nombre', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>Lien</th>
                     <th>Action</th>
+                </tr>
+                <tr>
+                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id})) }}" method="get">
+                        {% set filterQuery = request.query.all('filter') %}
+                        <th><input id="nameFilter" name="filter[name]" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                        <th><input id="referenceFilter" name="filter[reference]" class="form-control" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
+                        {% if hasRarities %}
+                            <th>
+                                <select id="rarityFilter" name="filter[rarity]" class="form-control">
+                                    <option value="">---</option>
+                                    {% for rarity in collection.rarities %}
+                                        <option value="{{ rarity.id }}" {% if filterQuery.rarity is defined and filterQuery.rarity == rarity.id %}selected{% endif %}>{{ rarity.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                        {% endif %}
+                        <th>
+                            <select id="priceFilter" name="filter[price]" class="form-control">
+                                <option value="">---</option>
+                                {% for priceKey, priceValue in prices %}
+                                    <option value="{{ priceKey }}" {% if filterQuery.price is defined and filterQuery.price == priceKey %}selected{% endif %}>{{ priceValue }}</option>
+                                {% endfor %}
+                            </select>
+                        </th>
+                        <th>
+                        </th>
+                        <th>
+                            <select id="qualityFilter"name="filter[quality]" class="form-control">
+                                <option value="">---</option>
+                                {% set qualityDefined = filterQuery.quality is defined %}
+                                <option value="10" {% if qualityDefined and filterQuery.quality == '10' %}selected{% endif %}>Excellente</option>
+                                <option value="8-9" {% if qualityDefined and filterQuery.quality == '8-9' %}selected{% endif %}>Très bonne</option>
+                                <option value="6-7" {% if qualityDefined and filterQuery.quality == '6-7' %}selected{% endif %}>Bonne</option>
+                                <option value="5" {% if qualityDefined and filterQuery.quality == '5' %}selected{% endif %}>Passable</option>
+                                <option value="3-4" {% if qualityDefined and filterQuery.quality == '3-4' %}selected{% endif %}>Légèrement usée</option>
+                                <option value="1-2" {% if qualityDefined and filterQuery.quality == '1-2' %}selected{% endif %}>Usée</option>
+                                <option value="0" {% if qualityDefined and filterQuery.quality == '0' %}selected{% endif %}>Abimé</option>
+                            </select>
+                        </th>
+                        <th>
+                            <select id="numberFilter" name="filter[number]" class="form-control">
+                                <option value="">---</option>
+                                {% set numberDefined = filterQuery.number is defined %}
+                                <option value="1" {% if numberDefined and filterQuery.number == 1 %}selected{% endif %}>Plusieurs exemplaires</option>
+                                <option value="0" {% if numberDefined and filterQuery.number is not null and filterQuery.number == 0 %}selected{% endif %}>Un seul exemplaire</option>
+                            </select>
+                        </th>
+                        <th></th>
+                        <th>
+                            <a href="{{ path('app_item_list', {collectionId: collection.id}) }}" class="btn btn-secondary btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                            </a>
+                        </th>
+                    </form>
                 </tr>
             </thead>
             <tbody class="table-group-divider">

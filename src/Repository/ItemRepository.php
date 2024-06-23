@@ -20,29 +20,21 @@ class ItemRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Item::class);
     }
+    
+    /**
+     * @param int $collectionId
+     * @return array
+     */
+    public function getMinAndMaxPrice(int $collectionId): array
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->select('MIN(i.price) AS minPrice, MAX(i.price) AS maxPrice')
+            ->where('i.collection = :collection')
+            ->setParameter('collection', $collectionId)
+            ->getQuery()
+            ->getSingleResult()
+        ;
 
-    //    /**
-    //     * @return Item[] Returns an array of Item objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('i.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Item
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $qb;
+    }
 }

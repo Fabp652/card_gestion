@@ -25,6 +25,7 @@ class ItemController extends AbstractController
     public function list(Request $request, PaginatorInterface $paginator, int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
+        $filters = $request->query->all('filter');
 
         $items = $this->itemRepo->createQueryBuilder('i')
             ->leftJoin('i.rarity', 'r')
@@ -32,10 +33,40 @@ class ItemController extends AbstractController
             ->setParameter('collectionId', $collectionId)
         ;
 
-        if ($rarityId = $request->query->get('rarity')) {
-            $items->andWhere('c.rarity = :rarity')
-                ->setParameter('rarity', $rarityId)
-            ;
+        foreach ($filters as $filterKey => $filterValue) {
+            if (!empty($filterValue)) {
+                if ($filterKey == 'name' || $filterKey == 'reference') {
+                    $items->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
+                        ->setParameter($filterKey, $filterValue . '%')
+                    ;
+                } elseif ($filterKey == 'price' || $filterKey == 'quality') {
+                    $priceExplode = explode('-', $filterValue);
+                    if (count($priceExplode) == 1) {
+                        $items->andWhere('i.' . $filterKey . ' = :' . $filterKey)
+                            ->setParameter($filterKey, $filterValue)
+                        ;
+                    } elseif (empty($priceExplode[0])) {
+                        $items->andWhere('i.' . $filterKey . ' < :' . $filterKey)
+                            ->setParameter($filterKey, $priceExplode[1])
+                        ;
+                    } else {
+                        $items->andWhere('i.price BETWEEN :min AND :max')
+                            ->setParameter('min', $priceExplode[0])
+                            ->setParameter('max', $priceExplode[1])
+                        ;
+                    }
+                } elseif ($filterKey == 'number') {
+                    $comparator = $filterValue == 1 ? '>' : '=';
+                    $items->andWhere('i.number ' . $comparator . ' 1');
+                } else {
+                    if ($filterKey == 'rarity') {
+                        $filterValue = (int) $filterValue;
+                    }
+                    $items->andWhere('i.' . $filterKey . ' = ' . ':' . $filterKey)
+                        ->setParameter($filterKey, $filterValue)
+                    ;
+                }
+            }
         }
 
         $items = $paginator->paginate(
@@ -44,25 +75,44 @@ class ItemController extends AbstractController
             $request->query->get('limit', 10)
         );
 
-        // $total = $this->itemRepo->createQueryBuilder('item')
-        //     ->select('SUM(item.price * item.number) AS totalAmount, SUM(item.number) AS total')
-        //     ->where('collection = :collectionId')
-        //     ->setParameter('collectionId', $collectionId)
-        // ;
+        $minAndMaxPrice = $this->itemRepo->getMinAndMaxPrice($collectionId);
+        $prices = [];
+        if ($minAndMaxPrice['minPrice'] < 1) {
+            $prices = [
+                '-1' => 'Moins de 1 €',
+                '1-5' => 'Plus de 1 €'
+            ];
+            $range = 5;
+            $actual = 5;
+        } elseif ($minAndMaxPrice['minPrice'] < 5) {
+            $prices = [
+                '-5' => 'Moins de 5 €',
+                '5-10' => 'Plus de 5 €'
+            ];
+            $range = 10;
+            $actual = 10;
+        } else {
+            $prices = [
+                '-10' => 'Moins de 10 €',
+                '10-20' => 'Plus de 10 €'
+            ];
+            $range = 10;
+            $actual = 10;
+        }
 
-        // if ($rarityId = $request->query->get('rarity')) {
-        //     $total->andWhere('c.rarity = :rarity')
-        //         ->setParameter('rarity', $rarityId)
-        //     ;
-        // }
+        while ($actual < $minAndMaxPrice['maxPrice']) {
+            $max = $actual + $range;
+            $key = $actual . '-' . $max;
+            $prices[$key] = 'Plus de ' . $actual . ' €';
 
-        $rarities = $this->rRepo->findAll();
+            $actual = $max;
+        }
 
         return $this->render('item/index.html.twig', [
             'items' => $items,
-            'rarities' => $rarities,
-            'collection' => $collection
-            // 'total' => $total->getQuery()->getOneOrNullResult()
+            'collection' => $collection,
+            'prices' => $prices,
+            'request' => $request
         ]);
     }
 }
