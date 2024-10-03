@@ -29,8 +29,8 @@
                                     <tr>
                                         <td>{{ category.categoryName }}</td>
                                         <td>{{ category.totalItem }}</td>
-                                        <td><b>{{ category.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
-                                        <td><b>{{ category.average|format_currency('EUR', locale = 'fr') }}</b></td>
+                                        <td><b class="text-success">{{ category.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
+                                        <td><b class="text-success">{{ category.average|format_currency('EUR', locale = 'fr') }}</b></td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -59,8 +59,8 @@
                                         <tr>
                                             <td>{{ rarity.rarityName }}</td>
                                             <td>{{ rarity.totalItem }}</td>
-                                            <td><b>{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
-                                            <td><b>{{ rarity.average|format_currency('EUR', locale = 'fr') }}</b></td>
+                                            <td><b class="text-success">{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
+                                            <td><b class="text-success">{{ rarity.average|format_currency('EUR', locale = 'fr') }}</b></td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -93,7 +93,7 @@
                                         <td>{{ most.name }}</td>
                                         <td>{{ most.categoryName }}</td>
                                         <td>{{ most.rarityName }}</td>
-                                        <td><b>{{ most.price|format_currency('EUR', locale = 'fr') }}</b></td>
+                                        <td><b class="text-success">{{ most.price|format_currency('EUR', locale = 'fr') }}</b></td>
                                         <td><b>{{ most.number }}</b></td>
                                     </tr>
                                 {% endfor %}
@@ -124,7 +124,7 @@
                                         <td>{{ less.name }}</td>
                                         <td>{{ less.categoryName }}</td>
                                         <td>{{ less.rarityName }}</td>
-                                        <td><b>{{ less.price|format_currency('EUR', locale = 'fr') }}</b></td>
+                                        <td><b class="text-success">{{ less.price|format_currency('EUR', locale = 'fr') }}</b></td>
                                         <td><b>{{ less.number }}</b></td>
                                     </tr>
                                 {% endfor %}

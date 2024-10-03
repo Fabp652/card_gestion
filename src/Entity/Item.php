@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\ItemRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
-#[ORM\Entity(repositoryClass: ItemRepository::class)]
+#[ORM\Entity(repositoryClass: ItemRepository::class), HasLifecycleCallbacks]
 class Item
 {
     #[ORM\Id]
@@ -205,7 +208,6 @@ class Item
         return $this->createdAt;
     }
 
-    #[ORM\PrePersist]
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
@@ -213,17 +215,28 @@ class Item
         return $this;
     }
 
+    #[ORM\PrePersist]
+    public function presPersit(): void
+    {
+        $this->createdAt = new DateTimeImmutable();
+    }
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    #[ORM\PreUpdate]
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    #[ORM\PreUpdate]
+    public function preUpdate(): void
+    {
+        $this->updatedAt = new DateTime();
     }
 
     public function getQuality(): ?int

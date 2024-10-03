@@ -1,0 +1,35 @@
+{% if itemId %}
+    {{ form_start(form, {method: 'POST', action: path('app_item_edit', {collectionId: collectionId, itemId: itemId}), attr: {'id': 'modalForm'}}) }}
+{% else %}
+    {{ form_start(form, {method: 'POST', action: path('app_item_add', {collectionId: collectionId}), attr: {'id': 'modalForm'}}) }}
+{% endif %}
+    <div class="row">
+        <div class="col-12">
+            {{ form_row(form.name) }}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.category) }}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.collection) }}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.reference) }}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.rarity) }}
+        </div>
+        <div class="col-4">
+            {{ form_row(form.price) }}
+        </div>
+        <div class="col-4">
+            {{ form_row(form.quality) }}
+        </div>
+        <div class="col-4">
+            {{ form_row(form.number) }}
+        </div>
+        <div class="col-12">
+            {{ form_row(form.link) }}
+        </div>
+    </div>
+{{ form_end(form) }}

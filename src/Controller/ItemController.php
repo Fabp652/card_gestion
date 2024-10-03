@@ -2,11 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Item;
+use App\Form\ItemType;
 use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
 use App\Repository\RarityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,7 +21,8 @@ class ItemController extends AbstractController
     public function __construct(
         private ItemRepository $itemRepo,
         private RarityRepository $rRepo,
-        private CollectionsRepository $collectionRepo
+        private CollectionsRepository $collectionRepo,
+        private EntityManagerInterface $em
     ) {
     }
 
@@ -40,19 +45,19 @@ class ItemController extends AbstractController
                         ->setParameter($filterKey, $filterValue . '%')
                     ;
                 } elseif ($filterKey == 'price' || $filterKey == 'quality') {
-                    $priceExplode = explode('-', $filterValue);
-                    if (count($priceExplode) == 1) {
+                    $filterExplode = explode('-', $filterValue);
+                    if (count($filterExplode) == 1) {
                         $items->andWhere('i.' . $filterKey . ' = :' . $filterKey)
                             ->setParameter($filterKey, $filterValue)
                         ;
-                    } elseif (empty($priceExplode[0])) {
+                    } elseif (empty($filterExplode[0])) {
                         $items->andWhere('i.' . $filterKey . ' < :' . $filterKey)
-                            ->setParameter($filterKey, $priceExplode[1])
+                            ->setParameter($filterKey, $filterExplode[1])
                         ;
                     } else {
-                        $items->andWhere('i.price BETWEEN :min AND :max')
-                            ->setParameter('min', $priceExplode[0])
-                            ->setParameter('max', $priceExplode[1])
+                        $items->andWhere('i. ' . $filterKey . ' BETWEEN :min AND :max')
+                            ->setParameter('min', $filterExplode[0])
+                            ->setParameter('max', $filterExplode[1])
                         ;
                     }
                 } elseif ($filterKey == 'number') {
@@ -114,5 +119,44 @@ class ItemController extends AbstractController
             'prices' => $prices,
             'request' => $request
         ]);
+    }
+
+
+    #[Route('/collection/{collectionId}', name: 'app_item_add', requirements: ['collectionId' => '\d+'])]
+    #[Route(
+        '/{itemId}/collection/{collectionId}',
+        name: 'app_item_edit',
+        requirements: ['collectionId' => '\d+', 'itemId' => '\d+']
+    )]
+    public function form(Request $request, int $collectionId, ?int $itemId): Response
+    {
+        if (!$this->collectionRepo->find($collectionId)) {
+            return new JsonResponse(['result' => false, 'message' => 'Collection introuvable']);
+        }
+
+        if ($itemId) {
+            $item = $this->itemRepo->find($itemId);
+            if (!$item) {
+                return new JsonResponse(['result' => false, 'message' => 'Objet introuvable']);
+            }
+        } else {
+            $item = new Item();
+        }
+
+        $form = $this->createForm(ItemType::class, $item)->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->em->persist($item);
+            $this->em->flush();
+
+            return new JsonResponse(['result' => true]);
+        }
+
+        $render = $this->render('item/form.html.twig', [
+            'form' => $form->createView(),
+            'itemId' => $itemId,
+            'collectionId' => $collectionId
+        ]);
+
+        return new JsonResponse(['result' => true, 'content' => $render->getContent()]);
     }
 }
