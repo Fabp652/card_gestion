@@ -35,7 +35,6 @@ class ItemType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $categories = $this->categoryRepo->findAll();
         $collection = $options['collection'];
 
         $builder
