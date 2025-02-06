@@ -64,7 +64,7 @@ class ItemController extends AbstractController
                     $comparator = $filterValue == 1 ? '>' : '=';
                     $items->andWhere('i.number ' . $comparator . ' 1');
                 } else {
-                    if ($filterKey == 'rarity') {
+                    if (is_numeric($filterValue)) {
                         $filterValue = (int) $filterValue;
                     }
                     $items->andWhere('i.' . $filterKey . ' = ' . ':' . $filterKey)
@@ -130,7 +130,8 @@ class ItemController extends AbstractController
     )]
     public function form(Request $request, int $collectionId, ?int $itemId): Response
     {
-        if (!$this->collectionRepo->find($collectionId)) {
+        $collection = $this->collectionRepo->find($collectionId);
+        if (!$collection) {
             return new JsonResponse(['result' => false, 'message' => 'Collection introuvable']);
         }
 
@@ -143,8 +144,9 @@ class ItemController extends AbstractController
             $item = new Item();
         }
 
-        $form = $this->createForm(ItemType::class, $item)->handleRequest($request);
+        $form = $this->createForm(ItemType::class, $item, ['collection' => $collection])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $item->setCollection($collection);
             $this->em->persist($item);
             $this->em->flush();
 
@@ -158,5 +160,22 @@ class ItemController extends AbstractController
         ]);
 
         return new JsonResponse(['result' => true, 'content' => $render->getContent()]);
+    }
+
+    #[Route('/{id}', name: 'app_item_delete', requirements: ['id' => '\d+'])]
+    public function delete(Request $request, int $id): Response
+    {
+        $referer = $request->headers->get('referer');
+
+        $item = $this->itemRepo->find($id);
+        if ($item) {
+            $this->em->remove($item);
+            $this->em->flush();
+            $this->addFlash('success', "L'objet est supprimé");
+        } else {
+            $this->addFlash('warning', "L'objet est déjà supprimer");
+        }
+
+        return $this->redirect($referer);
     }
 }

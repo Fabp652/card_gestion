@@ -25,42 +25,36 @@ export default class extends Controller {
         });
 
         $('#modalSubmit').on('click', function (e) {
+            $('.msg').remove();
             let formData = new FormData(document.querySelector('#modalForm'));
-            let url = $('#modalForm').attr('action');
-
-            fetch(url, {
-                method: $('#modalForm').attr('method'),
-                body: formData
-            }).then(response => {
-                if (response.status === 200) {
-                    response.json().then(json => {
-                        if (json.result === true) {
-                            modal.hide();
-                            window.location.reload();
-                        }
-                    })
+            let requiredData = $('input[required="required"]');
+            let valid = true;
+            
+            requiredData.each(function (index) {
+                if (!$(this).val()) {
+                    $(this).parent().append(
+                        '<span class="msg pt-0 fw-bold text-danger">Cet élément est requis</span>'
+                    );
+                    valid = false;
                 }
-            })
-        });
+            });
+            if (valid) {
+                let url = $('#modalForm').attr('action');
 
-        $(document).on('#modalBody form', 'submit', function (e) {
-            e.preventDefault();
-            console.log(1)
-            let formData = new FormData($(this));
-            let url = $(this).attr('action');
-
-            fetch(url, {
-                method: $(this).attr('method'),
-                body: formData
-            }).then(response => {
-                if (response.status === 200) {
-                    response.json().then(json => {
-                        if (json.result === true) {
-                            modal.hide();
-                        }
-                    })
-                }
-            })
+                fetch(url, {
+                    method: $('#modalForm').attr('method'),
+                    body: formData
+                }).then(response => {
+                    if (response.status === 200) {
+                        response.json().then(json => {
+                            if (json.result === true) {
+                                modal.hide();
+                                window.location.reload();
+                            }
+                        })
+                    }
+                })
+            }
         });
     }
 }

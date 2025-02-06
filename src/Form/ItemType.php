@@ -9,6 +9,9 @@ use App\Entity\Rarity;
 use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
 use App\Repository\RarityRepository;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -21,7 +24,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ItemType extends AbstractType
 {
     private const LABEL_CLASS = 'form-label';
-    private const ATTR_CLASS = 'form-control mb-3';
+    private const ATTR_CLASS = 'form-control';
 
     public function __construct(
         private RarityRepository $rarityRepo,
@@ -32,9 +35,8 @@ class ItemType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $rarities = $this->rarityRepo->findAll();
         $categories = $this->categoryRepo->findAll();
-        $collections = $this->collectionRepo->findAll();
+        $collection = $options['collection'];
 
         $builder
             ->add(
@@ -44,6 +46,7 @@ class ItemType extends AbstractType
                     'label' => 'Nom',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
+                    'required' => true
                 ]
             )
             ->add(
@@ -53,23 +56,7 @@ class ItemType extends AbstractType
                     'label' => 'Référence',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
-                ]
-            )
-            ->add(
-                'rarity',
-                ChoiceType::class,
-                [
-                    'label' => 'Rareté',
-                    'choices' => $rarities,
-                    'choice_value' => 'id',
-                    'choice_label' => function (?Rarity $rarity): string {
-                        return $rarity ? $rarity->getName() : '';
-                    },
-                    'choice_attr' => function (?Rarity $rarity): array {
-                        return $rarity ? ['class' => 'rarity_' . strtolower($rarity->getName())] : [];
-                    },
-                    'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'required' => false
                 ]
             )
             ->add(
@@ -80,6 +67,7 @@ class ItemType extends AbstractType
                     'scale' => 2,
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
+                    'required' => true
                 ]
             )
             ->add(
@@ -89,6 +77,7 @@ class ItemType extends AbstractType
                     'label' => 'Qualité',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
+                    'required' => true
                 ]
             )
             ->add(
@@ -98,6 +87,7 @@ class ItemType extends AbstractType
                     'label' => 'Nombre',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
+                    'required' => true
                 ]
             )
             ->add(
@@ -107,49 +97,59 @@ class ItemType extends AbstractType
                     'label' => 'Lien',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
+                    'required' => false
                 ]
             )
             ->add(
                 'category',
-                ChoiceType::class,
+                EntityType::class,
                 [
-                    'label' => 'Category',
-                    'choices' => $categories,
+                    'class' => Category::class,
+                    'label' => 'Categorie',
                     'choice_value' => 'id',
-                    'choice_label' => function (?Category $category): string {
-                        return $category ? $category->getName() : '';
-                    },
-                    'choice_attr' => function (?Category $category): array {
-                        return $category ? ['class' => 'rarity_' . strtolower($category->getName())] : [];
-                    },
+                    'choice_label' => 'name',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => ['class' => self::ATTR_CLASS],
-                ]
-            )
-            ->add(
-                'collection',
-                ChoiceType::class,
-                [
-                    'label' => 'Collection',
-                    'choices' => $collections,
-                    'choice_value' => 'id',
-                    'choice_label' => function (?Collections $collection): string {
-                        return $collection ? $collection->getName() : '';
-                    },
-                    'choice_attr' => function (?Collections $collection): array {
-                        return $collection ? ['class' => 'rarity_' . strtolower($collection->getName())] : [];
-                    },
-                    'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'query_builder' => function (EntityRepository $er) use ($collection): QueryBuilder {
+                        return $er->createQueryBuilder('c')
+                            ->orderBy('c.name', 'ASC')
+                            ->where('c.parent = :parent')
+                            ->setParameter('parent', $collection->getCategory())
+                        ;
+                    }
                 ]
             )
         ;
+
+        if ($collection->getRarities()->count() > 0) {
+            $builder->add(
+                'rarity',
+                EntityType::class,
+                [
+                    'class' => Rarity::class,
+                    'choice_label' => 'name',
+                    'choice_value' => 'id',
+                    'query_builder' => function (EntityRepository $er) use ($collection): QueryBuilder {
+                        return $er->createQueryBuilder('r')
+                            ->orderBy('r.grade', 'ASC')
+                            ->where('r.collection = :collection')
+                            ->setParameter('collection', $collection->getId())
+                        ;
+                    },
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS],
+                    'label' => 'Rareté',
+                    'required' => false
+                ]
+            );
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Item::class,
+            'collection' => null
         ]);
     }
 }

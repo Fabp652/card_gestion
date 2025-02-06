@@ -219,6 +219,7 @@ class Item
     public function presPersit(): void
     {
         $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTime();
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface

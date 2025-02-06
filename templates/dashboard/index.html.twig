@@ -5,9 +5,7 @@
 {% block body %}
     {{ parent() }}
 
-    <h1 class="my-5 text-center">DASHBOARD</h1>
-
-    <div class="container">
+    <div class="container mt-5">
         <div class="row row-cols-1 row-cols-md-3">
             {% for stat in stats %}
                 <div class="col mb-4">
