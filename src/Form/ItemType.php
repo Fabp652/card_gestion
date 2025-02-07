@@ -104,7 +104,7 @@ class ItemType extends AbstractType
                 EntityType::class,
                 [
                     'class' => Category::class,
-                    'label' => 'Categorie',
+                    'label' => 'Catégorie',
                     'choice_value' => 'id',
                     'choice_label' => 'name',
                     'label_attr' => ['class' => self::LABEL_CLASS],

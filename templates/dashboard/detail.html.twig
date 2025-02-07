@@ -1,66 +1,40 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}DÉTAILS : {{ collection.name|upper }}{% endblock %}
+{% block title %}{{ collection.name|upper }}{% endblock %}
 
 {% block body %}
     {{ parent() }}
 
-    <h1 class="my-5 text-center">DÉTAILS : {{ collection.name|upper }}</h1>
+    <h1 class="my-5 text-center">{{ collection.name|upper }}</h1>
 
     <div class="container">
-        <div class="row row-cols-1 row-cols-md-3 justify-content-center">
-            <div class="col mb-4">
-                <div class="card rounded-0">
-                    <div class="card-header rounded-0 bg-black bg-gradient">
-                        <h5 class="card-title color-title">PAR CATÉGORIE</h5>
-                    </div>
-                    <div class="card-body rounded-0 bg-light">
-                        <table class="table table-light table-hover table-responsive align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Total</th>
-                                    <th>Montant total</th>
-                                    <th>Moyenne</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for category in statCategories %}
-                                    <tr>
-                                        <td>{{ category.categoryName }}</td>
-                                        <td>{{ category.totalItem }}</td>
-                                        <td><b class="text-success">{{ category.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
-                                        <td><b class="text-success">{{ category.average|format_currency('EUR', locale = 'fr') }}</b></td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {% if statRarities is defined %}
-                <div class="col mb-4">
+        <div class="row mb-4">
+            {% for category, mostExpensive in mostExpensives %}
+                <div class="col-6">
                     <div class="card rounded-0">
-                        <div class="card-header rounded-0 bg-black bg-gradient">
-                            <h5 class="card-title color-title">PAR RARETÉ</h5>
+                        {% set categorySplitted = category|split('_') %}
+                        <div class="card-header rounded-0 bg-black bg-gradient d-flex justify-content-between">
+                            <h5 class="card-title color-title text-uppercase align-middle my-auto">LES 10 {{ categorySplitted|first }} LES PLUS CHERS</h5>
+                            <a class="btn btn-primary" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: categorySplitted|last}) }}">VOIR PLUS</a>
                         </div>
                         <div class="card-body rounded-0 bg-light">
                             <table class="table table-light table-hover table-responsive align-middle">
                                 <thead>
+                                    {% set hasRarities = collection.rarities|length > 0 %}
                                     <tr>
                                         <th>Nom</th>
-                                        <th>Total</th>
-                                        <th>Montant total</th>
-                                        <th>Moyenne</th>
+                                        {% if hasRarities %}<th>Rareté</th>{% endif %}
+                                        <th>Prix</th>
+                                        <th>Quantité</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for rarity in statRarities %}
+                                    {% for most in mostExpensive %}
                                         <tr>
-                                            <td>{{ rarity.rarityName }}</td>
-                                            <td>{{ rarity.totalItem }}</td>
-                                            <td><b class="text-success">{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
-                                            <td><b class="text-success">{{ rarity.average|format_currency('EUR', locale = 'fr') }}</b></td>
+                                            <td>{{ most.name }}</td>
+                                            {% if hasRarities %}<td>{{ most.rarityName }}</td>{% endif %}
+                                            <td><b class="text-success">{{ most.price|format_currency('EUR', locale = 'fr') }}</b></td>
+                                            <td><b>{{ most.number }}</b></td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -68,71 +42,40 @@
                         </div>
                     </div>
                 </div>
-            {% endif %}
+            {% endfor %}
         </div>
-        <div class="row">
-            <div class="col-6">
-                <div class="card rounded-0">
-                    <div class="card-header rounded-0 bg-black bg-gradient">
-                        <h5 class="card-title color-title">LES 10 PLUS CHERS</h5>
+        {% if statRarities is defined %}
+            <div class="row mb-4">
+                    <div class="col">
+                        <div class="card rounded-0">
+                            <div class="card-header rounded-0 bg-black bg-gradient">
+                                <h5 class="card-title color-title">PAR RARETÉ</h5>
+                            </div>
+                            <div class="card-body rounded-0 bg-light">
+                                <table class="table table-light table-hover table-responsive align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Total</th>
+                                            <th>Montant total</th>
+                                            <th>Moyenne</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rarity in statRarities %}
+                                            <tr>
+                                                <td>{{ rarity.rarityName }}</td>
+                                                <td>{{ rarity.totalItem }}</td>
+                                                <td><b class="text-success">{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
+                                                <td><b class="text-success">{{ rarity.average|format_currency('EUR', locale = 'fr') }}</b></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body rounded-0 bg-light">
-                        <table class="table table-light table-hover table-responsive align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Categorie</th>
-                                    <th>Rareté</th>
-                                    <th>Prix</th>
-                                    <th>Quantité</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for most in mostExpensive %}
-                                    <tr>
-                                        <td>{{ most.name }}</td>
-                                        <td>{{ most.categoryName }}</td>
-                                        <td>{{ most.rarityName }}</td>
-                                        <td><b class="text-success">{{ most.price|format_currency('EUR', locale = 'fr') }}</b></td>
-                                        <td><b>{{ most.number }}</b></td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
-            <div class="col-6">
-                <div class="card rounded-0">
-                    <div class="card-header rounded-0 bg-black bg-gradient">
-                        <h5 class="card-title color-title">LES 10 MOINS CHERS</h5>
-                    </div>
-                    <div class="card-body rounded-0 bg-light">
-                        <table class="table table-light table-hover table-responsive align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Categorie</th>
-                                    <th>Rareté</th>
-                                    <th>Prix</th>
-                                    <th>Quantité</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for less in lessExpensive %}
-                                    <tr>
-                                        <td>{{ less.name }}</td>
-                                        <td>{{ less.categoryName }}</td>
-                                        <td>{{ less.rarityName }}</td>
-                                        <td><b class="text-success">{{ less.price|format_currency('EUR', locale = 'fr') }}</b></td>
-                                        <td><b>{{ less.number }}</b></td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
 {% endblock %}

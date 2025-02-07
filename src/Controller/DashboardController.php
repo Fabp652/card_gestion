@@ -46,23 +46,7 @@ class DashboardController extends AbstractController
     public function collectionStat(int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
-
-        $statCategories = $this->itemRepo->createQueryBuilder('i')
-            ->andWhere('i.collection = :collection')
-            ->setParameter('collection', $collection)
-            ->select(
-                '
-                    SUM(i.price * i.number) AS totalAmount,
-                    SUM(i.number) AS totalItem,
-                    c.name AS categoryName,
-                    SUM(i.price * i.number) / SUM(i.number) AS average
-                '
-            )
-            ->join('i.category', 'c')
-            ->groupBy('c.id')
-            ->getQuery()
-            ->getResult()
-        ;
+        $categories = $collection->getCategory()->getChilds()->toArray();
 
         if (!$collection->getRarities()->isEmpty()) {
             $statRarities = $this->itemRepo->createQueryBuilder('ir')
@@ -83,35 +67,27 @@ class DashboardController extends AbstractController
             ;
         }
 
-        $mostExpensive = $this->itemRepo->createQueryBuilder('ime')
-            ->andWhere('ime.collection = :collection')
-            ->setParameter('collection', $collection)
-            ->select('ime.price, ime.number, ime.name, rme.name AS rarityName, cme.name AS categoryName')
-            ->leftJoin('ime.rarity', 'rme')
-            ->leftJoin('ime.category', 'cme')
-            ->orderBy('ime.price', 'DESC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-
-        $lessExpensive = $this->itemRepo->createQueryBuilder('ile')
-            ->andWhere('ile.collection = :collection')
-            ->setParameter('collection', $collection)
-            ->select('ile.price, ile.number, ile.name, rle.name AS rarityName, cle.name AS categoryName')
-            ->leftJoin('ile.rarity', 'rle')
-            ->leftJoin('ile.category', 'cle')
-            ->orderBy('ile.price', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        $mostExpensives = [];
+        foreach ($categories as $category) {
+            $index = $category->getName() . '_' . $category->getId();
+            $mostExpensives[$index] = $this->itemRepo->createQueryBuilder('ime')
+                ->andWhere('ime.collection = :collection')
+                ->setParameter('collection', $collection)
+                ->andWhere('ime.category = :category')
+                ->setParameter('category', $category)
+                ->select('ime.price, ime.number, ime.name, rme.name AS rarityName')
+                ->leftJoin('ime.rarity', 'rme')
+                ->leftJoin('ime.category', 'cme')
+                ->orderBy('ime.price', 'DESC')
+                ->setMaxResults(10)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
 
         return $this->render('dashboard/detail.html.twig', [
-            'statCategories' => $statCategories,
             'statRarities' => $statRarities ?? null,
-            'mostExpensive' => $mostExpensive,
-            'lessExpensive' => $lessExpensive,
+            'mostExpensives' => $mostExpensives,
             'collection' => $collection
         ]);
     }

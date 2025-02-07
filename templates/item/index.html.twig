@@ -22,7 +22,6 @@
                 {% set hasRarities = collection.rarities|length > 0 %}
                 <tr>
                     <th>{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    <th>{{ knp_pagination_sortable(items, 'Catégorie', 'c.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     {% if hasRarities %}
                         <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
@@ -35,17 +34,9 @@
                     <th>Action</th>
                 </tr>
                 <tr>
-                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id})) }}" method="get">
+                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: categoryId})) }}" method="get">
                         {% set filterQuery = request.query.all('filter') %}
                         <th><input id="nameFilter" name="filter[name]" class="form-control" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                        <th>
-                                <select id="categoryFilter" name="filter[category]" class="form-control">
-                                    <option value="">---</option>
-                                    {% for category in collection.category.childs %}
-                                        <option value="{{ category.id }}" {% if filterQuery.category is defined and filterQuery.category == category.id %}selected{% endif %}>{{ category.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </th>
                         <th><input id="referenceFilter" name="filter[reference]" class="form-control" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
                         {% if hasRarities %}
                             <th>
@@ -90,7 +81,7 @@
                         </th>
                         <th></th>
                         <th>
-                            <a href="{{ path('app_item_list', {collectionId: collection.id}) }}" class="btn btn-secondary btn-sm">
+                            <a href="{{ path('app_item_list', {collectionId: collection.id, categoryId: categoryId}) }}" class="btn btn-secondary btn-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                                     <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
                                 </svg>
@@ -125,7 +116,6 @@
                     
                     <tr>
                         <td>{{ item.name }}</td>
-                        <td>{{ item.category.name }}</td>
                         <td>{{ item.reference }}</td>
                         {% if hasRarities %}
                             <td>{% if item.rarity %}{{ item.rarity.name }}{% endif %}</td>

@@ -26,9 +26,13 @@ class ItemController extends AbstractController
     ) {
     }
 
-    #[Route('/list/collection/{collectionId}', name: 'app_item_list')]
-    public function list(Request $request, PaginatorInterface $paginator, int $collectionId): Response
-    {
+    #[Route('/list/collection/{collectionId}/category/{categoryId}', name: 'app_item_list')]
+    public function list(
+        Request $request,
+        PaginatorInterface $paginator,
+        int $collectionId,
+        int $categoryId
+    ): Response {
         $collection = $this->collectionRepo->find($collectionId);
         $filters = $request->query->all('filter');
 
@@ -36,6 +40,8 @@ class ItemController extends AbstractController
             ->leftJoin('i.rarity', 'r')
             ->where('i.collection = :collectionId')
             ->setParameter('collectionId', $collectionId)
+            ->andWhere('i.category = :categoryId')
+            ->setParameter('categoryId', $categoryId)
         ;
 
         foreach ($filters as $filterKey => $filterValue) {
@@ -117,7 +123,8 @@ class ItemController extends AbstractController
             'items' => $items,
             'collection' => $collection,
             'prices' => $prices,
-            'request' => $request
+            'request' => $request,
+            'categoryId' => $categoryId
         ]);
     }
 
