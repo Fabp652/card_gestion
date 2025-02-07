@@ -1,7 +1,0 @@
-<ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-    {% for collection in collections %}
-        <li class="nav-item">
-            <a class="nav-link" href="{{ absolute_url(path('app_item_list', {collectionId: collection.id}))}}">{{ collection.name }}</a>
-        </li>
-    {% endfor %}
-</ul>

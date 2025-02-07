@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/item')]
 class ItemController extends AbstractController
 {
     public function __construct(
@@ -26,7 +25,7 @@ class ItemController extends AbstractController
     ) {
     }
 
-    #[Route('/list/collection/{collectionId}/category/{categoryId}', name: 'app_item_list')]
+    #[Route('/collection/{collectionId}/category/{categoryId}/item', name: 'app_item_list')]
     public function list(
         Request $request,
         PaginatorInterface $paginator,
@@ -129,9 +128,9 @@ class ItemController extends AbstractController
     }
 
 
-    #[Route('/collection/{collectionId}', name: 'app_item_add', requirements: ['collectionId' => '\d+'])]
+    #[Route('/collection/{collectionId}/item/add', name: 'app_item_add', requirements: ['collectionId' => '\d+'])]
     #[Route(
-        '/{itemId}/collection/{collectionId}',
+        '/collection/{collectionId}/item/{itemId}/update',
         name: 'app_item_edit',
         requirements: ['collectionId' => '\d+', 'itemId' => '\d+']
     )]
@@ -169,7 +168,7 @@ class ItemController extends AbstractController
         return new JsonResponse(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/{id}', name: 'app_item_delete', requirements: ['id' => '\d+'])]
+    #[Route('/item/{id}', name: 'app_item_delete', requirements: ['id' => '\d+'])]
     public function delete(Request $request, int $id): Response
     {
         $referer = $request->headers->get('referer');
