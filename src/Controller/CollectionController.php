@@ -90,4 +90,23 @@ class CollectionController extends AbstractController
             'collection' => $collection
         ]);
     }
+
+    #[Route('/collection/{collectionId}/dropdown', name: 'app_collection_dropdown')]
+    public function dropdown(int $collectionId): Response
+    {
+        $actualCollection = $this->collectionRepo->find($collectionId);
+
+        $collections = $this->collectionRepo->createQueryBuilder('c')
+            ->select('c.id, c.name')
+            ->where('c.id != :collection')
+            ->setParameter('collection', $collectionId)
+            ->getQuery()
+            ->getResult()
+        ;
+
+        return $this->render('collection/partial/dropdown.html.twig', [
+            'actualCollection' => $actualCollection,
+            'collections' => $collections
+        ]);
+    }
 }

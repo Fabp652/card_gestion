@@ -18,24 +18,48 @@
     </head>
     <body class="bg-light">
         {% block body %}
-            <nav class="navbar fixed-top">
-                <div class="container-fluid">
-                    {% if collection is defined %}
-                        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-                            <div class="offcanvas-header">
-                                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">CATÉGORIES</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <div class="fixed-top">
+                <nav class="navbar">
+                    <div class="container-fluid">
+                        {% if collection is defined %}
+                            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                                <div class="offcanvas-header">
+                                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">CATÉGORIES</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                                </div>
+                                <div class="offcanvas-body">
+                                    {{ render(path('app_category_nav', {collectionId: collection.id})) }}
+                                </div>
                             </div>
-                            <div class="offcanvas-body">
-                                {{ render(path('app_category_nav', {collectionId: collection.id})) }}
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </nav>
+                            {{ render(path('app_collection_dropdown', {collectionId: collection.id})) }}
+                        {% endif %}
+                    </div>
+                </nav>
+
+                {% if collection is defined %}
+                    <nav class="ms-5" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ path('app_collection') }}">Accueil</a></li>
+                            {% if category is defined %}
+                                <li class="breadcrumb-item"><a href="{{ path('app_collection_view', {collectionId: collection.id}) }}">{{ collection.name }}</a></li>
+                                {% if item is defined %}
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ path('app_item_list', {collectionId: collection.id, categoryId: category.id}) }}">{{ collection.name }}</a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">{{ item.name }}</li>
+                                {% else %}
+                                    <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+                                {% endif %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">{{ collection.name }}</li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                {% endif %}
+            </div>
         {% endblock %}
     </body>
 </html>

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Item;
 use App\Form\ItemType;
+use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
 use App\Repository\RarityRepository;
@@ -29,10 +30,12 @@ class ItemController extends AbstractController
     public function list(
         Request $request,
         PaginatorInterface $paginator,
+        CategoryRepository $categoryRepo,
         int $collectionId,
         int $categoryId
     ): Response {
         $collection = $this->collectionRepo->find($collectionId);
+        $category = $categoryRepo->find($categoryId);
         $filters = $request->query->all('filter');
 
         $items = $this->itemRepo->createQueryBuilder('i')
@@ -123,7 +126,7 @@ class ItemController extends AbstractController
             'collection' => $collection,
             'prices' => $prices,
             'request' => $request,
-            'categoryId' => $categoryId
+            'category' => $category
         ]);
     }
 
