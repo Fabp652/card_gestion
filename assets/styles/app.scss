@@ -6,9 +6,51 @@
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
 
+$transitionDuration: 0.5s;
+$hundredPercent: 100%;
+
 .color-title {
     background-image: linear-gradient(180deg, $white, $gray-500);
-    background-size: 100%;
+    background-size: $hundredPercent;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.center-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+}
+
+.eye-icon-blue:hover {
+    color: #297efb;
+}
+
+.eye-icon-white:hover {
+    color: lightgray;
+}
+
+.category-link {
+    font-size: 1.15rem!important;
+    transition: $transitionDuration!important;
+}
+
+.category-link:hover {
+    color: #004fc3!important;
+}
+
+.breadcrumb-position {
+    padding-top: 4rem;
+}
+
+.category-border-hover {
+    border-bottom: 2px solid #004fc3;
+    width: 0;
+    transition: $transitionDuration;
+}
+
+.category-nav:hover > .category-border-hover {
+    width: $hundredPercent;
 }

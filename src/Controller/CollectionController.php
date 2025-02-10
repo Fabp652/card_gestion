@@ -24,10 +24,12 @@ class CollectionController extends AbstractController
                     SUM(i.number) AS totalItem,
                     c.name AS collectionName,
                     c.id AS collectionId,
-                    SUM(i.price * i.number) / SUM(i.number) AS average
+                    SUM(i.price * i.number) / SUM(i.number) AS average,
+                    cat.name As category
                 '
             )
             ->join('i.collection', 'c')
+            ->leftJoin('c.category', 'cat')
             ->groupBy('i.collection')
             ->getQuery()
             ->getResult()

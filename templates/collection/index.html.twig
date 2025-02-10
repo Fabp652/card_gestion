@@ -5,24 +5,25 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="container mt-5">
+    <div class="container mt-5 center-screen">
         <div class="row row-cols-1 row-cols-md-3">
             {% for stat in stats %}
                 <div class="col mb-4">
-                    <div class="card text-uppercase">
-                        <div class="card-header text-bg-dark">
+                    <div class="card text-uppercase rounded-0">
+                        <div class="card-header text-bg-dark rounded-0">
                             <h5 class="card-title">{{ stat.collectionName }}</h5>
                         </div>
-                        <div class="card-body fs-5 text-bg-light">
+                        <div class="card-body fs-5 text-bg-light p-0">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item text-bg-light">Nombre total d'objets : <b>{{ stat.totalItem }}</b></li>
                                 <li class="list-group-item text-bg-light">Montant total : <b class="text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }} </b></li>
                                 <li class="list-group-item text-bg-light">Montant moyen : <b class="text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }} </b></li>
                             </ul>
                         </div>
-                        <div class="card-footer text-end">
-                            <a class="btn btn-primary" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
-                                Voir plus
+                        <div class="card-footer d-flex justify-content-between">
+                            <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
+                            <a class="text-primary" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
+                                <i class="fa-solid fa-eye fa-xl eye-icon-blue"></i>
                             </a>
                         </div>
                     </div>
