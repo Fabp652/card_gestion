@@ -5,7 +5,20 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="container mt-5 center-screen">
+    <div class="container mt-5 center-screen" data-controller="modal">
+        <div class="align-self-start mb-3">
+            <div class="col-12">
+                <button
+                    type="button"
+                    class="btn btn-primary showModal rounded-0"
+                    id="showModal"
+                    data-url="{{ absolute_url(path('app_collection_add')) }}"
+                    data-title="Créer une nouvelle collection"
+                >
+                    Nouvelle collection
+                </button>
+            </div>
+        </div>
         <div class="row row-cols-1 row-cols-md-3">
             {% for stat in stats %}
                 <div class="col mb-4">
@@ -31,4 +44,5 @@
             {% endfor %}
         </div>
     </div>
+    {% include "Modal/modal.html.twig" %}
 {% endblock %}

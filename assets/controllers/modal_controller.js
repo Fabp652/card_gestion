@@ -50,6 +50,10 @@ export default class extends Controller {
                             if (json.result === true) {
                                 modal.hide();
                                 window.location.reload();
+                            } else {
+                                $('#modalBody').prepend(
+                                    '<b class="text-danger">' + json.message + '</b>'
+                                )
                             }
                         })
                     }

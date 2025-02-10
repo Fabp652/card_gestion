@@ -2,35 +2,43 @@
 
 namespace App\Controller;
 
+use App\Entity\Category;
+use App\Entity\Collections;
+use App\Form\CollectionType;
 use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class CollectionController extends AbstractController
 {
-    public function __construct(private CollectionsRepository $collectionRepo, private ItemRepository $itemRepo)
-    {
+    public function __construct(
+        private CollectionsRepository $collectionRepo,
+        private ItemRepository $itemRepo,
+        private EntityManagerInterface $em
+    ) {
     }
 
     #[Route(name: 'app_collection')]
     public function index(): Response
     {
-        $stats = $this->itemRepo->createQueryBuilder('i')
+        $stats = $this->collectionRepo->createQueryBuilder('c')
             ->select(
                 '
                     SUM(i.price * i.number) AS totalAmount,
-                    SUM(i.number) AS totalItem,
+                    CASE WHEN COUNT(i.id) > 0 THEN SUM(i.number) ELSE 0 END AS totalItem,
                     c.name AS collectionName,
                     c.id AS collectionId,
                     SUM(i.price * i.number) / SUM(i.number) AS average,
                     cat.name As category
                 '
             )
-            ->join('i.collection', 'c')
+            ->leftJoin('c.items', 'i')
             ->leftJoin('c.category', 'cat')
-            ->groupBy('i.collection')
+            ->groupBy('c.id')
             ->getQuery()
             ->getResult()
         ;
@@ -43,7 +51,11 @@ class CollectionController extends AbstractController
         );
     }
 
-    #[Route('/collection/{collectionId}', name: 'app_collection_view')]
+    #[Route(
+        '/collection/{collectionId}',
+        name: 'app_collection_view',
+        requirements: ['collectionId' => '\d+', 'itemId' => '\d+']
+    )]
     public function view(int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
@@ -110,5 +122,44 @@ class CollectionController extends AbstractController
             'actualCollection' => $actualCollection,
             'collections' => $collections
         ]);
+    }
+
+    #[Route('/collection/add', name: 'app_collection_add')]
+    public function form(Request $request, ?int $collectionId): Response
+    {
+        if ($collectionId) {
+            $collection = $this->collectionRepo->find($collectionId);
+        } else {
+            $collection = new Collections();
+        }
+        $form = $this->createForm(CollectionType::class, $collection)->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$collection->getCategory()) {
+                $newCategoryName = $request->get('newCategory');
+                if (!$newCategoryName) {
+                    return $this->json([
+                        'result' => false,
+                        'message' => 'Une catégorie doit être attribué à la collection.'
+                    ]);
+                }
+                $category = new Category();
+                $category->setName($newCategoryName);
+                $this->em->persist($category);
+
+                $collection->setCategory($category);
+            }
+            $this->em->persist($collection);
+            $this->em->flush();
+
+            return $this->json(['result' => true]);
+        }
+
+        $render = $this->render('collection/form.html.twig', [
+            'form' => $form->createView(),
+            'collectionId' => $collectionId
+        ]);
+
+        return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 }
