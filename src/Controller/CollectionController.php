@@ -54,7 +54,7 @@ class CollectionController extends AbstractController
     #[Route(
         '/collection/{collectionId}',
         name: 'app_collection_view',
-        requirements: ['collectionId' => '\d+', 'itemId' => '\d+']
+        requirements: ['collectionId' => '\d+']
     )]
     public function view(int $collectionId): Response
     {
@@ -90,7 +90,6 @@ class CollectionController extends AbstractController
                 ->setParameter('category', $category)
                 ->select('ime.price, ime.number, ime.name, rme.name AS rarityName')
                 ->leftJoin('ime.rarity', 'rme')
-                ->leftJoin('ime.category', 'cme')
                 ->orderBy('ime.price', 'DESC')
                 ->setMaxResults(10)
                 ->getQuery()
@@ -105,8 +104,12 @@ class CollectionController extends AbstractController
         ]);
     }
 
-    #[Route('/collection/{collectionId}/dropdown', name: 'app_collection_dropdown')]
-    public function dropdown(int $collectionId): Response
+    #[Route(
+        '/collection/{collectionId}/dropdown',
+        name: 'app_collection_dropdown',
+        requirements: ['collectionId' => '\d+']
+    )]
+    public function dropdown(?int $collectionId): Response
     {
         $actualCollection = $this->collectionRepo->find($collectionId);
 

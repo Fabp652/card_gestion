@@ -25,6 +25,12 @@ export default class extends Controller {
         });
 
         $('#modalSubmit').on('click', function (e) {
+            $('#modalForm').trigger('submit')
+        });
+
+        $(document).on('submit', function (e) {
+            e.preventDefault();
+
             $('.msg').remove();
             let formData = new FormData(document.querySelector('#modalForm'));
             let requiredData = $('input[required="required"]');

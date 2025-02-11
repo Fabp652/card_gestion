@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.name|upper }}{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+
+    <h1 class="text-center mb-5">{{ category.name|upper }}</h1>
+
+    <div class="container" data-controller="modal">
+        <div class="row">
+            <div class="col mb-3">
+                <button
+                    type="button"
+                    class="btn btn-primary showModal rounded-0"
+                    id="showModal"
+                    data-url="{{ absolute_url(path('app_category_add_child', {parentId: category.id})) }}"
+                    data-title="Créer une nouvelle catégorie"
+                >
+                    Nouvelle catégorie
+                </button>
+            </div>
+        </div>
+        <div class="row mb-4">
+            {% for child, mostExpensive in mostExpensives %}
+                <div class="col-6">
+                    <div class="card rounded-0">
+                        {% set childSplitted = child|split('_') %}
+                        <div class="card-header rounded-0 bg-black bg-gradient d-flex justify-content-between">
+                            <h5 class="card-title color-title text-uppercase align-middle my-auto">LES 10 {{ childSplitted|first }} LES PLUS CHERS</h5>
+                            <div class="btn-group" role="group">
+                                <button
+                                    data-url="{{ absolute_url(path('app_category_edit', {categoryId: childSplitted|last})) }}"
+                                    data-title="{{ 'Modifier "' ~ childSplitted|first ~ '"' }}"
+                                    class="btn btn-primary showModal"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <a href="{{ path('app_category_delete', {categoryId: childSplitted|last}) }}" class="btn btn-danger">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body rounded-0 bg-light">
+                            <table class="table table-light table-hover table-responsive align-middle">
+                                <thead>
+                                    {% set hasRarities =  mostExpensive|length > 0 ? mostExpensive|first().rarityName is not null : false %}
+                                    <tr>
+                                        <th>Nom</th>
+                                        {% if hasRarities %}<th>Rareté</th>{% endif %}
+                                        <th>Prix</th>
+                                        <th>Quantité</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for most in mostExpensive %}
+                                        <tr>
+                                            <td>{{ most.name }}</td>
+                                            {% if hasRarities %}<td>{{ most.rarityName }}</td>{% endif %}
+                                            <td><b class="text-success">{{ most.price|format_currency('EUR', locale = 'fr') }}</b></td>
+                                            <td><b>{{ most.number }}</b></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% include "Modal/modal.html.twig" %}
+{% endblock %}

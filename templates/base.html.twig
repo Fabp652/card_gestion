@@ -37,7 +37,7 @@
                     </div>
                 </nav>
             </div>
-            {% if collection is defined %}
+            {% if collection is defined or category is defined %}
                 <nav class="ms-4 mb-5 breadcrumb-position" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">
                         <li class="breadcrumb-item">
@@ -48,7 +48,7 @@
                                 Accueil
                             </a>
                         </li>
-                        {% if category is defined %}
+                        {% if category is defined and collection is defined %}
                             <li class="breadcrumb-item">
                                 <a
                                     class="link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
@@ -70,6 +70,8 @@
                             {% else %}
                                 <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
                             {% endif %}
+                        {% elseif category is defined %}
+                            <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
                         {% else %}
                             <li class="breadcrumb-item active" aria-current="page">{{ collection.name }}</li>
                         {% endif %}

@@ -6,8 +6,8 @@
     {{ parent() }}
 
     <div class="container mt-5 center-screen" data-controller="modal">
-        <div class="align-self-start mb-3">
-            <div class="col-12">
+        <div class="row mb-3 w-100">
+            <div class="col d-flex justify-content-start p-0">
                 <button
                     type="button"
                     class="btn btn-primary showModal rounded-0"
@@ -18,17 +18,37 @@
                     Nouvelle collection
                 </button>
             </div>
+            <div class="col d-flex justify-content-end p-0">
+                <div class="btn-group" role="group">
+                    <a class="btn btn btn-primary disabled rounded-0" href="#">
+                        Collections
+                    </a>
+                    <a href="{{ path('app_category_list') }}" class="btn btn-outline-primary rounded-0">
+                        Catégories
+                    </a>
+                </div>
+            </div>
         </div>
         <div class="row row-cols-1 row-cols-md-3">
             {% for stat in stats %}
                 <div class="col mb-4">
                     <div class="card text-uppercase rounded-0">
                         <div class="card-header text-bg-dark rounded-0 d-flex justify-content-between">
-                            <h5 class="card-title">{{ stat.collectionName }}</h5>
+                            <h5 class="card-title mb-0">{{ stat.collectionName }}</h5>
+                            <a class="text-white" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
+                                <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
+                            </a>
+                        </div>
+                        <div class="card-body fs-5 text-bg-light p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item text-bg-light">Nombre total d'objets : <b>{{ stat.totalItem }}</b></li>
+                                <li class="list-group-item text-bg-light">Montant total : <b class="text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }} </b></li>
+                                <li class="list-group-item text-bg-light">Montant moyen : <b class="text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }} </b></li>
+                            </ul>
+                        </div>
+                        <div class="card-footer text-start d-flex justify-content-between">
+                            <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
                             <div class="btn-group" role="group">
-                                <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
                                 <button
                                     data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
                                     data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
@@ -40,16 +60,6 @@
                                     <i class="fa-solid fa-trash-can"></i>
                                 </a>
                             </div>
-                        </div>
-                        <div class="card-body fs-5 text-bg-light p-0">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item text-bg-light">Nombre total d'objets : <b>{{ stat.totalItem }}</b></li>
-                                <li class="list-group-item text-bg-light">Montant total : <b class="text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }} </b></li>
-                                <li class="list-group-item text-bg-light">Montant moyen : <b class="text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }} </b></li>
-                            </ul>
-                        </div>
-                        <div class="card-footer d-flex justify-content-between">
-                            <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
                         </div>
                     </div>
                 </div>
