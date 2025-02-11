@@ -125,6 +125,11 @@ class CollectionController extends AbstractController
     }
 
     #[Route('/collection/add', name: 'app_collection_add')]
+    #[Route(
+        '/collection/{collectionId}/edit',
+        name: 'app_collection_edit',
+        requirements: ['collectionId' => '\d+']
+    )]
     public function form(Request $request, ?int $collectionId): Response
     {
         if ($collectionId) {
@@ -135,7 +140,7 @@ class CollectionController extends AbstractController
         $form = $this->createForm(CollectionType::class, $collection)->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$collection->getCategory()) {
+            if (!$collection->getCategory() || ( $collection->getId() && $request->get('newCategory'))) {
                 $newCategoryName = $request->get('newCategory');
                 if (!$newCategoryName) {
                     return $this->json([
@@ -161,5 +166,26 @@ class CollectionController extends AbstractController
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);
+    }
+
+    #[Route(
+        '/collection/{collectionId}/delete',
+        name: 'app_collection_delete',
+        requirements: ['collectionId' => '\d+']
+    )]
+    public function delete(Request $request, int $collectionId): Response
+    {
+        $referer = $request->headers->get('referer');
+
+        $collection = $this->collectionRepo->find($collectionId);
+        if ($collection) {
+            $this->em->remove($collection);
+            $this->em->flush();
+            $this->addFlash('success', "L'objet est supprimé");
+        } else {
+            $this->addFlash('warning', "L'objet est déjà supprimer");
+        }
+
+        return $this->redirect($referer);
     }
 }
