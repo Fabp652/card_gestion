@@ -12,8 +12,16 @@
         <h1 class="text-center mb-5">{{ collection.name|upper }}</h1>
     </div>
     <div class="row my-2">
-        <div class="col-12">
-            <button type="button" class="btn btn-primary showModal rounded-0" id="showModal" data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id})) }}" data-title="Ajouter un objet">Ajouter</button>
+        <div class="col-12 p-0">
+            <button 
+                type="button"
+                class="btn btn-primary showModal rounded-0"
+                id="showModal"
+                data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id})) }}"
+                data-title="Ajouter un objet"
+            >
+                Ajouter
+            </button>
         </div>
     </div>
     <div class="row mt-2">
@@ -36,11 +44,11 @@
                 <tr>
                     <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: category.id})) }}" method="get">
                         {% set filterQuery = request.query.all('filter') %}
-                        <th><input id="nameFilter" name="filter[name]" class="form-control" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                        <th><input id="referenceFilter" name="filter[reference]" class="form-control" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
+                        <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                        <th><input id="referenceFilter" name="filter[reference]" class="form-control rounded-0" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
                         {% if hasRarities %}
                             <th>
-                                <select id="rarityFilter" name="filter[rarity]" class="form-control">
+                                <select id="rarityFilter" name="filter[rarity]" class="form-select rounded-0">
                                     <option value="">---</option>
                                     {% for rarity in collection.rarities %}
                                         <option value="{{ rarity.id }}" {% if filterQuery.rarity is defined and filterQuery.rarity == rarity.id %}selected{% endif %}>{{ rarity.name }}</option>
@@ -49,7 +57,7 @@
                             </th>
                         {% endif %}
                         <th>
-                            <select id="priceFilter" name="filter[price]" class="form-control">
+                            <select id="priceFilter" name="filter[price]" class="form-select rounded-0">
                                 <option value="">---</option>
                                 {% for priceKey, priceValue in prices %}
                                     <option value="{{ priceKey }}" {% if filterQuery.price is defined and filterQuery.price == priceKey %}selected{% endif %}>{{ priceValue }}</option>
@@ -59,7 +67,7 @@
                         <th>
                         </th>
                         <th>
-                            <select id="qualityFilter"name="filter[quality]" class="form-control">
+                            <select id="qualityFilter"name="filter[quality]" class="form-select rounded-0">
                                 <option value="">---</option>
                                 {% set qualityDefined = filterQuery.quality is defined %}
                                 <option value="10" {% if qualityDefined and filterQuery.quality == '10' %}selected{% endif %}>Excellente</option>
@@ -72,7 +80,7 @@
                             </select>
                         </th>
                         <th>
-                            <select id="numberFilter" name="filter[number]" class="form-control">
+                            <select id="numberFilter" name="filter[number]" class="form-select rounded-0">
                                 <option value="">---</option>
                                 {% set numberDefined = filterQuery.number is defined %}
                                 <option value="1" {% if numberDefined and filterQuery.number == 1 %}selected{% endif %}>Plusieurs exemplaires</option>

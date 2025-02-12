@@ -141,13 +141,13 @@ class ItemController extends AbstractController
     {
         $collection = $this->collectionRepo->find($collectionId);
         if (!$collection) {
-            return new JsonResponse(['result' => false, 'message' => 'Collection introuvable']);
+            return $this->json(['result' => false, 'message' => 'Collection introuvable']);
         }
 
         if ($itemId) {
             $item = $this->itemRepo->find($itemId);
             if (!$item) {
-                return new JsonResponse(['result' => false, 'message' => 'Objet introuvable']);
+                return $this->json(['result' => false, 'message' => 'Objet introuvable']);
             }
         } else {
             $item = new Item();
@@ -159,7 +159,7 @@ class ItemController extends AbstractController
             $this->em->persist($item);
             $this->em->flush();
 
-            return new JsonResponse(['result' => true]);
+            return $this->json(['result' => true]);
         }
 
         $render = $this->render('item/form.html.twig', [
@@ -168,7 +168,7 @@ class ItemController extends AbstractController
             'collectionId' => $collectionId
         ]);
 
-        return new JsonResponse(['result' => true, 'content' => $render->getContent()]);
+        return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
     #[Route('/item/{id}', name: 'app_item_delete', requirements: ['id' => '\d+'])]

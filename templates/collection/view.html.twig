@@ -5,9 +5,22 @@
 {% block body %}
     {{ parent() }}
 
-    <h1 class="text-center">{{ collection.name|upper }}</h1>
+    <h1 class="text-center mb-4">{{ collection.name|upper }}</h1>
 
-    <div class="container">
+    <div class="container" data-controller="modal">
+        <div class="row">
+            <div class="col mb-3">
+                <button
+                    type="button"
+                    class="btn btn-primary showModal rounded-0"
+                    id="showModal"
+                    data-url="{{ absolute_url(path('app_category_add_child', {parentId: collection.category.id})) }}"
+                    data-title="Créer une nouvelle catégorie"
+                >
+                    Nouvelle catégorie
+                </button>
+            </div>
+        </div>
         <div class="row mb-4">
             {% set hasRarities = collection.rarities|length > 0 %}
             {% for category, mostExpensive in mostExpensives %}
@@ -80,4 +93,5 @@
             </div>
         {% endif %}
     </div>
+    {% include "Modal/modal.html.twig" %}
 {% endblock %}

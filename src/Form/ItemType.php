@@ -22,7 +22,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ItemType extends AbstractType
 {
     private const LABEL_CLASS = 'form-label';
-    private const ATTR_CLASS = 'form-control';
+    private const ATTR_CLASS_CONTROL = 'form-control rounded-0';
+    private const ATTR_CLASS_SELECT = 'form-select rounded-0';
 
     public function __construct(
         private RarityRepository $rarityRepo,
@@ -42,7 +43,7 @@ class ItemType extends AbstractType
                 [
                     'label' => 'Nom',
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_CONTROL],
                     'required' => true
                 ]
             )
@@ -52,7 +53,7 @@ class ItemType extends AbstractType
                 [
                     'label' => 'Référence',
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_CONTROL],
                     'required' => false
                 ]
             )
@@ -63,7 +64,7 @@ class ItemType extends AbstractType
                     'label' => 'Prix',
                     'scale' => 2,
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_CONTROL],
                     'required' => true
                 ]
             )
@@ -73,7 +74,7 @@ class ItemType extends AbstractType
                 [
                     'label' => 'Qualité',
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_CONTROL],
                     'required' => true
                 ]
             )
@@ -83,7 +84,7 @@ class ItemType extends AbstractType
                 [
                     'label' => 'Nombre',
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_CONTROL],
                     'required' => true
                 ]
             )
@@ -93,7 +94,7 @@ class ItemType extends AbstractType
                 [
                     'label' => 'Lien',
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_CONTROL],
                     'required' => false
                 ]
             )
@@ -106,7 +107,7 @@ class ItemType extends AbstractType
                     'choice_value' => 'id',
                     'choice_label' => 'name',
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_SELECT],
                     'query_builder' => function (EntityRepository $er) use ($collection): QueryBuilder {
                         return $er->createQueryBuilder('c')
                             ->orderBy('c.name', 'ASC')
@@ -134,7 +135,7 @@ class ItemType extends AbstractType
                         ;
                     },
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_SELECT],
                     'label' => 'Rareté',
                     'required' => false
                 ]
