@@ -37,7 +37,7 @@
                     </div>
                 </nav>
             </div>
-            {% if collection is defined or category is defined %}
+            {% if collection is defined or category is defined or item is defined %}
                 <nav class="ms-4 mb-5 breadcrumb-position" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">
                         <li class="breadcrumb-item">
@@ -48,7 +48,10 @@
                                 Accueil
                             </a>
                         </li>
-                        {% if category is defined and collection is defined %}
+                        {% if (category is defined and collection is defined) or item is defined %}
+                            {% if item is defined %}
+                                {% set collection = item.collection %}
+                            {% endif %}
                             <li class="breadcrumb-item">
                                 <a
                                     class="link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
@@ -61,9 +64,9 @@
                                 <li class="breadcrumb-item">
                                     <a 
                                         class="link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
-                                        href="{{ path('app_item_list', {collectionId: collection.id, categoryId: category.id}) }}"
+                                        href="{{ path('app_item_list', {collectionId: collection.id, categoryId: item.category.id}) }}"
                                     >
-                                        {{ collection.name }}
+                                        {{ item.category.name }}
                                     </a>
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">{{ item.name }}</li>

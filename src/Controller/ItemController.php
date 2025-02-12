@@ -171,7 +171,7 @@ class ItemController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/item/{id}', name: 'app_item_delete', requirements: ['id' => '\d+'])]
+    #[Route('/item/{id}/delete', name: 'app_item_delete', requirements: ['id' => '\d+'])]
     public function delete(Request $request, int $id): Response
     {
         $referer = $request->headers->get('referer');
@@ -186,5 +186,19 @@ class ItemController extends AbstractController
         }
 
         return $this->redirect($referer);
+    }
+
+    #[Route(
+        '/item/{id}',
+        name: 'app_item_view',
+        requirements: ['id' => '\d+']
+    )]
+    public function view(int $id): Response
+    {
+        $item = $this->itemRepo->find($id);
+
+        return $this->render('item/view.html.twig', [
+            'item' => $item
+        ]);
     }
 }

@@ -28,9 +28,16 @@ export default class extends Controller {
             $('#modalForm').trigger('submit')
         });
 
-        $(document).on('submit', function (e) {
-            e.preventDefault();
+        $('#modalBody').on('keypress', function (e) {
+            var key = e.which;
+            if (key == 13) {
+                $('#modalForm').trigger('submit')
+            }
+        })
 
+        $('#modalBody').on('submit', function (e) {
+            e.preventDefault();
+            console.log(1)
             $('.msg').remove();
             let formData = new FormData(document.querySelector('#modalForm'));
             let requiredData = $('input[required="required"]');

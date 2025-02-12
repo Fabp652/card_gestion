@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+{% block head %}
+{% endblock %}
+
+{% block title %}{{ item.name }}{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+
+    <div class="d-flex justify-content-center">
+        <h1 class="text-center mb-4">{{ item.name|upper }}</h1>
+        {% if item.link %}
+            <a href="{{ item.link }}" target="_blank">
+                <i class="fa-solid fa-link"></i>
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12 mb-2">
+                <span>Nom :</span>
+                <b>{{ item.name }}</b>
+            </div>
+            <div class="col-12 mb-2">
+                <span>Référence :</span>
+                <b>{{ item.reference }}</b>
+            </div>
+            <div class="col-12 mb-2">
+                <span>Rareté :</span>
+                <b>{{ item.rarity.name }}</b>
+            </div>
+            <div class="col-12 mb-2">
+                <span>Nombre :</span>
+                <b>{{ item.number }}</b>
+            </div>
+            <div class="col-12 mb-2">
+                <span>Prix :</span>
+                <b>{{ item.price|format_currency('EUR', locale='fr') }}</b>
+            </div>
+            <div class="col-12 mb-2">
+                <span>Qualité :</span>
+                <b>{{ item.quality }}/10</b>
+            </div>
+        </div>
+    </div>
+{% endblock %}

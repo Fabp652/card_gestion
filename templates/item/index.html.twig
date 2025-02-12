@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 {% block head %}
-{{ knp_pagination_rel_links(cards) }}
+{{ knp_pagination_rel_links(items) }}
 {% endblock %}
 
 {% block title %}{{ collection.name }}{% endblock %}
@@ -141,6 +141,9 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
+                                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
                                 <button
                                     data-url="{{ absolute_url(path('app_item_edit', {collectionId: collection.id, itemId: item.id})) }}"
                                     data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
