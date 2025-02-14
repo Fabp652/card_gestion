@@ -68,6 +68,36 @@
                 </div>
             {% endfor %}
         </div>
+        <div class="row">
+            <h2 class="text-uppercase">Les critères par catégorie</h2>
+            <div class="col-6">
+                <div class="card rounded-0">
+                    <div class="card-header rounded-0 bg-black bg-gradient d-flex justify-content-between">
+                        <h5 class="card-title color-title text-uppercase align-middle my-auto">{{ category.name }}</h5>
+                    </div>
+                    <div class="card-body rounded-0 bg-light">
+                        <table class="table table-light table-hover table-responsive align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Description</th>
+                                    <th>Point</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for criteria in category.criterias %}
+                                    <tr>
+                                        <td>{{ criteria.name }}</td>
+                                        <td><b class="text-success">{{ criteria.description }}</b></td>
+                                        <td><b>{{ criteria.point }}</b></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     {% include "Modal/modal.html.twig" %}
 {% endblock %}

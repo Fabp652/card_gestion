@@ -97,7 +97,8 @@ class CategoryController extends AbstractController
 
         return $this->render('category/view.html.twig', [
             'mostExpensives' => $mostExpensives,
-            'category' => $category
+            'category' => $category,
+            'childs' => $childs
         ]);
     }
 
