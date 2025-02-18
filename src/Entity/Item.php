@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ItemRepository;
 use DateTime;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -57,8 +58,13 @@ class Item
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[ORM\Column]
-    private ?int $quality = null;
+    #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'item')]
+    private Collection $itemQualities;
+
+    public function __construct()
+    {
+        $this->itemQualities = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -240,14 +246,32 @@ class Item
         $this->updatedAt = new DateTime();
     }
 
-    public function getQuality(): ?int
+    /**
+     * @return Collection<int, ItemQuality>
+     */
+    public function getItemQualities(): Collection
     {
-        return $this->quality;
+        return $this->itemQualities;
     }
 
-    public function setQuality(int $quality): static
+    public function addItemQuality(ItemQuality $itemQuality): static
     {
-        $this->quality = $quality;
+        if (!$this->itemQualities->contains($itemQuality)) {
+            $this->itemQualities->add($itemQuality);
+            $itemQuality->setItem($this);
+        }
+
+        return $this;
+    }
+
+    public function removeItemQuality(ItemQuality $itemQuality): static
+    {
+        if ($this->itemQualities->removeElement($itemQuality)) {
+            // set the owning side to null (unless already changed)
+            if ($itemQuality->getItem() === $this) {
+                $itemQuality->setItem(null);
+            }
+        }
 
         return $this;
     }

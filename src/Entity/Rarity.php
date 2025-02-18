@@ -33,6 +33,9 @@ class Rarity
     #[ORM\OneToMany(targetEntity: Item::class, mappedBy: 'rarity')]
     private Collection $items;
 
+    #[ORM\ManyToOne]
+    private ?FileManager $file = null;
+
     public function __construct()
     {
         $this->cards = new ArrayCollection();
@@ -135,6 +138,18 @@ class Rarity
                 $item->setRarity(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFile(): ?FileManager
+    {
+        return $this->file;
+    }
+
+    public function setFile(?FileManager $file): static
+    {
+        $this->file = $file;
 
         return $this;
     }

@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\ItemQualityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: ItemQualityRepository::class)]
+class ItemQuality
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column]
+    private ?int $quality = null;
+
+    #[ORM\ManyToOne(inversedBy: 'itemQualities')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Item $item = null;
+
+    #[ORM\ManyToMany(targetEntity: Criteria::class, inversedBy: 'itemQualities')]
+    private Collection $criterias;
+
+    #[ORM\ManyToOne]
+    private ?FileManager $file = null;
+
+    public function __construct()
+    {
+        $this->criterias = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getQuality(): ?int
+    {
+        return $this->quality;
+    }
+
+    public function setQuality(int $quality): static
+    {
+        $this->quality = $quality;
+
+        return $this;
+    }
+
+    public function getItem(): ?Item
+    {
+        return $this->item;
+    }
+
+    public function setItem(?Item $item): static
+    {
+        $this->item = $item;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Criteria>
+     */
+    public function getCriterias(): Collection
+    {
+        return $this->criterias;
+    }
+
+    public function addCriteria(Criteria $criteria): static
+    {
+        if (!$this->criterias->contains($criteria)) {
+            $this->criterias->add($criteria);
+        }
+
+        return $this;
+    }
+
+    public function removeCriteria(Criteria $criteria): static
+    {
+        $this->criterias->removeElement($criteria);
+
+        return $this;
+    }
+
+    public function getFile(): ?FileManager
+    {
+        return $this->file;
+    }
+
+    public function setFile(?FileManager $file): static
+    {
+        $this->file = $file;
+
+        return $this;
+    }
+}
