@@ -26,30 +26,9 @@ class CriteriaController extends AbstractController
     public function list(Request $request, PaginatorInterface $paginator, CategoryRepository $categoryRepo): Response
     {
         $filters = $request->query->all('filter');
+        $filters = array_filter($filters);
 
-        $criterias = $this->criteriaRepo->createQueryBuilder('c');
-        foreach ($filters as $filterKey => $filterValue) {
-            if (!empty($filterValue)) {
-                if ($filterKey == 'name') {
-                    $criterias->andWhere('c.' . $filterKey . ' LIKE :' . $filterKey)
-                        ->setParameter($filterKey, $filterValue . '%')
-                    ;
-                } elseif ($filterKey == 'category') {
-                    $criterias->join('c.categories', 'cat')
-                        ->join('cat.childs', 'child')
-                        ->andWhere('cat.id = :category OR child.id = :category')
-                        ->setParameter('category', $filterValue)
-                    ;
-                } else {
-                    if (is_numeric($filterValue)) {
-                        $filterValue = (int) $filterValue;
-                    }
-                    $criterias->andWhere('c.' . $filterKey . ' = ' . ':' . $filterKey)
-                        ->setParameter($filterKey, $filterValue)
-                    ;
-                }
-            }
-        }
+        $criterias = $this->criteriaRepo->findByFilter($filters);
 
         $criterias = $paginator->paginate(
             $criterias,

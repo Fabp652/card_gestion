@@ -25,44 +25,21 @@ class CategoryController extends AbstractController
     #[Route('/category', name: 'app_category_list')]
     public function list(): Response
     {
-        $stats = $this->categoryRepo->createQueryBuilder('c')
-            ->select(
-                '
-                    SUM(i.price * i.number) AS totalAmount,
-                    CASE WHEN COUNT(i.id) > 0 THEN SUM(i.number) ELSE 0 END AS totalItem,
-                    c.name AS categoryName,
-                    c.id AS categoryId,
-                    SUM(i.price * i.number) / SUM(i.number) AS average
-                '
-            )
-            ->leftJoin('c.collections', 'col')
-            ->leftJoin('col.items', 'i')
-            ->groupBy('c.id')
-            ->getQuery()
-            ->getResult()
-        ;
+        $stats = $this->categoryRepo->stats();
 
         return $this->render('category/index.html.twig', [
             'stats' => $stats,
         ]);
     }
 
-    #[Route('/collection/{collectionId}/category', name: 'app_category_nav')]
-    public function nav(CollectionsRepository $collectionsRepository, int $collectionId): Response
+    #[Route(
+        'collection/{collectionId}/category/{categoryId}/nav',
+        name: 'app_category_nav',
+        requirements: ['categoryId' => '\d+', 'collectionId' => '\d+']
+    )]
+    public function nav(int $collectionId, int $categoryId): Response
     {
-        $subQuery = $collectionsRepository->createQueryBuilder('co')
-            ->select('category.id')
-            ->leftJoin('co.category', 'category')
-            ->where('co.id = :collectionId')
-        ;
-
-        $categories = $this->categoryRepo->createQueryBuilder('c')
-            ->where('c.parent = (' . $subQuery->getDQL() . ')')
-            ->orderBy('c.name')
-            ->setParameter('collectionId', $collectionId)
-            ->getQuery()
-            ->getResult()
-        ;
+        $categories = $this->categoryRepo->findBy(['parent' => $categoryId]);
 
         return $this->render('category/partial/nav.html.twig', [
             'categories' => $categories,
@@ -78,21 +55,12 @@ class CategoryController extends AbstractController
     public function view(int $categoryId): Response
     {
         $category = $this->categoryRepo->find($categoryId);
-        $childs = $category->getChilds()->toArray();
+        $childs = $category->getChilds();
 
         $mostExpensives = [];
-        foreach ($childs as $child) {
+        foreach ($category->getChilds() as $child) {
             $index = $child->getName() . '_' . $child->getId();
-            $mostExpensives[$index] = $this->itemRepo->createQueryBuilder('ime')
-                ->andWhere('ime.category = :category')
-                ->setParameter('category', $child)
-                ->select('ime.price, ime.number, ime.name, rme.name AS rarityName')
-                ->leftJoin('ime.rarity', 'rme')
-                ->orderBy('ime.price', 'DESC')
-                ->setMaxResults(10)
-                ->getQuery()
-                ->getResult()
-            ;
+            $mostExpensives[$index] = $this->itemRepo->findMostExpensives(null, $child->getId());
         }
 
         return $this->render('category/view.html.twig', [

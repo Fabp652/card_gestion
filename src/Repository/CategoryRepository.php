@@ -22,4 +22,27 @@ class CategoryRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Category::class);
     }
+
+    /**
+     * @return array
+     */
+    public function stats(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select(
+                '
+                    SUM(i.price * i.number) AS totalAmount,
+                    CASE WHEN COUNT(i.id) > 0 THEN SUM(i.number) ELSE 0 END AS totalItem,
+                    c.name AS categoryName,
+                    c.id AS categoryId,
+                    SUM(i.price * i.number) / SUM(i.number) AS average
+                '
+            )
+            ->leftJoin('c.collections', 'col')
+            ->leftJoin('col.items', 'i')
+            ->groupBy('c.id')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

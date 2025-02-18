@@ -25,23 +25,7 @@ class CollectionController extends AbstractController
     #[Route(name: 'app_collection')]
     public function index(): Response
     {
-        $stats = $this->collectionRepo->createQueryBuilder('c')
-            ->select(
-                '
-                    SUM(i.price * i.number) AS totalAmount,
-                    CASE WHEN COUNT(i.id) > 0 THEN SUM(i.number) ELSE 0 END AS totalItem,
-                    c.name AS collectionName,
-                    c.id AS collectionId,
-                    SUM(i.price * i.number) / SUM(i.number) AS average,
-                    cat.name As category
-                '
-            )
-            ->leftJoin('c.items', 'i')
-            ->leftJoin('c.category', 'cat')
-            ->groupBy('c.id')
-            ->getQuery()
-            ->getResult()
-        ;
+        $stats = $this->collectionRepo->stats();
 
         return $this->render(
             'collection/index.html.twig',
@@ -59,42 +43,16 @@ class CollectionController extends AbstractController
     public function view(int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
-        $categories = $collection->getCategory()->getChilds()->toArray();
+        $categories = $collection->getCategory()->getChilds();
 
         if (!$collection->getRarities()->isEmpty()) {
-            $statRarities = $this->itemRepo->createQueryBuilder('ir')
-                ->andWhere('ir.collection = :collection')
-                ->setParameter('collection', $collection)
-                ->select(
-                    '
-                        SUM(ir.price * ir.number) AS totalAmount,
-                        SUM(ir.number) AS totalItem,
-                        r.name AS rarityName,
-                        SUM(ir.price * ir.number) / SUM(ir.number) AS average
-                    '
-                )
-                ->join('ir.rarity', 'r')
-                ->groupBy('ir.rarity')
-                ->getQuery()
-                ->getResult()
-            ;
+            $statRarities = $this->itemRepo->statByRarity($collectionId);
         }
 
         $mostExpensives = [];
         foreach ($categories as $category) {
             $index = $category->getName() . '_' . $category->getId();
-            $mostExpensives[$index] = $this->itemRepo->createQueryBuilder('ime')
-                ->andWhere('ime.collection = :collection')
-                ->setParameter('collection', $collection)
-                ->andWhere('ime.category = :category')
-                ->setParameter('category', $category)
-                ->select('ime.price, ime.number, ime.name, rme.name AS rarityName')
-                ->leftJoin('ime.rarity', 'rme')
-                ->orderBy('ime.price', 'DESC')
-                ->setMaxResults(10)
-                ->getQuery()
-                ->getResult()
-            ;
+            $mostExpensives[$index] = $this->itemRepo->findMostExpensives($collectionId, $category->getId());
         }
 
         return $this->render('collection/view.html.twig', [
@@ -109,17 +67,11 @@ class CollectionController extends AbstractController
         name: 'app_collection_dropdown',
         requirements: ['collectionId' => '\d+']
     )]
-    public function dropdown(?int $collectionId): Response
+    public function dropdown(int $collectionId): Response
     {
         $actualCollection = $this->collectionRepo->find($collectionId);
 
-        $collections = $this->collectionRepo->createQueryBuilder('c')
-            ->select('c.id, c.name')
-            ->where('c.id != :collection')
-            ->setParameter('collection', $collectionId)
-            ->getQuery()
-            ->getResult()
-        ;
+        $collections = $this->collectionRepo->findCollectionsWithoutActual($collectionId);
 
         return $this->render('collection/partial/dropdown.html.twig', [
             'actualCollection' => $actualCollection,

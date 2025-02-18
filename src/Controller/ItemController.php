@@ -36,50 +36,9 @@ class ItemController extends AbstractController
         $collection = $this->collectionRepo->find($collectionId);
         $category = $categoryRepo->find($categoryId);
         $filters = $request->query->all('filter');
+        $filters = array_filter($filters);
 
-        $items = $this->itemRepo->createQueryBuilder('i')
-            ->leftJoin('i.rarity', 'r')
-            ->where('i.collection = :collectionId')
-            ->setParameter('collectionId', $collectionId)
-            ->andWhere('i.category = :categoryId')
-            ->setParameter('categoryId', $categoryId)
-        ;
-
-        foreach ($filters as $filterKey => $filterValue) {
-            if (!empty($filterValue)) {
-                if ($filterKey == 'name' || $filterKey == 'reference') {
-                    $items->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
-                        ->setParameter($filterKey, $filterValue . '%')
-                    ;
-                } elseif ($filterKey == 'price' || $filterKey == 'quality') {
-                    $filterExplode = explode('-', $filterValue);
-                    if (count($filterExplode) == 1) {
-                        $items->andWhere('i.' . $filterKey . ' = :' . $filterKey)
-                            ->setParameter($filterKey, $filterValue)
-                        ;
-                    } elseif (empty($filterExplode[0])) {
-                        $items->andWhere('i.' . $filterKey . ' < :' . $filterKey)
-                            ->setParameter($filterKey, $filterExplode[1])
-                        ;
-                    } else {
-                        $items->andWhere('i. ' . $filterKey . ' BETWEEN :min AND :max')
-                            ->setParameter('min', $filterExplode[0])
-                            ->setParameter('max', $filterExplode[1])
-                        ;
-                    }
-                } elseif ($filterKey == 'number') {
-                    $comparator = $filterValue == 1 ? '>' : '=';
-                    $items->andWhere('i.number ' . $comparator . ' 1');
-                } else {
-                    if (is_numeric($filterValue)) {
-                        $filterValue = (int) $filterValue;
-                    }
-                    $items->andWhere('i.' . $filterKey . ' = ' . ':' . $filterKey)
-                        ->setParameter($filterKey, $filterValue)
-                    ;
-                }
-            }
-        }
+        $items = $this->itemRepo->findByFilter($filters, $collectionId, $categoryId);
 
         $items = $paginator->paginate(
             $items,

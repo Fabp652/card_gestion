@@ -21,28 +21,42 @@ class CollectionsRepository extends ServiceEntityRepository
         parent::__construct($registry, Collections::class);
     }
 
-    //    /**
-    //     * @return Collections[] Returns an array of Collections objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return array
+     */
+    public function stats(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select(
+                '
+                    SUM(i.price * i.number) AS totalAmount,
+                    CASE WHEN COUNT(i.id) > 0 THEN SUM(i.number) ELSE 0 END AS totalItem,
+                    c.name AS collectionName,
+                    c.id AS collectionId,
+                    SUM(i.price * i.number) / SUM(i.number) AS average,
+                    cat.name As category
+                '
+            )
+            ->leftJoin('c.items', 'i')
+            ->leftJoin('c.category', 'cat')
+            ->groupBy('c.id')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 
-    //    public function findOneBySomeField($value): ?Collections
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * @param int $collectionId
+     * @return array
+     */
+    public function findCollectionsWithoutActual(int $collectionId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select('c.id, c.name')
+            ->where('c.id != :collection')
+            ->setParameter('collection', $collectionId)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

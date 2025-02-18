@@ -29,7 +29,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                                 </div>
                                 <div class="offcanvas-body px-0">
-                                    {{ render(path('app_category_nav', {collectionId: collection.id})) }}
+                                    {{ render(path('app_category_nav', {collectionId: collection.id, categoryId: collection.category.id})) }}
                                 </div>
                             </div>
                             {{ render(path('app_collection_dropdown', {collectionId: collection.id})) }}
