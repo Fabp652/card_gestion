@@ -36,8 +36,8 @@
                     {% endif %}
                     <th>{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié le', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    <th>{{ knp_pagination_sortable(items, 'Qualité', 'i.quality', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    <th style="width:10%;">{{ knp_pagination_sortable(items, 'Nombre', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    {# TODO retirer tri <th>{{ knp_pagination_sortable(items, 'Qualité', 'i.quality', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th> #}
+                    <th style="width:10%;">{{ knp_pagination_sortable(items, 'Quantité', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>Lien</th>
                     <th>Action</th>
                 </tr>
@@ -66,7 +66,7 @@
                         </th>
                         <th>
                         </th>
-                        <th>
+                        {# TODO Changer le filtre <th>
                             <select id="qualityFilter"name="filter[quality]" class="form-select rounded-0">
                                 <option value="">---</option>
                                 {% set qualityDefined = filterQuery.quality is defined %}
@@ -77,8 +77,9 @@
                                 <option value="3-4" {% if qualityDefined and filterQuery.quality == '3-4' %}selected{% endif %}>Légèrement usée</option>
                                 <option value="1-2" {% if qualityDefined and filterQuery.quality == '1-2' %}selected{% endif %}>Usée</option>
                                 <option value="0" {% if qualityDefined and filterQuery.quality == '0' %}selected{% endif %}>Abimé</option>
+                                <option value="none">Non évalué</option>
                             </select>
-                        </th>
+                        </th> #}
                         <th>
                             <select id="numberFilter" name="filter[number]" class="form-select rounded-0">
                                 <option value="">---</option>
@@ -100,7 +101,7 @@
             </thead>
             <tbody class="table-group-divider">
                 {% for item in items %}
-                    {% if item.quality == 10 %}
+                    {# {% if item.quality == 10 %}
                         {% set qualityName = 'Excellente' %}
                     {% endif %}
                     {% if item.quality in range(8,9) %}
@@ -120,7 +121,7 @@
                     {% endif %}
                     {% if item.quality == 0 %}
                         {% set qualityName = 'Abimé' %}
-                    {% endif %}
+                    {% endif %} #}
                     
                     <tr>
                         <td>{{ item.name }}</td>
@@ -130,7 +131,7 @@
                         {% endif %}
                         <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
                         <td>{{ item.updatedAt ? item.updatedAt|date('d/m/Y') : item.createdAt|date('d/m/Y') }}</td>
-                        <td>{{ qualityName }}</td>
+                        {# TODO Afficher moyenne <td>{{ qualityName }}</td> #}
                         <td style="width:2%;">{{ item.number }}</td>
                         <td>
                             {% if item.link %}

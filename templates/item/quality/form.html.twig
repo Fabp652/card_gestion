@@ -1,0 +1,37 @@
+{% if itemQualityId %}
+    {% if evaluate %}
+        {{ form_start(form, {method: 'POST', action: path('app_item_quality_update_criteria', {itemQualityId: itemQualityId}), attr: {'id': 'modalForm'}}) }}
+    {% else %}
+        {{ form_start(form, {method: 'POST', action: path('app_item_quality_update_image', {itemQualityId: itemQualityId}), attr: {'id': 'modalForm'}}) }}
+    {% endif %}
+{% else %}
+    {{ form_start(form, {method: 'POST', action: path('app_item_quality_add', {itemId: itemId}), attr: {'id': 'modalForm'}}) }}
+{% endif %}
+    <div class="row" data-controller="quality">
+        {% if form.file is defined %}
+            <div class="col-12 mb-3">
+                {{ form_row(form.file) }}
+            </div>
+        {% endif %}
+        {% if form.criterias is defined %}
+            <div class="col-6">
+                {{ form_label(form.criterias) }}
+                <div class="mt-2">
+                    <div class="form-check pe-0">
+                        <input id="item_quality_criterias_0" class="form-check-input rounded-0 criteriaQuality" type="checkbox" name="perfect" value="1">
+                        <label class="form-check-label" for="item_quality_criterias_0" >Aucun défaut</label>
+                    </div>
+                    {% for childForm in form.criterias.children %}
+                        <div class="form-check pe-0">
+                            {{ form_widget(childForm, {'attr': {'class': 'form-check-input rounded-0 criteriaQuality'}}) }}   
+                            <label class="form-check-label" for="{{ childForm.vars.id }}" >{{ childForm.vars.label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-6">
+                {{ form_row(form.quality) }}
+            </div>
+        {% endif %}
+    </div>
+{{ form_end(form) }}

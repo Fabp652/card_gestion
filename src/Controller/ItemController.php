@@ -3,11 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Item;
+use App\Entity\ItemQuality;
+use App\Form\ItemQualityType;
 use App\Form\ItemType;
 use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
+use App\Repository\CriteriaRepository;
+use App\Repository\ItemQualityRepository;
 use App\Repository\ItemRepository;
 use App\Repository\RarityRepository;
+use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -158,5 +163,96 @@ class ItemController extends AbstractController
         return $this->render('item/view.html.twig', [
             'item' => $item
         ]);
+    }
+
+    #[Route(
+        '/item/{itemId}/quality/add',
+        name: 'app_item_quality_add',
+        requirements: ['itemId' => '\d+']
+    )]
+    #[Route(
+        '/item/quality/{itemQualityId}/update/criteria',
+        name: 'app_item_quality_update_criteria',
+        requirements: ['itemQualityId' => '\d+']
+    )]
+    #[Route(
+        '/item/quality/{itemQualityId}/update/image',
+        name: 'app_item_quality_update_image',
+        requirements: ['itemQualityId' => '\d+']
+    )]
+    public function evaluate(
+        Request $request,
+        FileManager $fileManager,
+        ItemQualityRepository $itemQualityRepository,
+        ?int $itemId,
+        ?int $itemQualityId
+    ): Response {
+        $options = [];
+        if ($itemQualityId) {
+            $itemQuality = $itemQualityRepository->find($itemQualityId);
+            $item = $itemQuality->getItem();
+            if (str_ends_with($request->getPathInfo(), 'criteria')) {
+                $options['evaluate'] = true;
+                $options['category'] = $item->getCategory();
+            } else {
+                $options['image'] = true;
+            }
+        } else {
+            $item = $this->itemRepo->find($itemId);
+            $options['category'] = $item->getCategory();
+            $itemQuality = new ItemQuality();
+        }
+
+        $form = $this->createForm(
+            ItemQualityType::class,
+            $itemQuality,
+            $options
+        )->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($request->get('perfect')) {
+                $itemQuality->setQuality(10);
+            } elseif ($itemQuality->getCriterias()->isEmpty()) {
+                $itemQuality->setQuality(null);
+            }
+
+            if (!$itemQuality->getId()) {
+                $itemQuality->setItem($item);
+            }
+
+            if ($form->has('file')) {
+                $file = $form->get('file')->getData();
+                if ($file) {
+                    $fileManagerEntity = $fileManager->upload('item', $item->getName(), $file);
+
+                    if (!$fileManagerEntity) {
+                        return $this->json([
+                            'result' => false,
+                            'message' => 'Une erreur est survenue pendant le téléchargement du fichier.'
+                        ]);
+                    }
+                    $this->em->persist($fileManagerEntity);
+                    $itemQuality->setFile($fileManagerEntity);
+                }
+            }
+            $this->em->persist($itemQuality);
+            $this->em->flush();
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            $messages = [];
+            foreach ($form->getErrors(true) as $error) {
+                $messages[] = $error->getMessage();
+            }
+            return $this->json(['result' => false, 'messages' => $messages]);
+        }
+
+        $render = $this->render('item/quality/form.html.twig', [
+            'form' => $form->createView(),
+            'itemId' => $itemId,
+            'itemQualityId' => $itemQualityId,
+            'evaluate' => array_key_exists('evaluate', $options),
+            'image' => array_key_exists('image', $options)
+        ]);
+
+        return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 }

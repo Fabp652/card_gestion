@@ -37,7 +37,7 @@ export default class extends Controller {
 
         $('#modalBody').on('submit', function (e) {
             e.preventDefault();
-            console.log(1)
+
             $('.msg').remove();
             let formData = new FormData(document.querySelector('#modalForm'));
             let requiredData = $('input[required="required"]');
@@ -64,9 +64,17 @@ export default class extends Controller {
                                 modal.hide();
                                 window.location.reload();
                             } else {
-                                $('#modalBody').prepend(
-                                    '<b class="text-danger">' + json.message + '</b>'
-                                )
+                                if (json.message) {
+                                    $('#modalBody').prepend(
+                                        '<b class="text-danger">' + json.message + '</b>'
+                                    )
+                                } else {
+                                    json.messages.forEach(message => {
+                                        $('#modalBody').prepend(
+                                            '<b class="text-danger">' + message + '</b>'
+                                        )
+                                    });
+                                }
                             }
                         })
                     }

@@ -69,16 +69,6 @@ class ItemType extends AbstractType
                 ]
             )
             ->add(
-                'quality',
-                IntegerType::class,
-                [
-                    'label' => 'Qualité',
-                    'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS_CONTROL],
-                    'required' => true
-                ]
-            )
-            ->add(
                 'number',
                 IntegerType::class,
                 [

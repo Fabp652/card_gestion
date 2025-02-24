@@ -15,7 +15,7 @@ class ItemQuality
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $quality = null;
 
     #[ORM\ManyToOne(inversedBy: 'itemQualities')]
@@ -43,7 +43,7 @@ class ItemQuality
         return $this->quality;
     }
 
-    public function setQuality(int $quality): static
+    public function setQuality(?int $quality): static
     {
         $this->quality = $quality;
 

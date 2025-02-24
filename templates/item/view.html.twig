@@ -16,32 +16,81 @@
         {% endif %}
     </div>
 
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-12 mb-2">
-                <span>Nom :</span>
-                <b>{{ item.name }}</b>
-            </div>
-            <div class="col-12 mb-2">
+    <div class="container mt-5" data-controller="modal">
+        <div class="row justify-content-center border text-center">
+            <div class="col">
                 <span>Référence :</span>
                 <b>{{ item.reference }}</b>
             </div>
-            <div class="col-12 mb-2">
+            <div class="col">
                 <span>Rareté :</span>
                 <b>{{ item.rarity.name }}</b>
             </div>
-            <div class="col-12 mb-2">
-                <span>Nombre :</span>
+            <div class="col">
+                <span>Quantité :</span>
                 <b>{{ item.number }}</b>
             </div>
-            <div class="col-12 mb-2">
+            <div class="col">
                 <span>Prix :</span>
                 <b>{{ item.price|format_currency('EUR', locale='fr') }}</b>
             </div>
-            <div class="col-12 mb-2">
-                <span>Qualité :</span>
-                <b>{{ item.quality }}/10</b>
-            </div>
         </div>
+        {% if item.itemQualities|length < item.number %}
+            <div class="row my-3">
+                <div class="col ps-0">
+                    <button 
+                        type="button"
+                        class="btn btn-primary showModal rounded-0"
+                        id="showModal"
+                        data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
+                        data-title="Évaluer un objet"
+                    >
+                        Évaluer un objet
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+        {% for itemQuality in item.itemQualities %}
+            <div class="row mt-5 mb-3 border border-black">
+                <div class="col-6 py-3 text-center border-end border-black position-relative">
+                    <button
+                        data-url="{{ absolute_url(path('app_item_quality_update_image', {itemQualityId: itemQuality.id})) }}"
+                        data-title="Changer l'image"
+                        class="btn btn-primary showModal rounded-0 position-absolute top-0 start-0"
+                    >
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <img src="{{ file_encoded(itemQuality.file) }}">
+                </div>
+                <div class="col-6 py-3 position-relative text-bg-dark bg-gradient">
+                    <button 
+                        type="button"
+                        class="btn btn-primary showModal rounded-0 position-absolute top-0 end-0"
+                        id="showModal"
+                        data-url="{{ absolute_url(path('app_item_quality_update_criteria', {itemQualityId: itemQuality.id})) }}"
+                        data-title="Évaluer l'objet"
+                    >
+                        Évaluer
+                    </button>
+                    {% if itemQuality.quality %}
+                            <div>
+                                <h2 class="mb-3 fw-bold">{{ itemQuality.quality }}/10</h2>
+                            </div>
+                            {% for criteria in itemQuality.criterias %}
+                                <div class="border-bottom">
+                                    <h3 class="ms-2 mb-1 text-warning">{{ criteria.name }}</h3>
+                                    <p class="ms-3 fst-italic">{{ criteria.description }} ({{ criteria.point }} point{% if criteria.point > 1 %}s{% endif %})</p>
+                                </div>
+                            {% else %}
+                                <h3 class="ms-2 mb-1 text-success">Aucun défaut</h3>
+                                <p class="ms-3 fst-italic">L'objet est en parfait état.</p>
+                            {% endfor %}
+                    {% else %}
+                        <h2 class="text-center position-absolute start-0 end-0 top-50 translate-middle-y mb-0">Pas encore évalué</h2>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
     </div>
+    {% include "Modal/modal.html.twig" %}
 {% endblock %}
