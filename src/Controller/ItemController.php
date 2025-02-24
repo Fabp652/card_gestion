@@ -41,7 +41,12 @@ class ItemController extends AbstractController
         $collection = $this->collectionRepo->find($collectionId);
         $category = $categoryRepo->find($categoryId);
         $filters = $request->query->all('filter');
-        $filters = array_filter($filters);
+        $filters = array_filter(
+            $filters,
+            function ($filter) {
+                return !empty($filter) || $filter == 0;
+            }
+        );
 
         $items = $this->itemRepo->findByFilter($filters, $collectionId, $categoryId);
 

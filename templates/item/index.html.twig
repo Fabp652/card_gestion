@@ -36,7 +36,7 @@
                     {% endif %}
                     <th>{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié le', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    {# TODO retirer tri <th>{{ knp_pagination_sortable(items, 'Qualité', 'i.quality', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th> #}
+                    <th>Qualité (moyenne)</th>
                     <th style="width:10%;">{{ knp_pagination_sortable(items, 'Quantité', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>Lien</th>
                     <th>Action</th>
@@ -66,20 +66,16 @@
                         </th>
                         <th>
                         </th>
-                        {# TODO Changer le filtre <th>
+                        <th>
                             <select id="qualityFilter"name="filter[quality]" class="form-select rounded-0">
                                 <option value="">---</option>
                                 {% set qualityDefined = filterQuery.quality is defined %}
-                                <option value="10" {% if qualityDefined and filterQuery.quality == '10' %}selected{% endif %}>Excellente</option>
-                                <option value="8-9" {% if qualityDefined and filterQuery.quality == '8-9' %}selected{% endif %}>Très bonne</option>
-                                <option value="6-7" {% if qualityDefined and filterQuery.quality == '6-7' %}selected{% endif %}>Bonne</option>
-                                <option value="5" {% if qualityDefined and filterQuery.quality == '5' %}selected{% endif %}>Passable</option>
-                                <option value="3-4" {% if qualityDefined and filterQuery.quality == '3-4' %}selected{% endif %}>Légèrement usée</option>
-                                <option value="1-2" {% if qualityDefined and filterQuery.quality == '1-2' %}selected{% endif %}>Usée</option>
-                                <option value="0" {% if qualityDefined and filterQuery.quality == '0' %}selected{% endif %}>Abimé</option>
-                                <option value="none">Non évalué</option>
+                                <option value="2" {% if qualityDefined and filterQuery.quality == '2' %}selected{% endif %}>Tous évalués</option>
+                                <option value="1" {% if qualityDefined and filterQuery.quality == '1' %}selected{% endif %}>Partiellement évalués</option>
+                                <option value="0" {% if qualityDefined and filterQuery.quality == '0' %}selected{% endif %}>Aucun évalué</option>
                             </select>
-                        </th> #}
+                        
+                        </th>
                         <th>
                             <select id="numberFilter" name="filter[number]" class="form-select rounded-0">
                                 <option value="">---</option>
@@ -100,29 +96,7 @@
                 </tr>
             </thead>
             <tbody class="table-group-divider">
-                {% for item in items %}
-                    {# {% if item.quality == 10 %}
-                        {% set qualityName = 'Excellente' %}
-                    {% endif %}
-                    {% if item.quality in range(8,9) %}
-                        {% set qualityName = 'Très bonne' %}
-                    {% endif %}
-                    {% if item.quality in range(6,7) %}
-                        {% set qualityName = 'Bonne' %}
-                    {% endif %}
-                    {% if item.quality == 5 %}
-                        {% set qualityName = 'Passable' %}
-                    {% endif %}
-                    {% if item.quality in range(3,4) %}
-                        {% set qualityName = 'Légèrement usée' %}
-                    {% endif %}
-                    {% if item.quality in range(1,2) %}
-                        {% set qualityName = 'Usée' %}
-                    {% endif %}
-                    {% if item.quality == 0 %}
-                        {% set qualityName = 'Abimé' %}
-                    {% endif %} #}
-                    
+                {% for item in items %}                    
                     <tr>
                         <td>{{ item.name }}</td>
                         <td>{{ item.reference }}</td>
@@ -131,7 +105,22 @@
                         {% endif %}
                         <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
                         <td>{{ item.updatedAt ? item.updatedAt|date('d/m/Y') : item.createdAt|date('d/m/Y') }}</td>
-                        {# TODO Afficher moyenne <td>{{ qualityName }}</td> #}
+                        <td class="position-relative">
+                            {% set qualityAverage = item.qualityAverage %}
+                            {{ qualityAverage }}
+                            {% set notEvaluatedNumber = item.notEvaluatedNumber %}
+                            {% if qualityAverage and notEvaluatedNumber > 0 %}
+                                <span
+                                    class="position-absolute top-0 end-0 text-danger pe-1"
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="top"
+                                    data-bs-custom-class="custom-tooltip"
+                                    data-bs-title="{{ notEvaluatedNumber }}"
+                                >
+                                    <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+                                </span>
+                            {% endif %}
+                        </td>
                         <td style="width:2%;">{{ item.number }}</td>
                         <td>
                             {% if item.link %}

@@ -17,7 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ItemRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private ItemQualityRepository $itemQualityRepository)
     {
         parent::__construct($registry, Item::class);
     }
@@ -123,7 +123,7 @@ class ItemRepository extends ServiceEntityRepository
                 $qb->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
                     ->setParameter($filterKey, $filterValue . '%')
                 ;
-            } elseif ($filterKey == 'price' || $filterKey == 'quality') {
+            } elseif ($filterKey == 'price') {
                 $filterExplode = explode('-', $filterValue);
                 if (count($filterExplode) == 1) {
                     $qb->andWhere('i.' . $filterKey . ' = :' . $filterKey)
@@ -142,6 +142,24 @@ class ItemRepository extends ServiceEntityRepository
             } elseif ($filterKey == 'number') {
                 $comparator = $filterValue == 1 ? '>' : '=';
                 $qb->andWhere('i.number ' . $comparator . ' 1');
+            } elseif ($filterKey == 'quality') {
+                $subQueryQuality = $this->itemQualityRepository->createQueryBuilder('iq')
+                    ->select('COUNT(iq.id)')
+                    ->where('iq.item = i')
+                ;
+                switch ($filterValue) {
+                    case '2':
+                        $qb->andWhere('(' . $subQueryQuality->getDQL() . ') = i.number');
+                        break;
+                    case '1':
+                        $where = '(' . $subQueryQuality->getDQL() . ') < i.number AND (';
+                        $where .= str_replace('iq', 'iq2', $subQueryQuality->getDQL()) . ') > 0';
+                        $qb->andWhere($where);
+                        break;
+                    default:
+                        $qb->andWhere('(' . $subQueryQuality->getDQL() . ') = 0');
+                        break;
+                }
             } else {
                 if (is_numeric($filterValue)) {
                     $filterValue = (int) $filterValue;

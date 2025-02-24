@@ -275,4 +275,37 @@ class Item
 
         return $this;
     }
+
+    public function getQualityAverage(): int|null
+    {
+        $totalQuality = 0;
+        $totalEvaluated = 0;
+        foreach ($this->itemQualities as $itemQuality) {
+            if ($itemQuality->getQuality()) {
+                $totalQuality += $itemQuality->getQuality();
+                $totalEvaluated++;
+            }
+        }
+
+        if ($totalEvaluated == 0) {
+            return null;
+        }
+        return $totalQuality / $totalEvaluated;
+    }
+
+    public function getNotEvaluatedNumber(): int
+    {
+        $notEvaluated = 0;
+        if ($this->itemQualities->isEmpty()) {
+            return $this->number;
+        } elseif ($this->itemQualities->count() < $this->number) {
+            $notEvaluated = $this->number - $this->itemQualities->count();
+        }
+
+        $itemQualitiesNotEvaluated = $this->itemQualities->filter(function ($itemQuality) {
+            return $itemQuality->getQuality() == null;
+        });
+
+        return $notEvaluated + $itemQualitiesNotEvaluated->count();
+    }
 }
