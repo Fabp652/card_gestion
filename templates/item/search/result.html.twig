@@ -1,0 +1,7 @@
+{% for item in items %}
+    <li>
+        <a href="{{ path('app_item_view', {id: item.id}) }}">
+            {{ item.collectionName }} -{% if item.reference %} {{ item.reference }} -{% endif %} {{ item.name }}
+        </a>
+    </li>
+{% endfor %}

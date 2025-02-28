@@ -100,7 +100,7 @@ class ItemRepository extends ServiceEntityRepository
      * @param int|null $categoryId
      * @return QueryBuilder
      */
-    public function findByFilter(array $filters, ?int $collectionId, ?int $categoryId): QueryBuilder
+    public function findByFilter(array $filters, ?int $collectionId = null, ?int $categoryId = null): QueryBuilder
     {
         $qb = $this->createQueryBuilder('i')
             ->leftJoin('i.rarity', 'r')
@@ -160,6 +160,10 @@ class ItemRepository extends ServiceEntityRepository
                         $qb->andWhere('(' . $subQueryQuality->getDQL() . ') = 0');
                         break;
                 }
+            } elseif ($filterKey == 'search') {
+                $qb->andWhere('i.name LIKE :search OR i.reference LIKE :search')
+                    ->setParameter('search', $filterValue . '%')
+                ;
             } else {
                 if (is_numeric($filterValue)) {
                     $filterValue = (int) $filterValue;

@@ -42,7 +42,7 @@ export default class extends Controller {
             let formData = new FormData(document.querySelector('#modalForm'));
             let requiredData = $('input[required="required"]');
             let valid = true;
-            
+
             requiredData.each(function (index) {
                 if (!$(this).val()) {
                     $(this).parent().append(

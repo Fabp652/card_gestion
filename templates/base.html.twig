@@ -16,28 +16,35 @@
     </head>
     <body class="bg-light">
         {% block body %}
-            <div class="fixed-top">
-                <nav class="navbar border-bottom bg-white">
-                    <div class="container-fluid justify-content-start">
-                        {% if collection is defined %}
-                            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                <nav class="navbar border-bottom bg-white px-2 fixed-top justify-content-center" data-controller="global">
+                    {% if collection is defined %}
+                        <div class="position-absolute start-0 top-50 translate-middle-y justify-content-around d-flex">
+                            <button class="navbar-toggler rounded-0 ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                                 <span class="navbar-toggler-icon"></span>
                             </button>
-                            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-                                <div class="offcanvas-header border-bottom bg-black bg-gradient" data-bs-theme="dark">
-                                    <h5 class="offcanvas-title fw-bold color-title" id="offcanvasNavbarLabel">CATÉGORIES</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                                </div>
-                                <div class="offcanvas-body px-0">
-                                    {{ render(path('app_category_nav', {collectionId: collection.id, categoryId: collection.category.id})) }}
-                                </div>
-                            </div>
                             {{ render(path('app_collection_dropdown', {collectionId: collection.id})) }}
-                            {# TODO barre de recherche #}
-                        {% endif %}
-                    </div>
+                        </div>
+                        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                            <div class="offcanvas-header border-bottom bg-black bg-gradient" data-bs-theme="dark">
+                                <h5 class="offcanvas-title fw-bold color-title" id="offcanvasNavbarLabel">CATÉGORIES</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body px-0">
+                                {{ render(path('app_category_nav', {collectionId: collection.id, categoryId: collection.category.id})) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <form id="searchForm" class="w-75 d-flex justify-content-center" role="search" action="{{ path('app_item_search') }}" method="GET">
+                        <div class="w-75 position-relative">
+                            <input id="search" class="form-control rounded-0" type="search" name="search" placeholder="Rechercher" aria-label="Rechercher">
+                            <ul id="searchResult" class="list-result position-absolute top-100 start-0 end-0 z-3 p-0 overflow-y-scroll border border-black bg-white" style="display:none;">
+                            </ul>
+                        </div>
+                        <button class="btn btn-outline-success rounded-0" type="submit">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </form>
                 </nav>
-            </div>
             {% if collection is defined or category is defined or item is defined %}
                 <nav class="ms-4 mb-5 breadcrumb-position" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">

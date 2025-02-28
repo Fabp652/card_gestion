@@ -260,4 +260,25 @@ class ItemController extends AbstractController
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
+
+    #[Route('/item/search', name: 'app_item_search')]
+    public function search(Request $request): Response
+    {
+        if ($search = $request->query->get('search')) {
+            $items = $this->itemRepo->findByFilter(['search' => $search])
+                ->select('i.id', 'i.name', 'i.reference, c.name AS collectionName')
+                ->leftJoin('i.collection', 'c')
+                ->getQuery()
+                ->getResult()
+            ;
+
+            $render = $this->render('item/search/result.html.twig', [
+                'items' => $items
+            ]);
+
+            return $this->json(['result' => true, 'searchResult' => $render->getContent()]);
+        }
+
+        return $this->json(['result' => false]);
+    }
 }
