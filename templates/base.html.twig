@@ -34,13 +34,13 @@
                             </div>
                         </div>
                     {% endif %}
-                    <form id="searchForm" class="w-75 d-flex justify-content-center" role="search" action="{{ path('app_item_search') }}" method="GET">
+                    <form id="searchForm" class="w-50 d-flex justify-content-center" role="search" action="{{ path('app_item_search') }}" method="GET">
                         <div class="w-75 position-relative">
-                            <input id="search" class="form-control rounded-0" type="search" name="search" placeholder="Rechercher" aria-label="Rechercher">
+                            <input id="search" class="form-control rounded-0 border-dark" type="search" name="search" placeholder="Rechercher" aria-label="Rechercher">
                             <ul id="searchResult" class="list-result position-absolute top-100 start-0 end-0 z-3 p-0 overflow-y-scroll border border-black bg-white" style="display:none;">
                             </ul>
                         </div>
-                        <button class="btn btn-outline-success rounded-0" type="submit">
+                        <button class="btn btn-outline-dark rounded-0" type="submit">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </form>
