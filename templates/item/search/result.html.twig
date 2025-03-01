@@ -1,6 +1,13 @@
 {% for item in items %}
     <li>
-        <a class="d-block p-2 link-underline link-underline-opacity-0 fs-5 text-black item-list" href="{{ path('app_item_view', {id: item.id}) }}">
+        <a
+            class="d-block p-2 link-underline link-underline-opacity-0 text-black item-list {{ storageId ? 'fw-bold' : 'fs-5' }}"
+            {% if storageId %}
+                href="{{ path('app_storage_item_add', {storageId: storageId, itemId: item.id}) }}"
+            {% else %}
+                href="{{ path('app_item_view', {id: item.id}) }}"
+            {% endif %}
+        >
             {% if item.reference %} {{ item.reference }} -{% endif %} {{ item.name }} ({{ item.collectionName }})
         </a>
     </li>

@@ -1,0 +1,7 @@
+{{ form_start(form, {method: 'POST', action: path('app_storage_type_add'), attr: {'id': 'modalForm'}}) }}
+    <div class="row">
+        <div class="col-12 mb-3">
+            {{ form_row(form.name) }}
+        </div>
+    </div>
+{{ form_end(form) }}

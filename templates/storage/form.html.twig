@@ -1,0 +1,22 @@
+{% if storageId %}
+    {{ form_start(form, {method: 'POST', action: path('app_storage_edit', {storageId: storageId}), attr: {'id': 'modalForm'}}) }}
+{% else %}
+    {{ form_start(form, {method: 'POST', action: path('app_storage_add'), attr: {'id': 'modalForm'}}) }}
+{% endif %}
+    <div class="row">
+        <div class="col-12 mb-3">
+            {{ form_row(form.name) }}
+        </div>
+        <div class="col-6 mb-3">
+            {{ form_row(form.storageType) }}
+        </div>
+        <div class="col-6 mb-3">
+            {{ form_row(form.capacity) }}
+        </div>
+        {% if storageId %}
+            <div class="col-12 mb-3">
+                {{ form_row(form.full) }}
+            </div>
+        {% endif %}
+    </div>
+{{ form_end(form) }}

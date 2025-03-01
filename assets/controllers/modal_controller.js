@@ -28,13 +28,6 @@ export default class extends Controller {
             $('#modalForm').trigger('submit')
         });
 
-        $('#modalBody').on('keypress', function (e) {
-            var key = e.which;
-            if (key == 13) {
-                $('#modalForm').trigger('submit')
-            }
-        })
-
         $('#modalBody').on('submit', function (e) {
             e.preventDefault();
 

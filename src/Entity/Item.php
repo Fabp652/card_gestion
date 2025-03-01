@@ -61,6 +61,9 @@ class Item
     #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'item')]
     private Collection $itemQualities;
 
+    #[ORM\ManyToOne(inversedBy: 'items')]
+    private ?Storage $storage = null;
+
     public function __construct()
     {
         $this->itemQualities = new ArrayCollection();
@@ -307,5 +310,17 @@ class Item
         });
 
         return $notEvaluated + $itemQualitiesNotEvaluated->count();
+    }
+
+    public function getStorage(): ?Storage
+    {
+        return $this->storage;
+    }
+
+    public function setStorage(?Storage $storage): static
+    {
+        $this->storage = $storage;
+
+        return $this;
     }
 }

@@ -8,8 +8,9 @@
 
 {% block body %}
     {{ parent() }}
+    
     <div class="pb-5"></div>
-    <div class="container mt-5 pt-1" data-controller="modal">
+    <div class="container mt-5" data-controller="modal">
         <div class="row mb-3 w-100">
             <div class="col d-flex justify-content-start p-0">
                 <button
@@ -26,6 +27,9 @@
                 <div class="btn-group" role="group">
                     <a class="btn btn btn-outline-primary rounded-0" href="{{ path('app_collection') }}">
                         Collections
+                    </a>
+                    <a class="btn btn btn-outline-primary rounded-0" href="{{ path('app_storage_list') }}">
+                        Rangements
                     </a>
                     <a class="btn btn-outline-primary rounded-0" href="{{ path('app_category_list') }}">
                         Catégories

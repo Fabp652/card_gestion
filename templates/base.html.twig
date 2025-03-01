@@ -17,7 +17,7 @@
     <body class="bg-light">
         {% block body %}
                 <nav class="navbar border-bottom bg-white px-2 fixed-top justify-content-center" data-controller="global">
-                    {% if collection is defined %}
+                    {% if collection is defined and collection %}
                         <div class="position-absolute start-0 top-50 translate-middle-y justify-content-around d-flex">
                             <button class="navbar-toggler rounded-0 ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                                 <span class="navbar-toggler-icon"></span>
@@ -45,7 +45,7 @@
                         </button>
                     </form>
                 </nav>
-            {% if collection is defined or category is defined or item is defined %}
+            {% if collection is defined or category is defined or item is defined or storage is defined %}
                 <nav class="ms-4 mb-5 breadcrumb-position" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">
                         <li class="breadcrumb-item">
@@ -56,7 +56,16 @@
                                 Accueil
                             </a>
                         </li>
-                        {% if (category is defined and collection is defined) or item is defined %}
+                        {% if storage is defined %}
+                            <li class="breadcrumb-item">
+                                <a
+                                    class="link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+                                    href="{{ path('app_storage_list') }}"
+                                >
+                                    {{ storage.name }}
+                                </a>
+                            </li>
+                        {% elseif (category is defined and collection is defined) or item is defined %}
                             {% if item is defined %}
                                 {% set collection = item.collection %}
                             {% endif %}

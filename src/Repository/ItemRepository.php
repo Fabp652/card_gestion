@@ -23,20 +23,31 @@ class ItemRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $collectionId
+     * @param int|null $collectionId
+     * @param int|null $storageId
      * @return array
      */
-    public function getMinAndMaxPrice(int $collectionId): array
+    public function getMinAndMaxPrice(?int $collectionId = null, ?int $storageId = null): array
     {
         $qb = $this->createQueryBuilder('i')
             ->select('MIN(i.price) AS minPrice, MAX(i.price) AS maxPrice')
-            ->where('i.collection = :collection')
-            ->setParameter('collection', $collectionId)
-            ->getQuery()
-            ->getSingleResult()
         ;
 
-        return $qb;
+        if ($collectionId) {
+            $qb->andWhere('i.collection = :collection')
+                ->setParameter('collection', $collectionId)
+            ;
+        }
+
+        if ($storageId) {
+            $qb->andWhere('i.storage = :storage')
+                ->setParameter('storage', $storageId)
+            ;
+        }
+
+        return $qb->getQuery()
+            ->getSingleResult()
+        ;
     }
 
     /**
@@ -98,10 +109,15 @@ class ItemRepository extends ServiceEntityRepository
      * @param array $filters
      * @param int|null $collectionId
      * @param int|null $categoryId
+     * @param int|null $storageId
      * @return QueryBuilder
      */
-    public function findByFilter(array $filters, ?int $collectionId = null, ?int $categoryId = null): QueryBuilder
-    {
+    public function findByFilter(
+        array $filters,
+        ?int $collectionId = null,
+        ?int $categoryId = null,
+        ?int $storageId = null
+    ): QueryBuilder {
         $qb = $this->createQueryBuilder('i')
             ->leftJoin('i.rarity', 'r')
         ;
@@ -115,6 +131,12 @@ class ItemRepository extends ServiceEntityRepository
         if ($categoryId) {
             $qb->andWhere('i.category = :categoryId')
                 ->setParameter('categoryId', $categoryId)
+            ;
+        }
+
+        if ($storageId) {
+            $qb->andWhere('i.storage = :storageId')
+                ->setParameter('storageId', $storageId)
             ;
         }
 

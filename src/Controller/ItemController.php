@@ -8,10 +8,10 @@ use App\Form\ItemQualityType;
 use App\Form\ItemType;
 use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
-use App\Repository\CriteriaRepository;
 use App\Repository\ItemQualityRepository;
 use App\Repository\ItemRepository;
 use App\Repository\RarityRepository;
+use App\Repository\StorageRepository;
 use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -30,16 +30,36 @@ class ItemController extends AbstractController
     ) {
     }
 
-    #[Route('/collection/{collectionId}/category/{categoryId}/item', name: 'app_item_list')]
+    #[Route(
+        '/collection/{collectionId}/category/{categoryId}/item',
+        name: 'app_item_list',
+        requirements: ['collectionId' => '\d+', 'categoryId' => '\d+']
+    )]
+    #[Route(
+        '/storage/{storageId}/item',
+        name: 'app_storage_item_list',
+        requirements: ['storageId' => '\d+']
+    )]
     public function list(
         Request $request,
         PaginatorInterface $paginator,
         CategoryRepository $categoryRepo,
-        int $collectionId,
-        int $categoryId
+        StorageRepository $storageRepository,
+        ?int $collectionId,
+        ?int $categoryId,
+        ?int $storageId
     ): Response {
-        $collection = $this->collectionRepo->find($collectionId);
-        $category = $categoryRepo->find($categoryId);
+        $collection = null;
+        $category = null;
+        $storage = null;
+
+        if ($storageId) {
+            $storage = $storageRepository->find($storageId);
+        } else {
+            $collection = $this->collectionRepo->find($collectionId);
+            $category = $categoryRepo->find($categoryId);
+        }
+
         $filters = $request->query->all('filter');
         $filters = array_filter(
             $filters,
@@ -48,7 +68,7 @@ class ItemController extends AbstractController
             }
         );
 
-        $items = $this->itemRepo->findByFilter($filters, $collectionId, $categoryId);
+        $items = $this->itemRepo->findByFilter($filters, $collectionId, $categoryId, $storageId);
 
         $items = $paginator->paginate(
             $items,
@@ -56,7 +76,7 @@ class ItemController extends AbstractController
             $request->query->get('limit', 10)
         );
 
-        $minAndMaxPrice = $this->itemRepo->getMinAndMaxPrice($collectionId);
+        $minAndMaxPrice = $this->itemRepo->getMinAndMaxPrice($collectionId, $storageId);
         $prices = [];
         if ($minAndMaxPrice['minPrice'] < 1) {
             $prices = [
@@ -94,7 +114,8 @@ class ItemController extends AbstractController
             'collection' => $collection,
             'prices' => $prices,
             'request' => $request,
-            'category' => $category
+            'category' => $category,
+            'storage' => $storage
         ]);
     }
 
@@ -264,6 +285,7 @@ class ItemController extends AbstractController
     #[Route('/item/search', name: 'app_item_search')]
     public function search(Request $request): Response
     {
+
         if ($search = $request->query->get('search')) {
             $items = $this->itemRepo->findByFilter(['search' => $search])
                 ->select('i.id', 'i.name', 'i.reference, c.name AS collectionName')
@@ -273,7 +295,8 @@ class ItemController extends AbstractController
             ;
 
             $render = $this->render('item/search/result.html.twig', [
-                'items' => $items
+                'items' => $items,
+                'storageId' => $request->query->get('storage')
             ]);
 
             return $this->json(['result' => true, 'searchResult' => $render->getContent()]);
