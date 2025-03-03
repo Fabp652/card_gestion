@@ -31,5 +31,26 @@ export default class extends Controller {
                 $('#itemsList').hide();
             }
         });
+
+        $('#storageFull').on('change', function (e) {
+            let url = $(this).attr('data-url');
+            let formData = new FormData();
+            formData.set('full', $(this).prop('checked'));
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.status === 200) {
+                    response.json().then(json => {
+                        if (json.result === true) {
+                            window.location.reload();
+                        } else {
+                            alert('Une erreur est survenue pendant la mise à jour du rangement');
+                        }
+                    });
+                }
+            });
+        })
     }
 }

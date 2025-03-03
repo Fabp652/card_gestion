@@ -135,4 +135,24 @@ class StorageController extends AbstractController
 
         return $this->redirect($referer);
     }
+
+    #[Route(
+        '/storage/{storageId}/full',
+        name: 'app_storage_full',
+        requirements: ['storageId' => '\d+']
+    )]
+    public function full(Request $request, int $storageId): Response
+    {
+        if ($request->request->has('full')) {
+            $storage = $this->storageRepository->find($storageId);
+            $full = $request->get('full') == 'true' ? true : false;
+
+            $storage->setFull($full);
+            $this->em->flush();
+
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
+        }
+    }
 }

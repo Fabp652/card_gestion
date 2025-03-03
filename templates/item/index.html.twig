@@ -31,23 +31,36 @@
                         Ajouter
                     </button>
                 </div>
-            {% elseif not storage.full %}
-                <div class="col-4 p-0 position-relative">
+            {% elseif storage %}
+                {% if not storage.full %}
+                    <div class="col-4 p-0 position-relative">
+                        <input
+                            id="addItem"
+                            name="item"
+                            class="form-control rounded-0 border-black"
+                            type="search"
+                            role="search"
+                            data-url="{{ absolute_url(path('app_item_search', {storage: storage.id})) }}"
+                            placeholder="Ajouter un objet"
+                        >
+                        <ul
+                            id="itemsList"
+                            class="list-result position-absolute top-100 start-0 end-0 z-3 p-0 overflow-y-scroll border border-black bg-white"
+                            style="display:none;"
+                        >
+                        </ul>
+                    </div>
+                {% endif %}
+                <div class="form-check form-switch col d-flex justify-content-end align-self-center">
                     <input
-                        id="addItem"
-                        name="item"
-                        class="form-control rounded-0 border-black"
-                        type="search"
-                        role="search"
-                        data-url="{{ absolute_url(path('app_item_search', {storage: storage.id})) }}"
-                        placeholder="Ajouter un objet"
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="storageFull"
+                        {% if storage.full %}checked{% endif %}
+                        data-url="{{ path('app_storage_full', {storageId: storage.id}) }}"
                     >
-                    <ul
-                        id="itemsList"
-                        class="list-result position-absolute top-100 start-0 end-0 z-3 p-0 overflow-y-scroll border border-black bg-white"
-                        style="display:none;"
-                    >
-                    </ul>
+                    <label class="form-check-label ms-2" for="storageFull">{{ storage.name }} est plein</label>
                 </div>
             {% endif %}
     </div>
