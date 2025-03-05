@@ -89,7 +89,8 @@ class ItemQualityType extends AbstractType
                             ],
                             'mimeTypesMessage' => 'Seuls les image au formats jpeg ou png sont acceptés'
                         ])
-                    ]
+                    ],
+                    'required' => false
                 ]
             );
         }

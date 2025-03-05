@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Category;
 use App\Entity\Item;
 use App\Entity\Rarity;
+use App\Entity\Storage;
 use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
 use App\Repository\RarityRepository;
@@ -24,6 +25,8 @@ class ItemType extends AbstractType
     private const LABEL_CLASS = 'form-label';
     private const ATTR_CLASS_CONTROL = 'form-control rounded-0';
     private const ATTR_CLASS_SELECT = 'form-select rounded-0';
+    private const LABEL_CLASS_CHECKBOX = 'form-check-label';
+    private const ATTR_CLASS_CHECKBOX = 'form-check form-check-inline';
 
     public function __construct(
         private RarityRepository $rarityRepo,
@@ -107,6 +110,24 @@ class ItemType extends AbstractType
                     }
                 ]
             )
+            ->add('storages', EntityType::class, [
+                'class' => Storage::class,
+                'label' => 'Rangement',
+                'choice_value' => 'id',
+                'choice_label' => 'name',
+                'expanded' => true,
+                'multiple' => true,
+                'label_attr' => ['class' => self::LABEL_CLASS_CHECKBOX],
+                'attr' => ['class' => self::ATTR_CLASS_CHECKBOX],
+                'query_builder' => function (EntityRepository $er): QueryBuilder {
+                    return $er->createQueryBuilder('s')
+                        ->orderBy('s.name', 'ASC')
+                        ->where('s.full = false')
+                    ;
+                },
+                'required' => false,
+                'by_reference' => false
+            ])
         ;
 
         if ($collection->getRarities()->count() > 0) {

@@ -28,7 +28,7 @@ class Storage
     #[ORM\JoinColumn(nullable: false)]
     private ?StorageType $storageType = null;
 
-    #[ORM\OneToMany(targetEntity: Item::class, mappedBy: 'storage')]
+    #[ORM\ManyToMany(targetEntity: Item::class, mappedBy: 'storages')]
     private Collection $items;
 
     public function __construct()
@@ -101,7 +101,7 @@ class Storage
     {
         if (!$this->items->contains($item)) {
             $this->items->add($item);
-            $item->setStorage($this);
+            $item->addStorage($this);
         }
 
         return $this;
@@ -110,10 +110,7 @@ class Storage
     public function removeItem(Item $item): static
     {
         if ($this->items->removeElement($item)) {
-            // set the owning side to null (unless already changed)
-            if ($item->getStorage() === $this) {
-                $item->setStorage(null);
-            }
+            $item->removeStorage($this);
         }
 
         return $this;

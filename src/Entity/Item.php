@@ -61,12 +61,13 @@ class Item
     #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'item')]
     private Collection $itemQualities;
 
-    #[ORM\ManyToOne(inversedBy: 'items')]
-    private ?Storage $storage = null;
+    #[ORM\ManyToMany(targetEntity: Storage::class, inversedBy: 'items')]
+    private Collection $storages;
 
     public function __construct()
     {
         $this->itemQualities = new ArrayCollection();
+        $this->storages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -312,14 +313,26 @@ class Item
         return $notEvaluated + $itemQualitiesNotEvaluated->count();
     }
 
-    public function getStorage(): ?Storage
+    /**
+     * @return Collection<int, Storage>
+     */
+    public function getStorages(): Collection
     {
-        return $this->storage;
+        return $this->storages;
     }
 
-    public function setStorage(?Storage $storage): static
+    public function addStorage(Storage $storage): static
     {
-        $this->storage = $storage;
+        if (!$this->storages->contains($storage)) {
+            $this->storages->add($storage);
+        }
+
+        return $this;
+    }
+
+    public function removeStorage(Storage $storage): static
+    {
+        $this->storages->removeElement($storage);
 
         return $this;
     }

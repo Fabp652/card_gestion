@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Item;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,8 +41,8 @@ class ItemRepository extends ServiceEntityRepository
         }
 
         if ($storageId) {
-            $qb->andWhere('i.storage = :storage')
-                ->setParameter('storage', $storageId)
+            $qb->join('i.storages', 's', Join::WITH, 's.id = :storageId')
+                ->setParameter('storageId', $storageId)
             ;
         }
 
@@ -135,7 +136,7 @@ class ItemRepository extends ServiceEntityRepository
         }
 
         if ($storageId) {
-            $qb->andWhere('i.storage = :storageId')
+            $qb->join('i.storages', 's', Join::WITH, 's.id = :storageId')
                 ->setParameter('storageId', $storageId)
             ;
         }

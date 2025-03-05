@@ -70,36 +70,6 @@ class Rarity
         return $this;
     }
 
-    /**
-     * @return Collection<int, Card>
-     */
-    public function getCards(): Collection
-    {
-        return $this->cards;
-    }
-
-    public function addCard(Card $card): static
-    {
-        if (!$this->cards->contains($card)) {
-            $this->cards->add($card);
-            $card->setRarity($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCard(Card $card): static
-    {
-        if ($this->cards->removeElement($card)) {
-            // set the owning side to null (unless already changed)
-            if ($card->getRarity() === $this) {
-                $card->setRarity(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getCollection(): ?Collections
     {
         return $this->collection;

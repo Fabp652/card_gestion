@@ -20,10 +20,18 @@
             {{ form_row(form.price) }}
         </div>
         <div class="col-6 mb-3">
-            {{ form_row(form.quality) }}
-        </div>
-        <div class="col-6 mb-3">
             {{ form_row(form.number) }}
+        </div>
+        <div class="col-12 mb-3">
+             {{ form_label(form.storages) }}
+            <div class="mt-2 row ps-3">
+                {% for childForm in form.storages.children %}
+                    <div class="form-check col-6 pe-0">
+                        {{ form_widget(childForm, {'attr': {'class': 'form-check-input rounded-0'}}) }}   
+                        <label class="form-check-label" for="{{ childForm.vars.id }}" >{{ childForm.vars.label }}</label>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
         <div class="col-12">
             {{ form_row(form.link) }}
