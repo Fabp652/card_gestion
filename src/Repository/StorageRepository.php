@@ -29,11 +29,11 @@ class StorageRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('s')
             ->select(
                 '
-                    SUM(i.price * i.number) AS totalAmount,
-                    CASE WHEN COUNT(i.id) > 0 THEN SUM(i.number) ELSE 0 END AS totalItem,
+                    SUM(i.price) AS totalAmount,
+                    CASE WHEN COUNT(iq.id) > 0 THEN COUNT(iq.id) ELSE 0 END AS totalItem,
                     s.name AS storageName,
                     s.id AS storageId,
-                    SUM(i.price * i.number) / SUM(i.number) AS average,
+                    SUM(i.price) / SUM(i.number) AS average,
                     st.name As type
                 '
             )

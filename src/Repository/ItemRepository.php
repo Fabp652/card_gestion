@@ -41,7 +41,8 @@ class ItemRepository extends ServiceEntityRepository
         }
 
         if ($storageId) {
-            $qb->join('i.storages', 's', Join::WITH, 's.id = :storageId')
+            $qb->leftJoin('i.itemQualities', 'iq')
+                ->join('iq.storage', 's', Join::WITH, 's.id = :storageId')
                 ->setParameter('storageId', $storageId)
             ;
         }
@@ -136,7 +137,8 @@ class ItemRepository extends ServiceEntityRepository
         }
 
         if ($storageId) {
-            $qb->join('i.storages', 's', Join::WITH, 's.id = :storageId')
+            $qb->leftJoin('i.itemQualities', 'iq')
+                ->join('iq.storage', 's', Join::WITH, 's.id = :storageId')
                 ->setParameter('storageId', $storageId)
             ;
         }

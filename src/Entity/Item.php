@@ -281,7 +281,7 @@ class Item
         $totalQuality = 0;
         $totalEvaluated = 0;
         foreach ($this->itemQualities as $itemQuality) {
-            if ($itemQuality->getQuality()) {
+            if (is_int($itemQuality->getQuality())) {
                 $totalQuality += $itemQuality->getQuality();
                 $totalEvaluated++;
             }
@@ -289,6 +289,8 @@ class Item
 
         if ($totalEvaluated == 0) {
             return null;
+        } elseif ($totalQuality == 0) {
+            return $totalQuality;
         }
         return $totalQuality / $totalEvaluated;
     }
@@ -303,7 +305,7 @@ class Item
         }
 
         $itemQualitiesNotEvaluated = $this->itemQualities->filter(function ($itemQuality) {
-            return $itemQuality->getQuality() == null;
+            return is_null($itemQuality->getQuality());
         });
 
         return $notEvaluated + $itemQualitiesNotEvaluated->count();
