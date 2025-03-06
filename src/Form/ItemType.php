@@ -110,24 +110,6 @@ class ItemType extends AbstractType
                     }
                 ]
             )
-            ->add('storages', EntityType::class, [
-                'class' => Storage::class,
-                'label' => 'Rangement',
-                'choice_value' => 'id',
-                'choice_label' => 'name',
-                'expanded' => true,
-                'multiple' => true,
-                'label_attr' => ['class' => self::LABEL_CLASS_CHECKBOX],
-                'attr' => ['class' => self::ATTR_CLASS_CHECKBOX],
-                'query_builder' => function (EntityRepository $er): QueryBuilder {
-                    return $er->createQueryBuilder('s')
-                        ->orderBy('s.name', 'ASC')
-                        ->where('s.full = false')
-                    ;
-                },
-                'required' => false,
-                'by_reference' => false
-            ])
         ;
 
         if ($collection->getRarities()->count() > 0) {

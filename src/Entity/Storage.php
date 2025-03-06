@@ -28,12 +28,12 @@ class Storage
     #[ORM\JoinColumn(nullable: false)]
     private ?StorageType $storageType = null;
 
-    #[ORM\ManyToMany(targetEntity: Item::class, mappedBy: 'storages')]
-    private Collection $items;
+    #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'storage')]
+    private Collection $itemQualities;
 
     public function __construct()
     {
-        $this->items = new ArrayCollection();
+        $this->itemQualities = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -90,27 +90,30 @@ class Storage
     }
 
     /**
-     * @return Collection<int, Item>
+     * @return Collection<int, ItemQuality>
      */
-    public function getItems(): Collection
+    public function getItemQualities(): Collection
     {
-        return $this->items;
+        return $this->itemQualities;
     }
 
-    public function addItem(Item $item): static
+    public function addItemQuality(ItemQuality $itemQuality): static
     {
-        if (!$this->items->contains($item)) {
-            $this->items->add($item);
-            $item->addStorage($this);
+        if (!$this->itemQualities->contains($itemQuality)) {
+            $this->itemQualities->add($itemQuality);
+            $itemQuality->setStorage($this);
         }
 
         return $this;
     }
 
-    public function removeItem(Item $item): static
+    public function removeItemQuality(ItemQuality $itemQuality): static
     {
-        if ($this->items->removeElement($item)) {
-            $item->removeStorage($this);
+        if ($this->itemQualities->removeElement($itemQuality)) {
+            // set the owning side to null (unless already changed)
+            if ($itemQuality->getStorage() === $this) {
+                $itemQuality->setStorage(null);
+            }
         }
 
         return $this;

@@ -4,8 +4,10 @@ namespace App\Form;
 
 use App\Entity\Criteria;
 use App\Entity\ItemQuality;
+use App\Entity\Storage;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -24,54 +26,53 @@ class ItemQualityType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $category = $options['category'];
-        $evaluate = $options['evaluate'];
         $data = $options['data'];
-        $image = $options['image'];
-
-        if (!$data->getId() || $evaluate) {
-            $builder
-                ->add('criterias', EntityType::class, [
-                    'class' => Criteria::class,
-                    'choice_value' => 'id',
-                    'choice_label' => 'name',
-                    'label' => 'Critères',
-                    'label_attr' => ['class' => self::LABEL_CLASS_CHECKBOX],
-                    'attr' => ['class' => self::ATTR_CLASS_CHECKBOX],
-                    'expanded' => true,
-                    'multiple' => true,
-                    'by_reference' => false,
-                    'query_builder' => function (EntityRepository $er) use ($category) {
-                        return $er->createQueryBuilder('c')
-                            ->join('c.categories', 'cat', Join::WITH, 'cat.id = :category OR cat.id = :parent')
-                            ->setParameter('category', $category->getId())
-                            ->setParameter('parent', $category->getParent())
-                        ;
-                    },
-                    'choice_attr' => function ($choice, string $key, mixed $value) {
-                        return ['data-point' => $choice->getPoint()];
-                    },
-                    'required' => false
-                ])
-                ->add(
-                    'quality',
-                    IntegerType::class,
-                    [
-                        'label' => 'Qualité',
-                        'label_attr' => ['class' => self::LABEL_CLASS],
-                        'attr' => [
-                            'class' => self::ATTR_CLASS_CONTROL,
-                            'min' => 0,
-                            'max' => 10
-                        ],
-                        'data' => $data->getQuality() ?? 10,
-                        'required' => false
-                    ]
-                )
-            ;
+        if ($data->getQuality() == 10 && $data->getCriterias()->isEmpty()) {
+            $disabled = true;
+        } else {
+            $disabled = false;
         }
 
-        if (!$data->getId() || $image) {
-            $builder->add(
+        $builder
+            ->add('criterias', EntityType::class, [
+                'class' => Criteria::class,
+                'choice_value' => 'id',
+                'choice_label' => 'name',
+                'label' => 'Critères',
+                'label_attr' => ['class' => self::LABEL_CLASS_CHECKBOX],
+                'attr' => ['class' => self::ATTR_CLASS_CHECKBOX],
+                'expanded' => true,
+                'multiple' => true,
+                'by_reference' => false,
+                'query_builder' => function (EntityRepository $er) use ($category) {
+                    return $er->createQueryBuilder('c')
+                        ->join('c.categories', 'cat', Join::WITH, 'cat.id = :category OR cat.id = :parent')
+                        ->setParameter('category', $category->getId())
+                        ->setParameter('parent', $category->getParent())
+                    ;
+                },
+                'choice_attr' => function ($choice, string $key, mixed $value) {
+                    return ['data-point' => $choice->getPoint()];
+                },
+                'required' => false,
+                'disabled' => $disabled
+            ])
+            ->add(
+                'quality',
+                IntegerType::class,
+                [
+                    'label' => 'Qualité',
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => [
+                        'class' => self::ATTR_CLASS_CONTROL,
+                        'min' => 0,
+                        'max' => 10
+                    ],
+                    'data' => $data->getQuality() ?? 10,
+                    'required' => false
+                ]
+            )
+            ->add(
                 'file',
                 FileType::class,
                 [
@@ -92,8 +93,24 @@ class ItemQualityType extends AbstractType
                     ],
                     'required' => false
                 ]
-            );
-        }
+            )
+            ->add('storage', EntityType::class, [
+                'class' => Storage::class,
+                'label' => 'Rangement',
+                'choice_value' => 'id',
+                'choice_label' => 'name',
+                'label_attr' => ['class' => self::LABEL_CLASS],
+                'attr' => ['class' => 'form-select rounded-0'],
+                'query_builder' => function (EntityRepository $er): QueryBuilder {
+                    return $er->createQueryBuilder('s')
+                        ->orderBy('s.name', 'ASC')
+                        ->where('s.full = false')
+                    ;
+                },
+                'required' => false,
+                'by_reference' => false
+            ])
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver)

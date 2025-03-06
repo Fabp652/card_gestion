@@ -28,6 +28,12 @@ class ItemQuality
     #[ORM\ManyToOne]
     private ?FileManager $file = null;
 
+    #[ORM\ManyToOne(inversedBy: 'itemQualities')]
+    private ?ItemSale $itemSale = null;
+
+    #[ORM\ManyToOne(inversedBy: 'itemQualities')]
+    private ?Storage $storage = null;
+
     public function __construct()
     {
         $this->criterias = new ArrayCollection();
@@ -94,6 +100,30 @@ class ItemQuality
     public function setFile(?FileManager $file): static
     {
         $this->file = $file;
+
+        return $this;
+    }
+
+    public function getItemSale(): ?ItemSale
+    {
+        return $this->itemSale;
+    }
+
+    public function setItemSale(?ItemSale $itemSale): static
+    {
+        $this->itemSale = $itemSale;
+
+        return $this;
+    }
+
+    public function getStorage(): ?Storage
+    {
+        return $this->storage;
+    }
+
+    public function setStorage(?Storage $storage): static
+    {
+        $this->storage = $storage;
 
         return $this;
     }

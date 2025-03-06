@@ -197,13 +197,8 @@ class ItemController extends AbstractController
         requirements: ['itemId' => '\d+']
     )]
     #[Route(
-        '/item/quality/{itemQualityId}/update/criteria',
-        name: 'app_item_quality_update_criteria',
-        requirements: ['itemQualityId' => '\d+']
-    )]
-    #[Route(
-        '/item/quality/{itemQualityId}/update/image',
-        name: 'app_item_quality_update_image',
+        '/item/quality/{itemQualityId}/update',
+        name: 'app_item_quality_edit',
         requirements: ['itemQualityId' => '\d+']
     )]
     public function evaluate(
@@ -217,17 +212,11 @@ class ItemController extends AbstractController
         if ($itemQualityId) {
             $itemQuality = $itemQualityRepository->find($itemQualityId);
             $item = $itemQuality->getItem();
-            if (str_ends_with($request->getPathInfo(), 'criteria')) {
-                $options['evaluate'] = true;
-                $options['category'] = $item->getCategory();
-            } else {
-                $options['image'] = true;
-            }
         } else {
             $item = $this->itemRepo->find($itemId);
-            $options['category'] = $item->getCategory();
             $itemQuality = new ItemQuality();
         }
+        $options['category'] = $item->getCategory();
 
         $form = $this->createForm(
             ItemQualityType::class,
@@ -274,9 +263,7 @@ class ItemController extends AbstractController
         $render = $this->render('item/quality/form.html.twig', [
             'form' => $form->createView(),
             'itemId' => $itemId,
-            'itemQualityId' => $itemQualityId,
-            'evaluate' => array_key_exists('evaluate', $options),
-            'image' => array_key_exists('image', $options)
+            'itemQualityId' => $itemQualityId
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);

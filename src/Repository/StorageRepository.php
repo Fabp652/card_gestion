@@ -37,7 +37,8 @@ class StorageRepository extends ServiceEntityRepository
                     st.name As type
                 '
             )
-            ->leftJoin('s.items', 'i')
+            ->leftJoin('s.itemQualities', 'iq')
+            ->leftJoin('iq.item', 'i')
             ->leftJoin('s.storageType', 'st')
             ->groupBy('s.id')
             ->getQuery()

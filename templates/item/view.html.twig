@@ -52,27 +52,20 @@
         {% endif %}
         {% for itemQuality in item.itemQualities %}
             <div class="row mt-5 mb-3 border border-black">
-                <div class="col-6 py-3 text-center border-end border-black position-relative">
-                    <button
-                        data-url="{{ absolute_url(path('app_item_quality_update_image', {itemQualityId: itemQuality.id})) }}"
-                        data-title="Changer l'image"
-                        class="btn btn-primary showModal rounded-0 position-absolute top-0 start-0"
-                    >
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
+                <div class="col-5 py-3 text-center border-end border-black {{ not itemQuality.file ? 'no-image' : ''}}">
                     {% if itemQuality.file %}
                         <img src="{{ file_encoded(itemQuality.file) }}">
                     {% endif %}
                 </div>
-                <div class="col-6 py-3 position-relative text-bg-dark bg-gradient">
+                <div class="col py-3 position-relative text-bg-dark bg-gradient">
                     <button 
                         type="button"
                         class="btn btn-primary showModal rounded-0 position-absolute top-0 end-0"
                         id="showModal"
-                        data-url="{{ absolute_url(path('app_item_quality_update_criteria', {itemQualityId: itemQuality.id})) }}"
+                        data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
                         data-title="Évaluer l'objet"
                     >
-                        Évaluer
+                        <i class="fa-solid fa-gear"></i>
                     </button>
                     {% if itemQuality.quality %}
                             <div>
