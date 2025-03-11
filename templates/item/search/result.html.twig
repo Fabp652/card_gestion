@@ -8,7 +8,7 @@
                 href="{{ path('app_item_view', {id: item.id}) }}"
             {% endif %}
         >
-            {% if item.reference %} {{ item.reference }} -{% endif %} {{ item.name }} ({{ item.collectionName }})
+            {% if item.sort is defined %}N°{{ item.sort }}{% endif %} {% if item.reference %} {{ item.reference }} -{% endif %} {{ item.name }} ({{ item.collectionName }})
         </a>
     </li>
 {% endfor %}

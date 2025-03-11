@@ -229,6 +229,8 @@ class ItemController extends AbstractController
                 $itemQuality->setQuality(10);
             } elseif ($itemQuality->getCriterias()->isEmpty()) {
                 $itemQuality->setQuality(null);
+            } elseif ($itemQuality->getQuality() < 0) {
+                $itemQuality->setQuality(0);
             }
 
             if (!$itemQuality->getId()) {
@@ -270,20 +272,25 @@ class ItemController extends AbstractController
     }
 
     #[Route('/item/search', name: 'app_item_search')]
-    public function search(Request $request): Response
+    public function search(Request $request, ItemQualityRepository $itemQualityRepository): Response
     {
-
         if ($search = $request->query->get('search')) {
-            $items = $this->itemRepo->findByFilter(['search' => $search])
-                ->select('i.id', 'i.name', 'i.reference, c.name AS collectionName')
-                ->leftJoin('i.collection', 'c')
-                ->getQuery()
-                ->getResult()
-            ;
+            $storageId = $request->query->get('storage');
+
+            if ($storageId) {
+                $items = $itemQualityRepository->search($search);
+            } else {
+                $items = $this->itemRepo->findByFilter(['search' => $search])
+                    ->select('i.id', 'i.name', 'i.reference, c.name AS collectionName')
+                    ->leftJoin('i.collection', 'c')
+                    ->getQuery()
+                    ->getResult()
+                ;
+            }
 
             $render = $this->render('item/search/result.html.twig', [
                 'items' => $items,
-                'storageId' => $request->query->get('storage')
+                'storageId' => $storageId
             ]);
 
             return $this->json(['result' => true, 'searchResult' => $render->getContent()]);

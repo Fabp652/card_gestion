@@ -35,24 +35,36 @@
                 <b>{{ item.price|format_currency('EUR', locale='fr') }}</b>
             </div>
         </div>
-        {% if item.itemQualities|length < item.number %}
-            <div class="row my-3">
-                <div class="col ps-0">
-                    <button 
-                        type="button"
-                        class="btn btn-primary showModal rounded-0"
-                        id="showModal"
-                        data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
-                        data-title="Évaluer un objet"
-                    >
-                        Évaluer un objet
-                    </button>
-                </div>
+        <div class="row my-3">
+            <div class="col ps-0">
+                <button
+                    type="button"
+                    class="btn btn-primary showModal rounded-0 me-3"
+                    id="showModal"
+                    data-url="{{ absolute_url(path('app_item_edit', {itemId: item.id, collectionId: item.collection.id})) }}"
+                    data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
+                >
+                    Modifier
+                </button>
+            {% if item.itemQualities|length < item.number %}
+                <button
+                    type="button"
+                    class="btn btn-primary showModal rounded-0"
+                    id="showModal"
+                    data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
+                    data-title="Évaluer un exemplaire"
+                >
+                    Évaluer un exemplaire
+                </button>
+            {% endif %}
             </div>
-        {% endif %}
+        </div>
         {% for itemQuality in item.itemQualities %}
             <div class="row mt-5 mb-3 border border-black" style="height:400px;">
-                <div class="col-5 py-3 text-center border-end border-black mh-100{{ not itemQuality.file ? ' no-image' : ''}}">
+                <div class="col-5 position-relative py-3 text-center border-end border-black mh-100{{ not itemQuality.file ? ' no-image' : ''}}">
+                    <div class="sort-item">
+                        <h1 class="fw-bold">{{ itemQuality.sort }}</h1>
+                    </div>
                     {% if itemQuality.file %}
                         <img class="mh-100" src="{{ file_encoded(itemQuality.file) }}">
                     {% endif %}
@@ -85,7 +97,7 @@
                     {% endif %}
                     {% if itemQuality.storage %}
                         <a
-                            class="btn btn-light showModal rounded-0 position-absolute bottom-0 end-0"
+                            class="btn btn-outline-light border-bottom-0 border-end-0 showModal rounded-0 position-absolute bottom-0 end-0"
                             href="{{ absolute_url(path('app_storage_item_list', {storageId: itemQuality.storage.id}))}} }}"
                         >
                             {{ itemQuality.storage.name }}

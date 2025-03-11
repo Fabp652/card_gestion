@@ -5,15 +5,18 @@
 {% endif %}
     <div class="row" data-controller="quality">
         <div class="col-12 mb-3">
-             {{ form_row(form.storage) }}
-        </div>
-        <div class="col-12 mb-3">
             {{ form_row(form.file) }}
         </div>
-        <div class="col-6">
+        <div class="col-6 mb-3">
+             {{ form_row(form.storage) }}
+        </div>
+        <div class="col-6 mb-3">
+            {{ form_row(form.quality) }}
+        </div>
+        <div class="col-12">
             {{ form_label(form.criterias) }}
-            <div class="mt-2">
-                <div class="form-check pe-0">
+            <div class="mt-2 d-flex flex-wrap">
+                <div class="form-check pe-0 col-6">
                     <input
                         id="item_quality_criterias_0"
                         class="form-check-input rounded-0 criteriaQuality"
@@ -25,15 +28,12 @@
                     <label class="form-check-label" for="item_quality_criterias_0" >Aucun défaut</label>
                 </div>
                 {% for childForm in form.criterias.children %}
-                    <div class="form-check pe-0">
+                    <div class="form-check pe-0 col-6">
                         {{ form_widget(childForm, {'attr': {'class': 'form-check-input rounded-0 criteriaQuality'}}) }}   
                         <label class="form-check-label" for="{{ childForm.vars.id }}" >{{ childForm.vars.label }}</label>
                     </div>
                 {% endfor %}
             </div>
-        </div>
-        <div class="col-6">
-            {{ form_row(form.quality) }}
         </div>
     </div>
 {{ form_end(form) }}

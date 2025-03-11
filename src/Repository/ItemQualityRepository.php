@@ -21,28 +21,19 @@ class ItemQualityRepository extends ServiceEntityRepository
         parent::__construct($registry, ItemQuality::class);
     }
 
-    //    /**
-    //     * @return ItemQuality[] Returns an array of ItemQuality objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('i.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?ItemQuality
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * @param string $search
+     */
+    public function search(string $search): array
+    {
+        return $this->createQueryBuilder('iq')
+            ->select('iq.id', 'i.name', 'i.reference, c.name AS collectionName, iq.sort')
+            ->leftJoin('iq.item', 'i')
+            ->leftJoin('i.collection', 'c')
+            ->andWhere('i.name LIKE :search OR i.reference LIKE :search')
+            ->setParameter('search', $search . '%')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

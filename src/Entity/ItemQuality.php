@@ -34,6 +34,9 @@ class ItemQuality
     #[ORM\ManyToOne(inversedBy: 'itemQualities')]
     private ?Storage $storage = null;
 
+    #[ORM\Column]
+    private ?int $sort = null;
+
     public function __construct()
     {
         $this->criterias = new ArrayCollection();
@@ -124,6 +127,18 @@ class ItemQuality
     public function setStorage(?Storage $storage): static
     {
         $this->storage = $storage;
+
+        return $this;
+    }
+
+    public function getSort(): ?int
+    {
+        return $this->sort;
+    }
+
+    public function setSort(int $sort): static
+    {
+        $this->sort = $sort;
 
         return $this;
     }
