@@ -4,6 +4,8 @@ namespace App\Repository;
 
 use App\Entity\ItemQuality;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -35,5 +37,56 @@ class ItemQualityRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    /**
+     * @param array $filters
+     * @param int|null $storageId
+     * @return QueryBuilder
+     */
+    public function findByFilter(array $filters, ?int $storageId = null): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('iq')
+            ->leftJoin('iq.item', 'i')
+        ;
+
+        if ($storageId) {
+            $qb->join('iq.storage', 's', Join::WITH, 's.id = :storageId')
+                ->setParameter('storageId', $storageId)
+            ;
+        }
+
+        foreach ($filters as $filterKey => $filterValue) {
+            if (is_numeric($filterValue)) {
+                $filterValue = (int) $filterValue;
+            }
+            if ($filterKey == 'name' || $filterKey == 'reference') {
+                $qb->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
+                    ->setParameter($filterKey, $filterValue . '%')
+                ;
+            } elseif ($filterKey == 'price') {
+                $filterExplode = explode('-', $filterValue);
+                if (count($filterExplode) == 1) {
+                    $qb->andWhere('i.' . $filterKey . ' = :' . $filterKey)
+                        ->setParameter($filterKey, $filterValue)
+                    ;
+                } elseif (empty($filterExplode[0])) {
+                    $qb->andWhere('i.' . $filterKey . ' < :' . $filterKey)
+                        ->setParameter($filterKey, $filterExplode[1])
+                    ;
+                } else {
+                    $qb->andWhere('i. ' . $filterKey . ' BETWEEN :min AND :max')
+                        ->setParameter('min', $filterExplode[0])
+                        ->setParameter('max', $filterExplode[1])
+                    ;
+                }
+            } else {
+                $qb->andWhere('iq.' . $filterKey . ' = ' . ':' . $filterKey)
+                    ->setParameter($filterKey, $filterValue)
+                ;
+            }
+        }
+
+        return $qb;
     }
 }

@@ -11,7 +11,6 @@ use App\Repository\CollectionsRepository;
 use App\Repository\ItemQualityRepository;
 use App\Repository\ItemRepository;
 use App\Repository\RarityRepository;
-use App\Repository\StorageRepository;
 use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -35,30 +34,15 @@ class ItemController extends AbstractController
         name: 'app_item_list',
         requirements: ['collectionId' => '\d+', 'categoryId' => '\d+']
     )]
-    #[Route(
-        '/storage/{storageId}/item',
-        name: 'app_storage_item_list',
-        requirements: ['storageId' => '\d+']
-    )]
     public function list(
         Request $request,
         PaginatorInterface $paginator,
         CategoryRepository $categoryRepo,
-        StorageRepository $storageRepository,
-        ?int $collectionId,
-        ?int $categoryId,
-        ?int $storageId
+        int $collectionId,
+        int $categoryId
     ): Response {
-        $collection = null;
-        $category = null;
-        $storage = null;
-
-        if ($storageId) {
-            $storage = $storageRepository->find($storageId);
-        } else {
-            $collection = $this->collectionRepo->find($collectionId);
-            $category = $categoryRepo->find($categoryId);
-        }
+        $collection = $this->collectionRepo->find($collectionId);
+        $category = $categoryRepo->find($categoryId);
 
         $filters = $request->query->all('filter');
         $filters = array_filter(
@@ -68,7 +52,7 @@ class ItemController extends AbstractController
             }
         );
 
-        $items = $this->itemRepo->findByFilter($filters, $collectionId, $categoryId, $storageId);
+        $items = $this->itemRepo->findByFilter($filters, $collectionId, $categoryId);
 
         $items = $paginator->paginate(
             $items,
@@ -76,7 +60,7 @@ class ItemController extends AbstractController
             $request->query->get('limit', 10)
         );
 
-        $minAndMaxPrice = $this->itemRepo->getMinAndMaxPrice($collectionId, $storageId);
+        $minAndMaxPrice = $this->itemRepo->getMinAndMaxPrice($collectionId);
         $prices = [];
         if ($minAndMaxPrice['minPrice'] < 1) {
             $prices = [
@@ -114,8 +98,7 @@ class ItemController extends AbstractController
             'collection' => $collection,
             'prices' => $prices,
             'request' => $request,
-            'category' => $category,
-            'storage' => $storage
+            'category' => $category
         ]);
     }
 

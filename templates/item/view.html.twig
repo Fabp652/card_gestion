@@ -98,7 +98,7 @@
                     {% if itemQuality.storage %}
                         <a
                             class="btn btn-outline-light border-bottom-0 border-end-0 showModal rounded-0 position-absolute bottom-0 end-0"
-                            href="{{ absolute_url(path('app_storage_item_list', {storageId: itemQuality.storage.id}))}} }}"
+                            href="{{ absolute_url(path('app_storage_view', {storageId: itemQuality.storage.id}))}} }}"
                         >
                             {{ itemQuality.storage.name }}
                         </a>

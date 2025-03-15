@@ -3,79 +3,35 @@
 {{ knp_pagination_rel_links(items) }}
 {% endblock %}
 
-{% block title %}{{ collection ? collection.name : storage.name }}{% endblock %}
+{% block title %}{{ collection ? collection.name }}{% endblock %}
 
 {% block body %}
-{% if collection %}
-    {% set route = 'app_item_list' %}
-    {% set params = {collectionId: collection.id, categoryId: category.id} %}
-{% else %}
-    {% set route = 'app_storage_item_list' %}
-    {% set params = {storageId: storage.id} %}
-{% endif %}
 {{ parent() }}
-<div class="mx-5" {% if collection %}data-controller="modal"{% endif %}>
+<div class="mx-5" data-controller="modal">
     <div class="row mb-5">
-        <h1 class="text-center">{{ collection ? collection.name|upper  : storage.name|upper }}</h1>
+        <h1 class="text-center">{{ collection.name|upper }}</h1>
     </div>
     <div class="row my-2">
-            {% if collection %}
-                <div class="col-12 p-0">
-                    <button 
-                        type="button"
-                        class="btn btn-primary showModal rounded-0"
-                        id="showModal"
-                        data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id})) }}"
-                        data-title="Ajouter un objet"
-                    >
-                        Ajouter
-                    </button>
-                </div>
-            {% elseif storage %}
-                {% if not storage.full %}
-                    <div class="col-4 p-0 position-relative">
-                        <input
-                            id="addItem"
-                            name="item"
-                            class="form-control rounded-0 border-black"
-                            type="search"
-                            role="search"
-                            data-url="{{ absolute_url(path('app_item_search', {storage: storage.id})) }}"
-                            placeholder="Ajouter un objet"
-                        >
-                        <ul
-                            id="itemsList"
-                            class="list-result position-absolute top-100 start-0 end-0 z-3 p-0 overflow-y-scroll border border-black bg-white"
-                            style="display:none;"
-                        >
-                        </ul>
-                    </div>
-                {% endif %}
-                <div class="form-check form-switch col d-flex justify-content-end align-self-center">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        role="switch"
-                        id="storageFull"
-                        {% if storage.full %}checked{% endif %}
-                        data-url="{{ path('app_storage_full', {storageId: storage.id}) }}"
-                    >
-                    <label class="form-check-label ms-2" for="storageFull">{{ storage.name }} est plein</label>
-                </div>
-            {% endif %}
+        <div class="col-12 p-0">
+            <button 
+                type="button"
+                class="btn btn-primary showModal rounded-0"
+                id="showModal"
+                data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id})) }}"
+                data-title="Ajouter un objet"
+            >
+                Ajouter
+            </button>
+        </div>
     </div>
     <div class="row mt-2">
         <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
             <thead class="table-dark border-dark">
-                {% if collection %}
-                    {% set hasRarities = collection.rarities|length > 0 %}
-                {% endif %}
+                {% set hasRarities = collection.rarities|length > 0 %}
                 <tr>
                     <th>{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    {% if collection and hasRarities %}
-                        <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    {% endif %}
+                    <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié le', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>Qualité (moyenne)</th>
@@ -84,11 +40,11 @@
                     <th>Action</th>
                 </tr>
                 <tr>
-                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path(route, params)) }}" method="get">
+                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: category.id})) }}" method="get">
                         {% set filterQuery = request.query.all('filter') %}
                         <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
                         <th><input id="referenceFilter" name="filter[reference]" class="form-control rounded-0" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
-                        {% if collection and hasRarities %}
+                        {% if hasRarities %}
                             <th>
                                 <select id="rarityFilter" name="filter[rarity]" class="form-select rounded-0">
                                     <option value="">---</option>
@@ -128,7 +84,7 @@
                         </th>
                         <th></th>
                         <th>
-                            <a href="{{ path(route, params) }}" class="btn btn-secondary btn-sm rounded-0">
+                            <a href="{{ path('app_item_list', {collectionId: collection.id, categoryId: category.id}) }}" class="btn btn-secondary btn-sm rounded-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                                     <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
                                 </svg>
@@ -138,11 +94,11 @@
                 </tr>
             </thead>
             <tbody class="table-group-divider">
-                {% for item in items %}                    
+                {% for item in items %}
                     <tr>
                         <td>{{ item.name }}</td>
                         <td>{{ item.reference }}</td>
-                        {% if collection and hasRarities %}
+                        {% if hasRarities %}
                             <td>{% if item.rarity %}{{ item.rarity.name }}{% endif %}</td>
                         {% endif %}
                         <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
@@ -176,22 +132,16 @@
                                 <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
-                                {% if collection %}
-                                    <button
-                                        data-url="{{ absolute_url(path('app_item_edit', {collectionId: collection.id, itemId: item.id})) }}"
-                                        data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
-                                        class="btn btn-primary btn-sm showModal"
-                                    >
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                    <a href="{{ path('app_item_delete', {id: item.id}) }}" class="btn btn-danger btn-sm">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-                                {% else %}
-                                    <a href="{{ path('app_storage_remove', {storageId: storage.id, itemId: item.id}) }}" class="btn btn-danger btn-sm">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </a>
-                                {% endif %}
+                                <button
+                                    data-url="{{ absolute_url(path('app_item_edit', {collectionId: collection.id, itemId: item.id})) }}"
+                                    data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
+                                    class="btn btn-primary btn-sm showModal"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <a href="{{ path('app_item_delete', {id: item.id}) }}" class="btn btn-danger btn-sm">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -205,8 +155,6 @@
             {{ knp_pagination_render(items) }}
         </div>
     </div>
-    {% if collection %}
-        {% include "Modal/modal.html.twig" %}
-    {% endif %}
+    {% include "Modal/modal.html.twig" %}
 </div>
 {% endblock %}

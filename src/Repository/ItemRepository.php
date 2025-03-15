@@ -117,8 +117,7 @@ class ItemRepository extends ServiceEntityRepository
     public function findByFilter(
         array $filters,
         ?int $collectionId = null,
-        ?int $categoryId = null,
-        ?int $storageId = null
+        ?int $categoryId = null
     ): QueryBuilder {
         $qb = $this->createQueryBuilder('i')
             ->leftJoin('i.rarity', 'r')
@@ -133,13 +132,6 @@ class ItemRepository extends ServiceEntityRepository
         if ($categoryId) {
             $qb->andWhere('i.category = :categoryId')
                 ->setParameter('categoryId', $categoryId)
-            ;
-        }
-
-        if ($storageId) {
-            $qb->leftJoin('i.itemQualities', 'iq')
-                ->join('iq.storage', 's', Join::WITH, 's.id = :storageId')
-                ->setParameter('storageId', $storageId)
             ;
         }
 

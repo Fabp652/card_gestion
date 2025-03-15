@@ -51,7 +51,7 @@
                     <div class="card text-uppercase rounded-0">
                         <div class="card-header text-bg-dark rounded-0 d-flex justify-content-between">
                             <h5 class="card-title mb-0">{{ stat.storageName }}</h5>
-                            <a class="text-white" href="{{absolute_url(path('app_storage_item_list', {storageId: stat.storageId}))}}">
+                            <a class="text-white" href="{{absolute_url(path('app_storage_view', {storageId: stat.storageId}))}}">
                                 <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
                             </a>
                         </div>

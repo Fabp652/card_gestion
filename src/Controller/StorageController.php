@@ -4,9 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Storage;
 use App\Form\StorageType;
-use App\Repository\ItemRepository;
+use App\Repository\ItemQualityRepository;
 use App\Repository\StorageRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -79,23 +80,23 @@ class StorageController extends AbstractController
     }
 
     #[Route(
-        '/storage/{storageId}/item/{itemId}/add',
+        '/storage/{storageId}/item/{itemQualityId}/add',
         name: 'app_storage_item_add',
-        requirements: ['storageId' => '\d+', 'itemId' => '\d+']
+        requirements: ['storageId' => '\d+', 'itemQualityId' => '\d+']
     )]
     public function addItem(
         Request $request,
-        ItemRepository $itemRepository,
+        ItemQualityRepository $itemQualityRepository,
         int $storageId,
-        int $itemId
+        int $itemQualityId
     ): Response {
         $referer = $request->headers->get('referer');
 
         $storage = $this->storageRepository->find($storageId);
         if ($storage) {
-            $item = $itemRepository->find($itemId);
-            if ($item) {
-                $storage->addItem($item);
+            $itemQuality = $itemQualityRepository->find($itemQualityId);
+            if ($itemQuality) {
+                $storage->addItemQuality($itemQuality);
                 $this->em->flush();
             } else {
                 $this->addFlash('danger', 'Objet non trouvé');
@@ -108,23 +109,23 @@ class StorageController extends AbstractController
     }
 
     #[Route(
-        '/storage/{storageId}/item/{itemId}/remove',
+        '/storage/{storageId}/item/{itemQualityId}/remove',
         name: 'app_storage_remove',
-        requirements: ['storageId' => '\d+', 'itemId' => '\d+']
+        requirements: ['storageId' => '\d+', 'itemQualityId' => '\d+']
     )]
     public function removeItem(
         Request $request,
-        ItemRepository $itemRepository,
+        ItemQualityRepository $itemQualityRepository,
         int $storageId,
-        int $itemId
+        int $itemQualityId
     ): Response {
         $referer = $request->headers->get('referer');
 
         $storage = $this->storageRepository->find($storageId);
         if ($storage) {
-            $item = $itemRepository->find($itemId);
-            if ($item) {
-                $storage->removeItem($item);
+            $itemQuality = $itemQualityRepository->find($itemQualityId);
+            if ($itemQuality) {
+                $storage->removeItemQuality($itemQuality);
                 $this->em->flush();
             } else {
                 $this->addFlash('danger', 'Objet non trouvé');
@@ -154,5 +155,41 @@ class StorageController extends AbstractController
         } else {
             return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
         }
+    }
+
+    #[Route(
+        '/storage/{storageId}',
+        name: 'app_storage_view',
+        requirements: ['storageId' => '\d+']
+    )]
+    public function view(
+        Request $request,
+        PaginatorInterface $paginator,
+        ItemQualityRepository $itemQualityRepository,
+        int $storageId
+    ): Response {
+        $storage = $this->storageRepository->find($storageId);
+
+        $filters = $request->query->all('filter');
+        $filters = array_filter(
+            $filters,
+            function ($filter) {
+                return !empty($filter) || $filter == 0;
+            }
+        );
+
+        $itemQualities = $itemQualityRepository->findByFilter($filters, $storageId);
+
+        $itemQualities = $paginator->paginate(
+            $itemQualities,
+            $request->query->get('page', 1),
+            $request->query->get('limit', 10)
+        );
+
+        return $this->render('storage/view.html.twig', [
+            'itemQualities' => $itemQualities,
+            'storage' => $storage,
+            'request' => $request
+        ]);
     }
 }
