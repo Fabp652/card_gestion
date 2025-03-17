@@ -19,10 +19,13 @@ class ItemSale
     private ?float $price = null;
 
     #[ORM\Column]
-    private ?bool $sold = null;
+    private ?bool $sold = false;
 
     #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'itemSale')]
     private Collection $itemQualities;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $link = null;
 
     public function __construct()
     {
@@ -84,6 +87,18 @@ class ItemSale
                 $itemQuality->setItemSale(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+
+    public function setLink(?string $link): static
+    {
+        $this->link = $link;
 
         return $this;
     }

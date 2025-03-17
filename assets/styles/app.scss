@@ -5,6 +5,7 @@
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
+@import "../../node_modules/@selectize/selectize/dist/scss/selectize.scss";
 
 $transitionDuration: 0.5s;
 $hundredPercent: 100%;

@@ -25,8 +25,6 @@ class ItemType extends AbstractType
     private const LABEL_CLASS = 'form-label';
     private const ATTR_CLASS_CONTROL = 'form-control rounded-0';
     private const ATTR_CLASS_SELECT = 'form-select rounded-0';
-    private const LABEL_CLASS_CHECKBOX = 'form-check-label';
-    private const ATTR_CLASS_CHECKBOX = 'form-check form-check-inline';
 
     public function __construct(
         private RarityRepository $rarityRepo,

@@ -142,4 +142,15 @@ class ItemQuality
 
         return $this;
     }
+
+    public function getChoiceLabel(): string
+    {
+        $choiceLabel = $this->sort;
+        if ($this->item->getReference()) {
+            $choiceLabel .= ' - ' . $this->item->getReference();
+        }
+        $choiceLabel .= ' - ' . $this->item->getName();
+
+        return $choiceLabel;
+    }
 }

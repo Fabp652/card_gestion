@@ -70,15 +70,26 @@
                     {% endif %}
                 </div>
                 <div class="col py-3 position-relative text-bg-dark bg-gradient">
-                    <button 
-                        type="button"
-                        class="btn btn-primary showModal rounded-0 position-absolute top-0 end-0"
-                        id="showModal"
-                        data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
-                        data-title="Évaluer l'objet"
-                    >
-                        <i class="fa-solid fa-gear"></i>
-                    </button>
+                    <div class="position-absolute top-0 end-0 btn-group">
+                        {# <button 
+                            type="button"
+                            class="btn btn-outline-success showModal rounded-0 border-top-0"
+                            id="showModal"
+                            data-url="{{ absolute_url(path('app_item_sale_new', {itemId: item.id})) }}"
+                            data-title="Mise en vente"
+                        >
+                            <i class="fa-solid fa-coins"></i>
+                        </button> #}
+                        <button 
+                            type="button"
+                            class="btn btn-primary showModal rounded-0"
+                            id="showModal"
+                            data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
+                            data-title="Évaluer l'objet"
+                        >
+                            <i class="fa-solid fa-gear"></i>
+                        </button>
+                    </div>
                     {% if itemQuality.quality is not null %}
                             <div>
                                 <h2 class="fw-bold">{{ itemQuality.quality }}/10</h2>
