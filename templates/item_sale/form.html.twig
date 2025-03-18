@@ -1,5 +1,8 @@
-{{ form_start(form, {method: 'POST', action: path('app_item_sale_new', {collectionId: collectionId}), attr: {'id': 'modalForm', 'data-controller': 'select'}}) }}
+{{ form_start(form, {method: 'POST', action: path('app_item_sale_new'), attr: {'id': 'modalForm', 'data-controller': 'select'}}) }}
     <div class="row">
+        <div class="col-12 mb-3">
+            {{ form_row(form.name) }}
+        </div>
         <div class="col-12 mb-3">
             {{ form_row(form.price) }}
         </div>

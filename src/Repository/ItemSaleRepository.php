@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\ItemSale;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,28 +22,45 @@ class ItemSaleRepository extends ServiceEntityRepository
         parent::__construct($registry, ItemSale::class);
     }
 
-//    /**
-//     * @return ItemSale[] Returns an array of ItemSale objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('i')
-//            ->andWhere('i.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('i.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @param array $filters
+     * @return QueryBuilder
+     */
+    public function findByFilter(array $filters): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('isl');
 
-//    public function findOneBySomeField($value): ?ItemSale
-//    {
-//        return $this->createQueryBuilder('i')
-//            ->andWhere('i.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        foreach ($filters as $filterKey => $filterValue) {
+            if ($filterKey == 'name' || $filterKey == 'reference') {
+                $qb->andWhere('isl.' . $filterKey . ' LIKE :' . $filterKey)
+                    ->setParameter($filterKey, $filterValue . '%')
+                ;
+            } elseif ($filterKey == 'price') {
+                $filterExplode = explode('-', $filterValue);
+                if (count($filterExplode) == 1) {
+                    $qb->andWhere('isl.' . $filterKey . ' = :' . $filterKey)
+                        ->setParameter($filterKey, $filterValue)
+                    ;
+                } elseif (empty($filterExplode[0])) {
+                    $qb->andWhere('isl.' . $filterKey . ' < :' . $filterKey)
+                        ->setParameter($filterKey, $filterExplode[1])
+                    ;
+                } else {
+                    $qb->andWhere('isl. ' . $filterKey . ' BETWEEN :min AND :max')
+                        ->setParameter('min', $filterExplode[0])
+                        ->setParameter('max', $filterExplode[1])
+                    ;
+                }
+            } else {
+                if (is_numeric($filterValue)) {
+                    $filterValue = (int) $filterValue;
+                }
+                $qb->andWhere('isl.' . $filterKey . ' = ' . ':' . $filterKey)
+                    ->setParameter($filterKey, $filterValue)
+                ;
+            }
+        }
+
+        return $qb;
+    }
 }

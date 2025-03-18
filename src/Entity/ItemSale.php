@@ -27,6 +27,9 @@ class ItemSale
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $link = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $name = null;
+
     public function __construct()
     {
         $this->itemQualities = new ArrayCollection();
@@ -91,6 +94,15 @@ class ItemSale
         return $this;
     }
 
+    public function removeAllItemQualities(): static
+    {
+        foreach ($this->itemQualities as $itemQuality) {
+            $this->removeItemQuality($itemQuality);
+        }
+
+        return $this;
+    }
+
     public function getLink(): ?string
     {
         return $this->link;
@@ -99,6 +111,18 @@ class ItemSale
     public function setLink(?string $link): static
     {
         $this->link = $link;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
 
         return $this;
     }

@@ -10,6 +10,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,7 +23,6 @@ class ItemSaleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $collection = $options['collection'];
         $data = $options['data'];
         $builder
             ->add('price', NumberType::class, [
@@ -46,13 +46,17 @@ class ItemSaleType extends AbstractType
                 'attr' => ['class' => 'select2'],
                 'multiple' => true,
                 'by_reference' => false,
-                'query_builder' => function (EntityRepository $er) use ($collection) {
+                'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('iq')
                         ->leftJoin('iq.item', 'i')
-                        ->where('i.collection = :collection')
-                        ->setParameter('collection', $collection)
                     ;
                 },
+                'required' => true
+            ])
+            ->add('name', TextType::class, [
+                'label' => 'Nom',
+                'label_attr' => ['class' => self::LABEL_CLASS],
+                'attr' => ['class' => self::ATTR_CLASS_CONTROL],
                 'required' => true
             ])
         ;
@@ -69,8 +73,7 @@ class ItemSaleType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => ItemSale::class,
-            'collection' => null
+            'data_class' => ItemSale::class
         ]);
     }
 }

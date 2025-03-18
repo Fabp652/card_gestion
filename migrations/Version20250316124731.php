@@ -21,11 +21,13 @@ final class Version20250316124731 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE item_sale ADD link VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE item_sale ADD name VARCHAR(255) NOT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE item_sale DROP link');
+        $this->addSql('ALTER TABLE item_sale DROP name');
     }
 }
