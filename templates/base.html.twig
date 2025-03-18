@@ -44,6 +44,34 @@
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </form>
+
+                    <ul class="nav position-absolute end-0 me-3">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_collection') }}">
+                                Collections
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_storage_list') }}">
+                                Rangements
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('app_category_list') }}" class="nav-link">
+                                Catégories
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('app_criteria_list') }}" class="nav-link">
+                                Critères
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                Ventes
+                            </a>
+                        </li>
+                    </ul>
                 </nav>
             {% if collection is defined or category is defined or item is defined or storage is defined %}
                 <nav class="ms-4 mb-5 breadcrumb-position" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
