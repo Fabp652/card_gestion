@@ -29,7 +29,7 @@
             <thead class="table-dark border-dark">
                 {% set hasRarities = collection.rarities|length > 0 %}
                 <tr>
-                    <th>{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th class="w-25">{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>{{ knp_pagination_sortable(items, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     {% if hasRarities %}
                         <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
@@ -56,13 +56,9 @@
                                 </select>
                             </th>
                         {% endif %}
-                        <th>
-                            <select id="priceFilter" name="filter[price]" class="form-select rounded-0">
-                                <option value="">---</option>
-                                {% for priceKey, priceValue in prices %}
-                                    <option value="{{ priceKey }}" {% if filterQuery.price is defined and filterQuery.price == priceKey %}selected{% endif %}>{{ priceValue }}</option>
-                                {% endfor %}
-                            </select>
+                        <th class="input-group">
+                            <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control rounded-0" placeholder="Prix minimum" value="{{ filterQuery.min_price ?? '' }}">
+                            <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control rounded-0" placeholder="Prix maximum" value="{{ filterQuery.max_price ?? '' }}">
                         </th>
                         <th>
                         </th>

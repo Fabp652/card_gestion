@@ -60,7 +60,10 @@
                             <th></th>
                             <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
                             <th><input id="referenceFilter" name="filter[reference]" class="form-control rounded-0" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
-                            <th>{# TODO Range min max #}</th>
+                            <th class="input-group">
+                                <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control rounded-0" placeholder="Prix minimum" value="{{ filterQuery.min_price ?? '' }}">
+                                <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control rounded-0" placeholder="Prix maximum" value="{{ filterQuery.max_price ?? '' }}">
+                            </th>
                             <th>
                                 <input id="qualityFilter" name="filter[quality]" class="form-control rounded-0" type="number" value="{{ filterQuery.quality ?? '' }}" min="0" max="10">
                             </th>

@@ -35,22 +35,16 @@ class ItemSaleRepository extends ServiceEntityRepository
                 $qb->andWhere('isl.' . $filterKey . ' LIKE :' . $filterKey)
                     ->setParameter($filterKey, $filterValue . '%')
                 ;
-            } elseif ($filterKey == 'price') {
-                $filterExplode = explode('-', $filterValue);
-                if (count($filterExplode) == 1) {
-                    $qb->andWhere('isl.' . $filterKey . ' = :' . $filterKey)
-                        ->setParameter($filterKey, $filterValue)
-                    ;
-                } elseif (empty($filterExplode[0])) {
-                    $qb->andWhere('isl.' . $filterKey . ' < :' . $filterKey)
-                        ->setParameter($filterKey, $filterExplode[1])
-                    ;
-                } else {
-                    $qb->andWhere('isl. ' . $filterKey . ' BETWEEN :min AND :max')
-                        ->setParameter('min', $filterExplode[0])
-                        ->setParameter('max', $filterExplode[1])
-                    ;
-                }
+            } elseif (str_contains($filterKey, 'min')) {
+                $filterKeyExplode = explode('_', $filterKey);
+                $qb->andWhere('isl.' . $filterKeyExplode[1] . ' >= :min')
+                    ->setParameter('min', $filterValue)
+                ;
+            } elseif (str_contains($filterKey, 'max')) {
+                $filterKeyExplode = explode('_', $filterKey);
+                $qb->andWhere('isl.' . $filterKeyExplode[1] . ' <= :max')
+                    ->setParameter('max', $filterValue)
+                ;
             } else {
                 if (is_numeric($filterValue)) {
                     $filterValue = (int) $filterValue;

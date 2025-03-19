@@ -60,43 +60,9 @@ class ItemController extends AbstractController
             $request->query->get('limit', 10)
         );
 
-        $minAndMaxPrice = $this->itemRepo->getMinAndMaxPrice($collectionId);
-        $prices = [];
-        if ($minAndMaxPrice['minPrice'] < 1) {
-            $prices = [
-                '-1' => 'Moins de 1 €',
-                '1-5' => 'Plus de 1 €'
-            ];
-            $range = 5;
-            $actual = 5;
-        } elseif ($minAndMaxPrice['minPrice'] < 5) {
-            $prices = [
-                '-5' => 'Moins de 5 €',
-                '5-10' => 'Plus de 5 €'
-            ];
-            $range = 10;
-            $actual = 10;
-        } else {
-            $prices = [
-                '-10' => 'Moins de 10 €',
-                '10-20' => 'Plus de 10 €'
-            ];
-            $range = 10;
-            $actual = 10;
-        }
-
-        while ($actual < $minAndMaxPrice['maxPrice']) {
-            $max = $actual + $range;
-            $key = $actual . '-' . $max;
-            $prices[$key] = 'Plus de ' . $actual . ' €';
-
-            $actual = $max;
-        }
-
         return $this->render('item/index.html.twig', [
             'items' => $items,
             'collection' => $collection,
-            'prices' => $prices,
             'request' => $request,
             'category' => $category
         ]);

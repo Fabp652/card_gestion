@@ -64,22 +64,16 @@ class ItemQualityRepository extends ServiceEntityRepository
                 $qb->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
                     ->setParameter($filterKey, $filterValue . '%')
                 ;
-            } elseif ($filterKey == 'price') {
-                $filterExplode = explode('-', $filterValue);
-                if (count($filterExplode) == 1) {
-                    $qb->andWhere('i.' . $filterKey . ' = :' . $filterKey)
-                        ->setParameter($filterKey, $filterValue)
-                    ;
-                } elseif (empty($filterExplode[0])) {
-                    $qb->andWhere('i.' . $filterKey . ' < :' . $filterKey)
-                        ->setParameter($filterKey, $filterExplode[1])
-                    ;
-                } else {
-                    $qb->andWhere('i. ' . $filterKey . ' BETWEEN :min AND :max')
-                        ->setParameter('min', $filterExplode[0])
-                        ->setParameter('max', $filterExplode[1])
-                    ;
-                }
+            } elseif (str_contains($filterKey, 'min')) {
+                $filterKeyExplode = explode('_', $filterKey);
+                $qb->andWhere('i.' . $filterKeyExplode[1] . ' >= :min')
+                    ->setParameter('min', $filterValue)
+                ;
+            } elseif (str_contains($filterKey, 'max')) {
+                $filterKeyExplode = explode('_', $filterKey);
+                $qb->andWhere('i.' . $filterKeyExplode[1] . ' <= :max')
+                    ->setParameter('max', $filterValue)
+                ;
             } else {
                 $qb->andWhere('iq.' . $filterKey . ' = ' . ':' . $filterKey)
                     ->setParameter($filterKey, $filterValue)

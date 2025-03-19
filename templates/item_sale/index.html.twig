@@ -27,7 +27,7 @@
             <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
                 <thead class="table-dark border-dark">
                     <tr>
-                        <th>{{ knp_pagination_sortable(itemSales, 'Nom', 'is.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                        <th class="w-50">{{ knp_pagination_sortable(itemSales, 'Nom', 'is.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                         <th>{{ knp_pagination_sortable(itemSales, 'Price', 'is.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                         <th>Vendu</th>
                         <th>Lien</th>
@@ -37,7 +37,10 @@
                         <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_sale_list')) }}" method="get">
                             {% set filterQuery = request.query.all('filter') %}
                             <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                            <th></th>
+                            <th class="input-group">
+                                <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control rounded-0" placeholder="Prix minimum" value="{{ filterQuery.min_price ?? '' }}">
+                                <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control rounded-0" placeholder="Prix maximum" value="{{ filterQuery.max_price ?? '' }}">
+                            </th>
                             <th>
                                 <select id="soldFilter" name="filter[sold]" class="form-select rounded-0">
                                     <option value="">---</option>
@@ -74,7 +77,7 @@
                     {% for itemSale in itemSales %}
                         <tr>
                             <td>{{ itemSale.name }}</td>
-                            <td>{{ itemSale.price }}</td>
+                            <td>{{ itemSale.price|format_currency('EUR', locale='fr') }}</td>
                             <td>{{ itemSale.sold ? 'Vendu' : 'Non vendu' }}</td>
                             <td>{{ itemSale.link }}</td>
                             <td>
