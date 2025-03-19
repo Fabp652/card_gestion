@@ -22,10 +22,12 @@
                 <span>Référence :</span>
                 <b>{{ item.reference }}</b>
             </div>
-            <div class="col">
-                <span>Rareté :</span>
-                <b>{{ item.rarity.name }}</b>
-            </div>
+            {% if item.rarity %}
+                <div class="col">
+                    <span>Rareté :</span>
+                    <b>{{ item.rarity.name }}</b>
+                </div>
+            {% endif %}
             <div class="col">
                 <span>Quantité :</span>
                 <b>{{ item.number }}</b>
@@ -71,19 +73,16 @@
                 </div>
                 <div class="col py-3 position-relative text-bg-dark bg-gradient">
                     <div class="position-absolute top-0 end-0 btn-group">
-                        {# <button 
+                        <a 
                             type="button"
-                            class="btn btn-outline-success showModal rounded-0 border-top-0"
-                            id="showModal"
-                            data-url="{{ absolute_url(path('app_item_sale_new', {itemId: item.id})) }}"
-                            data-title="Mise en vente"
+                            class="btn btn-outline-success rounded-0 border-top-0"
+                            href="{{ path('app_item_sale_view', {itemSaleId: itemQuality.itemSale.id}) }}"
                         >
                             <i class="fa-solid fa-coins"></i>
-                        </button> #}
+                        </a>
                         <button 
                             type="button"
                             class="btn btn-primary showModal rounded-0"
-                            id="showModal"
                             data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
                             data-title="Évaluer l'objet"
                         >

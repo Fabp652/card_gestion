@@ -79,6 +79,9 @@
                             <td>{{ itemSale.link }}</td>
                             <td>
                                 <div class="btn-group" role="group">
+                                    <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_sale_view', {itemSaleId: itemSale.id}) }}">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
                                     <button
                                         data-url="{{ absolute_url(path('app_item_sale_edit', {itemSaleId: itemSale.id})) }}"
                                         data-title="{{ 'Modifier "' ~ itemSale.name ~ '"' }}"

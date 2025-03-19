@@ -58,7 +58,7 @@ class Item
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'item')]
+    #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'item', cascade: ['remove'])]
     private Collection $itemQualities;
 
     public function __construct()

@@ -73,7 +73,7 @@
                         </li>
                     </ul>
                 </nav>
-            {% if collection is defined or category is defined or item is defined or storage is defined %}
+            {% if collection is defined or category is defined or item is defined or storage is defined or itemSale is defined %}
                 <nav class="ms-4 mb-5 breadcrumb-position" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">
                         {% if storage is defined and storage %}
@@ -103,10 +103,23 @@
                                     Accueil
                                 </a>
                             </li>
+                        {% elseif itemSale is defined %}
+                            <li class="breadcrumb-item">
+                                <a
+                                    class="link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+                                    href="{{ path('app_item_sale_list') }}"
+                                >
+                                    Accueil {# TODO CHANGER #}
+                                </a>
+                            </li>
                         {% endif %}
                         {% if storage is defined and storage %}
                             <li class="breadcrumb-item">
                                 {{ storage.name }}
+                            </li>
+                        {% elseif itemSale is defined and itemSale %}
+                            <li class="breadcrumb-item">
+                                {{ itemSale.name }}
                             </li>
                         {% elseif (category is defined and collection is defined) or item is defined %}
                             {% if item is defined %}

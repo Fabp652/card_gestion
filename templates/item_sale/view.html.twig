@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+{% block head %}
+    {{ knp_pagination_rel_links(itemQualities) }}
+{% endblock %}
+
+{% block title %}{{ itemSale.name }}{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <div class="mx-5" data-controller="select update">
+        <div class="row mb-5">
+            <h1 class="text-center">{{ itemSale.name|upper }}</h1>
+        </div>
+        <form id="formUpdate" class="row my-2 justify-content-between" action="{{ path('app_item_sale_update', {itemSaleId: itemSale.id}) }}" method="post">
+            <div class="col ps-0">
+                <select class="select2" id="updateItemQuality" name="itemQuality" placeholder="Ajouter un objet">
+                    <option value=""></option>
+                    {% for itemQualityOption in itemQualitiesOption %}
+                        {% set item = itemQualityOption.item %}
+                        <option value="{{ itemQualityOption.id }}">
+                            N°{{ itemQualityOption.sort }} - {% if item.reference %} {{ item.reference }} -{% endif %} {{ item.name }} ({{ item.collection.name }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <input type="number" id="updatePrice" name="price" value="{{ itemSale.price }}">
+                <label for="updatePrice">Prix (en €)</label>
+            </div>
+            <div class="form-check form-switch col d-flex justify-content-end align-self-center">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="updateSold"
+                    name="sold"
+                    {% if itemSale.sold %}checked{% endif %}
+                >
+                <label class="form-check-label ms-2" for="updateSold">Vendu</label>
+            </div>
+        </form>
+        <div class="row mt-2">
+            <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
+                <thead class="table-dark border-dark">
+                    <tr>
+                        <th>Numéro</th>
+                        <th>{{ knp_pagination_sortable(itemQualities, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                        <th>{{ knp_pagination_sortable(itemQualities, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                        <th>{{ knp_pagination_sortable(itemQualities, 'Qualité', 'iq.quality', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_sale_view', {itemSaleId: itemSale.id})) }}" method="get">
+                            {% set filterQuery = app.request.query.all('filter') %}
+                            <th></th>
+                            <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                            <th><input id="referenceFilter" name="filter[reference]" class="form-control rounded-0" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
+                            <th>{# TODO Range min max #}</th>
+                            <th>
+                                <a href="{{ path('app_item_sale_view', {itemSaleId: itemSale.id}) }}" class="btn btn-secondary btn-sm rounded-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                    </svg>
+                                </a>
+                            </th>
+                        </form>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    {% for itemQuality in itemQualities %}
+                        {% set item = itemQuality.item %}
+                        <tr>
+                            <td>{{ itemQuality.sort }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.reference }}</td>
+                            <td>{{ itemQuality.quality }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_item_sale_remove', {itemSaleId: itemSale.id, itemQualityId: itemQuality.id}) }}" class="btn btn-danger btn-sm">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="9">Il n'y a pas d'objet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="navigation">
+                {{ knp_pagination_render(itemQualities) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
