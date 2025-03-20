@@ -15,10 +15,21 @@
 <div class="mx-5" data-controller="modal">
     <div class="row mb-5">
         <h1 class="text-center fw-bold">{{ collection.name|upper }}</h1>
-        <h3 class="text-center fw-semibold">{{ category.name }}</h3>
     </div>
     <div class="row my-2">
-        <div class="col-12 p-0">
+        <div class="col-12 p-0 d-flex">
+            <div class="dropdown me-3">
+                <button class="btn btn-outline-primary dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:160px;">
+                    {{ category.name }}
+                </button>
+                <ul class="dropdown-menu w-100 p-0">
+                    {% for otherCategory in categories %}
+                        <li>
+                            <a class="dropdown-item" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: otherCategory.id}) }}">{{ otherCategory.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
             <button 
                 type="button"
                 class="btn btn-primary showModal"

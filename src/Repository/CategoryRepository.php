@@ -45,4 +45,19 @@ class CategoryRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    /**
+     * @param Category $category
+     * @return array
+     */
+    public function findWithoutActualCategory(Category $category): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.parent = :parent AND c.id != :category')
+            ->setParameter('parent', $category->getParent())
+            ->setParameter('category', $category)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

@@ -43,6 +43,7 @@ class ItemController extends AbstractController
     ): Response {
         $collection = $this->collectionRepo->find($collectionId);
         $category = $categoryRepo->find($categoryId);
+        $categories = $categoryRepo->findWithoutActualCategory($category);
 
         $filters = $request->query->all('filter');
         $filters = array_filter(
@@ -64,7 +65,8 @@ class ItemController extends AbstractController
             'items' => $items,
             'collection' => $collection,
             'request' => $request,
-            'category' => $category
+            'category' => $category,
+            'categories' => $categories
         ]);
     }
 
