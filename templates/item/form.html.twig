@@ -7,17 +7,17 @@
         <div class="col-12 mb-3">
             {{ form_row(form.name) }}
         </div>
+        {% if form.rarity is defined %}
+            <div class="col-12 mb-3">
+                {{ form_row(form.rarity) }}
+            </div>
+        {% endif %}
         <div class="col-6 mb-3">
             {{ form_row(form.category) }}
         </div>
         <div class="col-6 mb-3">
             {{ form_row(form.reference) }}
         </div>
-        {% if form.rarity is defined %}
-            <div class="col-6 mb-3">
-                {{ form_row(form.rarity) }}
-            </div>
-        {% endif %}
         <div class="col-6 mb-3">
             {{ form_row(form.price) }}
         </div>

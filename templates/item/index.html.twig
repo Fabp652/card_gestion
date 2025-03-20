@@ -3,21 +3,27 @@
 {{ knp_pagination_rel_links(items) }}
 {% endblock %}
 
-{% block title %}{{ collection ? collection.name }}{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('table') }}
+{% endblock %}
+
+{% block title %}{{ collection.name }} ({{ category.name }}){% endblock %}
 
 {% block body %}
 {{ parent() }}
 <div class="mx-5" data-controller="modal">
     <div class="row mb-5">
-        <h1 class="text-center">{{ collection.name|upper }}</h1>
+        <h1 class="text-center fw-bold">{{ collection.name|upper }}</h1>
+        <h3 class="text-center fw-semibold">{{ category.name }}</h3>
     </div>
     <div class="row my-2">
         <div class="col-12 p-0">
             <button 
                 type="button"
-                class="btn btn-primary showModal rounded-0"
+                class="btn btn-primary showModal"
                 id="showModal"
-                data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id})) }}"
+                data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id, categoryId: category.id})) }}"
                 data-title="Ajouter un objet"
             >
                 Ajouter
@@ -34,10 +40,10 @@
                     {% if hasRarities %}
                         <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     {% endif %}
-                    <th>{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié le', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                    <th>Qualité (moyenne)</th>
-                    <th style="width:10%;">{{ knp_pagination_sortable(items, 'Quantité', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th class="w-10">{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                    <th class="w-10">Qualité (moyenne)</th>
+                    <th class="w-10">{{ knp_pagination_sortable(items, 'Quantité', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                     <th>Lien</th>
                     <th>Action</th>
                 </tr>
@@ -57,8 +63,8 @@
                             </th>
                         {% endif %}
                         <th class="input-group">
-                            <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control rounded-0" placeholder="Prix minimum" value="{{ filterQuery.min_price ?? '' }}">
-                            <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control rounded-0" placeholder="Prix maximum" value="{{ filterQuery.max_price ?? '' }}">
+                            <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control rounded-0" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                            <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control rounded-0" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
                         </th>
                         <th>
                         </th>
@@ -120,7 +126,7 @@
                         <td style="width:2%;">{{ item.number }}</td>
                         <td>
                             {% if item.link %}
-                                <a href="{{ item.link }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-0">
+                                <a href="{{ item.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                     <i class="fa-solid fa-link"></i>
                                 </a>
                             {% endif %}

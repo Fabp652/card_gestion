@@ -10,14 +10,17 @@
 {% block body %}
     {{ parent() }}
 
-    <h1 class="text-center mb-4">{{ collection.name|upper }}</h1>
-
     <div class="container" data-controller="modal">
+        {% if collection.file %}
+            {# TODO image #}
+        {% else %}
+            <h1 class="text-center mb-4 fw-bold">{{ collection.name|upper }}</h1>
+        {% endif %}
         <div class="row">
             <div class="col mb-3">
                 <button
                     type="button"
-                    class="btn btn-primary showModal rounded-0"
+                    class="btn btn-primary showModal"
                     id="showModal"
                     data-url="{{ absolute_url(path('app_category_add_child', {parentId: collection.category.id})) }}"
                     data-title="Créer une nouvelle catégorie"
@@ -30,15 +33,15 @@
             {% set hasRarities = collection.rarities|length > 0 %}
             {% for category, mostExpensive in mostExpensives %}
                 <div class="col-6">
-                    <div class="card rounded-0">
+                    <div class="card">
                         {% set categorySplitted = category|split('_') %}
-                        <div class="card-header rounded-0 bg-black bg-gradient d-flex justify-content-between">
+                        <div class="card-header bg-black bg-gradient d-flex justify-content-between">
                             <h5 class="card-title color-title text-uppercase align-middle my-auto">LES 10 {{ categorySplitted|first }} LES PLUS CHERS</h5>
                             <a class="text-white" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: categorySplitted|last}) }}">
                                 <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
                             </a>
                         </div>
-                        <div class="card-body rounded-0 bg-light">
+                        <div class="card-body bg-light">
                             <table class="table table-light table-hover table-responsive align-middle">
                                 <thead>
                                     <tr>
@@ -54,8 +57,10 @@
                                             <td>{{ most.name }}</td>
                                             {% if hasRarities %}<td>{{ most.rarityName }}</td>{% endif %}
                                             <td><b class="text-success">{{ most.price|format_currency('EUR', locale = 'fr') }}</b></td>
-                                            <td><b>{{ most.number }}</b></td>
+                                            <td class="text-center"><b>{{ most.number }}</b></td>
                                         </tr>
+                                    {% else %}
+                                        <tr><td colspan="4" class="text-center">Il n'y pas d'objet</td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -67,11 +72,11 @@
         {% if statRarities is defined %}
             <div class="row mb-4">
                     <div class="col">
-                        <div class="card rounded-0">
-                            <div class="card-header rounded-0 bg-black bg-gradient">
+                        <div class="card">
+                            <div class="card-header bg-black bg-gradient">
                                 <h5 class="card-title color-title">PAR RARETÉ</h5>
                             </div>
-                            <div class="card-body rounded-0 bg-light">
+                            <div class="card-body bg-light">
                                 <table class="table table-light table-hover table-responsive align-middle">
                                     <thead>
                                         <tr>
@@ -89,6 +94,8 @@
                                                 <td><b class="text-success">{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
                                                 <td><b class="text-success">{{ rarity.average|format_currency('EUR', locale = 'fr') }}</b></td>
                                             </tr>
+                                        {% else %}
+                                            <tr><td colspan="4" class="text-center">Il n'y pas d'objet</td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>

@@ -43,7 +43,7 @@
             <div class="col ps-0">
                 <button
                     type="button"
-                    class="btn btn-primary showModal rounded-0 me-3"
+                    class="btn btn-primary showModal me-3"
                     id="showModal"
                     data-url="{{ absolute_url(path('app_item_edit', {itemId: item.id, collectionId: item.collection.id})) }}"
                     data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
@@ -53,7 +53,7 @@
             {% if item.itemQualities|length < item.number %}
                 <button
                     type="button"
-                    class="btn btn-primary showModal rounded-0"
+                    class="btn btn-primary showModal"
                     id="showModal"
                     data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
                     data-title="Évaluer un exemplaire"
@@ -78,7 +78,7 @@
                         {% if itemQuality.itemSale %}
                             <a 
                                 type="button"
-                                class="btn btn-outline-success rounded-0 border-top-0"
+                                class="btn btn-outline-success border-top-0"
                                 href="{{ path('app_item_sale_view', {itemSaleId: itemQuality.itemSale.id}) }}"
                             >
                                 <i class="fa-solid fa-coins"></i>
@@ -86,7 +86,7 @@
                         {% endif %}
                         <button 
                             type="button"
-                            class="btn btn-primary showModal rounded-0"
+                            class="btn btn-primary showModal"
                             data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
                             data-title="Évaluer l'objet"
                         >
@@ -111,7 +111,7 @@
                     {% endif %}
                     {% if itemQuality.storage %}
                         <a
-                            class="btn btn-outline-light border-bottom-0 border-end-0 showModal rounded-0 position-absolute bottom-0 end-0"
+                            class="btn btn-outline-light border-bottom-0 border-end-0 showModal position-absolute bottom-0 end-0"
                             href="{{ absolute_url(path('app_storage_view', {storageId: itemQuality.storage.id}))}} }}"
                         >
                             {{ itemQuality.storage.name }}

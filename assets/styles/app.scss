@@ -2,6 +2,11 @@ $transitionDuration: 0.5s;
 $hundredPercent: 100%;
 $primary: #004fc3;
 $success: #1c5c3f;
+$danger: #bf0d0d;
+$btn-border-radius: 0;
+$input-border-radius: 0;
+$card-border-radius: 0;
+
 
 @import 'bootstrap/scss/bootstrap';
 @import "bootstrap/scss/functions";
@@ -13,7 +18,7 @@ $success: #1c5c3f;
 @import "../../node_modules/@selectize/selectize/dist/scss/selectize.scss";
 
 .color-title {
-    background-image: linear-gradient(180deg, $white, $gray-500);
+    background-image: linear-gradient(90deg, $white, $gray-500);
     background-size: $hundredPercent;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -61,4 +66,8 @@ $success: #1c5c3f;
 
 .breadcrumb-color {
     color: $primary!important;
+}
+
+.btn-sm {
+    border-radius: 0!important;
 }

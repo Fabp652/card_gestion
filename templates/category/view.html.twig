@@ -12,7 +12,7 @@
             <div class="col mb-3">
                 <button
                     type="button"
-                    class="btn btn-primary showModal rounded-0"
+                    class="btn btn-primary showModal"
                     id="showModal"
                     data-url="{{ absolute_url(path('app_category_add_child', {parentId: category.id})) }}"
                     data-title="Créer une nouvelle catégorie"
@@ -24,9 +24,9 @@
         <div class="row mb-4">
             {% for child, mostExpensive in mostExpensives %}
                 <div class="col-6">
-                    <div class="card rounded-0">
+                    <div class="card">
                         {% set childSplitted = child|split('_') %}
-                        <div class="card-header rounded-0 bg-black bg-gradient d-flex justify-content-between">
+                        <div class="card-header bg-black bg-gradient d-flex justify-content-between">
                             <h5 class="card-title color-title text-uppercase align-middle my-auto">LES 10 {{ childSplitted|first }} LES PLUS CHERS</h5>
                             <div class="btn-group" role="group">
                                 <button
@@ -71,11 +71,11 @@
         <div class="row">
             <h2 class="text-uppercase">Les critères par catégorie</h2>
             <div class="col-6">
-                <div class="card rounded-0">
-                    <div class="card-header rounded-0 bg-black bg-gradient d-flex justify-content-between">
+                <div class="card">
+                    <div class="card-header bg-black bg-gradient d-flex justify-content-between">
                         <h5 class="card-title color-title text-uppercase align-middle my-auto">{{ category.name }}</h5>
                     </div>
-                    <div class="card-body rounded-0 bg-light">
+                    <div class="card-body bg-light">
                         <table class="table table-light table-hover table-responsive align-middle">
                             <thead>
                                 <tr>

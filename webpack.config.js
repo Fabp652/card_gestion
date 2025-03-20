@@ -25,6 +25,7 @@ Encore
     .addStyleEntry('canvas', './assets/styles/canvas.scss')
     .addStyleEntry('eye_icon', './assets/styles/eye_icon.scss')
     .addStyleEntry('item_view', './assets/styles/item_view.scss')
+    .addStyleEntry('table', './assets/styles/table.scss')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

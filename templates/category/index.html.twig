@@ -16,7 +16,7 @@
             <div class="col d-flex justify-content-start p-0">
                 <button
                     type="button"
-                    class="btn btn-primary showModal rounded-0"
+                    class="btn btn-primary showModal"
                     id="showModal"
                     data-url="{{ absolute_url(path('app_category_add')) }}"
                     data-title="Créer une nouvelle catégorie"
@@ -28,8 +28,8 @@
         <div class="row row-cols-1 row-cols-md-3">
             {% for stat in stats %}
                 <div class="col mb-4">
-                    <div class="card text-uppercase rounded-0 text-start">
-                        <div class="card-header text-bg-dark rounded-0 d-flex justify-content-between">
+                    <div class="card text-uppercase text-start">
+                        <div class="card-header text-bg-dark d-flex justify-content-between">
                             <h5 class="card-title mb-0">{{ stat.categoryName }}</h5>
                             <a class="text-white" href="{{absolute_url(path('app_category_view', {categoryId: stat.categoryId}))}}">
                                 <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
