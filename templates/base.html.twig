@@ -7,6 +7,10 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
+            {% if collection is defined and collection %}
+                {{ encore_entry_link_tags('canvas') }}
+                {{ encore_entry_link_tags('dropdown') }}
+            {% endif %}
         {% endblock %}
 
         {% block javascripts %}
@@ -34,7 +38,7 @@
                     {% endif %}
                     <form id="searchForm" class="w-50 d-flex justify-content-center ms-auto" role="search" action="{{ path('app_item_search') }}" method="GET">
                         <div class="w-75 position-relative">
-                            <input id="search" class="form-control rounded-0 border-dark" type="search" name="search" placeholder="Rechercher" aria-label="Rechercher">
+                            <input id="search" class="form-control rounded-0 border-dark focus-ring" type="search" name="search" placeholder="Rechercher" aria-label="Rechercher" style="--bs-focus-ring-color: rgba(var(--bs-black-rgb), .25)">
                             <ul id="searchResult" class="list-result position-absolute top-100 start-0 end-0 z-3 p-0 overflow-y-scroll border border-black bg-white" style="display:none;">
                             </ul>
                         </div>

@@ -3,7 +3,7 @@
         {{actualCollection.name}}
     </button >
 
-    <ul class="dropdown-menu">
+    <ul class="dropdown-menu w-100 rounded-0 p-0">
         {% for collection in collections %}
             <li><a class="dropdown-item" href="{{ path('app_collection_view', {collectionId: collection.id}) }}">{{ collection.name }}</a></li>
         {% endfor %}

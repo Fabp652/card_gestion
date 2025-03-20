@@ -1,0 +1,22 @@
+$transitionDuration: 0.5s;
+$primary: #004fc3;
+$hundredPercent: 100%;
+
+.category-link {
+    font-size: 1.15rem!important;
+    transition: $transitionDuration!important;
+}
+
+.category-link:hover {
+    color: $primary!important;
+}
+
+.category-border-hover {
+    border-bottom: 2px solid $primary;
+    width: 0;
+    transition: $transitionDuration;
+}
+
+.category-nav:hover > .category-border-hover {
+    width: $hundredPercent;
+}

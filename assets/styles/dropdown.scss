@@ -1,0 +1,11 @@
+.dropdown-toggle::after {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%) !important;
+}
+
+.dropdown-item:hover {
+    background-color: #004fc3;
+    color: #fff;
+} 

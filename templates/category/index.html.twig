@@ -1,6 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('eye_icon') }}
+{% endblock %}
+
+{% block title %}Catégories{% endblock %}
 
 {% block body %}
     {{ parent() }}
