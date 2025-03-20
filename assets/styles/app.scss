@@ -1,3 +1,9 @@
+$transitionDuration: 0.5s;
+$hundredPercent: 100%;
+$colorLink: #004fc3;
+$primary: $colorLink;
+$success: #1c5c3f;
+
 @import 'bootstrap/scss/bootstrap';
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";
@@ -6,10 +12,6 @@
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
 @import "../../node_modules/@selectize/selectize/dist/scss/selectize.scss";
-
-$transitionDuration: 0.5s;
-$hundredPercent: 100%;
-$colorLink: #004fc3;
 
 .color-title {
     background-image: linear-gradient(180deg, $white, $gray-500);
@@ -80,4 +82,42 @@ $colorLink: #004fc3;
     border-right: 1px solid $black;
     width: 50px;
     background-color: $light;
+}
+
+.navbar-link {
+    color: $gray-600!important
+}
+
+.navbar-link:hover {
+    color: $colorLink!important
+}
+
+.navbar-border-hover {
+    border-bottom: 2px solid $colorLink;
+    width: 0;
+    transition: $transitionDuration;
+}
+
+.nav-item:hover > .navbar-border-hover {
+    width: $hundredPercent;
+}
+
+.navbar-active {
+    color: $colorLink!important;
+}
+
+.navbar-border-active {
+    border-bottom: 2px solid $colorLink;
+    width: $hundredPercent;
+}
+
+.breadcrumb-color {
+    color: $colorLink!important;
+}
+
+.dropdown-toggle::after {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%) !important;
 }

@@ -73,13 +73,15 @@
                 </div>
                 <div class="col py-3 position-relative text-bg-dark bg-gradient">
                     <div class="position-absolute top-0 end-0 btn-group">
-                        <a 
-                            type="button"
-                            class="btn btn-outline-success rounded-0 border-top-0"
-                            href="{{ path('app_item_sale_view', {itemSaleId: itemQuality.itemSale.id}) }}"
-                        >
-                            <i class="fa-solid fa-coins"></i>
-                        </a>
+                        {% if itemQuality.itemSale %}
+                            <a 
+                                type="button"
+                                class="btn btn-outline-success rounded-0 border-top-0"
+                                href="{{ path('app_item_sale_view', {itemSaleId: itemQuality.itemSale.id}) }}"
+                            >
+                                <i class="fa-solid fa-coins"></i>
+                            </a>
+                        {% endif %}
                         <button 
                             type="button"
                             class="btn btn-primary showModal rounded-0"
