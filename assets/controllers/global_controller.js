@@ -6,6 +6,14 @@ export default class extends Controller {
             $('#searchForm').trigger('submit');
         });
 
+        $(window).on('click', function (e) {
+            $('#searchResult').hide();
+        });
+
+        $('#search, #searchResult').on('click', function(event){
+            event.stopPropagation();
+        });
+
         $('#searchForm').on('submit', function (e) {
             e.preventDefault();
 
