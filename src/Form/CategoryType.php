@@ -11,7 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class CategoryType extends AbstractType
 {
     private const LABEL_CLASS = 'form-label';
-    private const ATTR_CLASS = 'form-control rounded-0';
+    private const ATTR_CLASS = 'form-control';
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

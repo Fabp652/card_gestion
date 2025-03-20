@@ -18,8 +18,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ItemSaleType extends AbstractType
 {
     private const LABEL_CLASS = 'form-label';
-    private const ATTR_CLASS_CONTROL = 'form-control rounded-0';
-    private const ATTR_CLASS_SELECT = 'form-select rounded-0';
+    private const ATTR_CLASS_CONTROL = 'form-control';
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

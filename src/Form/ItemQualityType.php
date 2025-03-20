@@ -20,7 +20,7 @@ class ItemQualityType extends AbstractType
 {
     private const LABEL_CLASS = 'form-label';
     private const LABEL_CLASS_CHECKBOX = 'form-check-label';
-    private const ATTR_CLASS_CONTROL = 'form-control rounded-0';
+    private const ATTR_CLASS_CONTROL = 'form-control';
     private const ATTR_CLASS_CHECKBOX = 'form-check form-check-inline';
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -100,7 +100,7 @@ class ItemQualityType extends AbstractType
                 'choice_value' => 'id',
                 'choice_label' => 'name',
                 'label_attr' => ['class' => self::LABEL_CLASS],
-                'attr' => ['class' => 'form-select rounded-0'],
+                'attr' => ['class' => 'form-select'],
                 'query_builder' => function (EntityRepository $er): QueryBuilder {
                     return $er->createQueryBuilder('s')
                         ->orderBy('s.name', 'ASC')

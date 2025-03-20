@@ -75,8 +75,12 @@ class ItemController extends AbstractController
         name: 'app_item_edit',
         requirements: ['collectionId' => '\d+', 'itemId' => '\d+']
     )]
-    public function form(Request $request, int $collectionId, ?int $itemId): Response
-    {
+    public function form(
+        Request $request,
+        CategoryRepository $categoryRepo,
+        int $collectionId,
+        ?int $itemId
+    ): Response {
         $collection = $this->collectionRepo->find($collectionId);
         if (!$collection) {
             return $this->json(['result' => false, 'message' => 'Collection introuvable']);
@@ -89,6 +93,10 @@ class ItemController extends AbstractController
             }
         } else {
             $item = new Item();
+            if ($categoryId = $request->query->get('categoryId')) {
+                $category = $categoryRepo->find($categoryId);
+                $item->setCategory($category);
+            }
         }
 
         $form = $this->createForm(ItemType::class, $item, ['collection' => $collection])->handleRequest($request);
