@@ -143,21 +143,32 @@ class ItemSaleController extends AbstractController
         ItemQualityRepository $itemQualityRepository,
         int $itemSaleId
     ): Response {
+        $flush = false;
         $itemSale = $this->itemSaleRepository->find($itemSaleId);
 
         $datas = $request->request->all();
         foreach ($datas as $dataKey => $dataValue) {
             if ($dataKey === 'itemQuality' && $dataValue) {
                 $itemQuality = $itemQualityRepository->find($dataValue);
-                $itemSale->addItemQuality($itemQuality);
-            } elseif ($dataKey === 'price' && $dataValue) {
+                if (!$itemSale->getItemQualities()->contains($itemQuality)) {
+                    $itemSale->addItemQuality($itemQuality);
+                    $flush = true;
+                }
+            } elseif ($dataKey === 'price' && $dataValue && $dataValue != $itemSale->getPrice()) {
                 $itemSale->setPrice((float) $dataValue);
+                $flush = true;
             } elseif ($dataKey === 'sold') {
                 $sold = $dataValue == 'true';
-                $itemSale->setSold($sold);
+                if ($sold != $itemSale->isSold()) {
+                    $itemSale->setSold($sold);
+                    $flush = true;
+                }
             }
         }
-        $this->em->flush();
+        
+        if ($flush) {
+            $this->em->flush();
+        }
 
         return $this->json(['result' => true]);
     }

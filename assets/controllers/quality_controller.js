@@ -18,6 +18,14 @@ export default class extends Controller {
                 checkboxes.prop('disabled', false);
             } else if (quality < 10) {
                 quality += parseInt($(this).data('point'));
+                for (let index = 0; index < checkboxes.length; index++) {
+                    const checkbox = checkboxes[index];
+                    quality -= $(checkbox).data('point');
+                }
+            }
+
+            if (quality < 0) {
+                quality = 0;
             }
 
             $('#item_quality_quality').attr('value', quality);

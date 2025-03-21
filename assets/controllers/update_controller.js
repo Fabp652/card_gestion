@@ -5,7 +5,9 @@ export default class extends Controller {
         $('#formUpdate').on('submit', function (e) {
             e.preventDefault();
             let formData = new FormData(document.querySelector('#formUpdate'));
-            formData.set('sold', $(this).prop('checked'));
+            if ($('#updateSold').length) {
+                formData.set('sold', $('#updateSold').prop('checked'));
+            }
 
             fetch($(this).attr('action'), {
                 method: $(this).attr('method'),

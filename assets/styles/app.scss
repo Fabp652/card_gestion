@@ -1,14 +1,4 @@
-$transitionDuration: 0.5s;
-$hundredPercent: 100%;
-$primary: #004fc3;
-$success: #1c5c3f;
-$danger: #bf0d0d;
-$btn-border-radius: 0;
-$input-border-radius: 0;
-$card-border-radius: 0;
-$dropdown-border-radius: 0;
-
-
+@import '_variables.scss';
 @import 'bootstrap/scss/bootstrap';
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";

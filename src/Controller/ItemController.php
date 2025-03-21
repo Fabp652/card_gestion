@@ -73,7 +73,7 @@ class ItemController extends AbstractController
 
     #[Route('/collection/{collectionId}/item/add', name: 'app_item_add', requirements: ['collectionId' => '\d+'])]
     #[Route(
-        '/collection/{collectionId}/item/{itemId}/update',
+        '/collection/{collectionId}/item/{itemId}/edit',
         name: 'app_item_edit',
         requirements: ['collectionId' => '\d+', 'itemId' => '\d+']
     )]
@@ -212,7 +212,9 @@ class ItemController extends AbstractController
                 }
             }
 
-            $itemQuality->setSort($item->getItemQualities()->count() + 1);
+            if (!$itemQuality->getSort()) {
+                $itemQuality->setSort($item->getItemQualities()->count() + 1);
+            }
 
             $this->em->persist($itemQuality);
             $this->em->flush();
@@ -259,5 +261,32 @@ class ItemController extends AbstractController
         }
 
         return $this->json(['result' => false]);
+    }
+
+    #[Route(
+        '/item/{itemId}/update',
+        name: 'app_item_update',
+        requirements: ['itemId' => '\d+']
+    )]
+    public function update(Request $request, int $itemId): Response
+    {
+        $flush = false;
+        $item = $this->itemRepo->find($itemId);
+
+        $datas = $request->request->all();
+        foreach ($datas as $dataKey => $dataValue) {
+            if ($dataKey == 'number' && $dataValue != $item->getNumber()) {
+                $item->setNumber($dataValue);
+                $flush = true;
+            } elseif ($dataKey == 'price' && $dataValue != $item->getPrice()) {
+                $item->setPrice($dataValue);
+                $flush = true;
+            }
+        }
+
+        if ($flush) {
+            $this->em->flush();
+        }
+        return $this->json(['result' => true]);
     }
 }
