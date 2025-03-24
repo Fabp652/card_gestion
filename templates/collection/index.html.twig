@@ -11,66 +11,70 @@
     {{ parent() }}
 
     <div class="container mt-5 pt-5" data-controller="modal">
-        <h1 class="text-center fw-bold">
-            COLLECTIONS
-        </h1>
-        <div class="row mb-3 w-100">
-            <div class="col d-flex justify-content-start">
-                <button
-                    type="button"
-                    class="btn btn-primary showModal"
-                    id="showModal"
-                    data-url="{{ absolute_url(path('app_collection_add')) }}"
-                    data-title="Créer une nouvelle collection"
-                >
-                    Nouvelle collection
-                </button>
+        <div class="card">
+            <div class="card-header border-bottom-0 bg-white pb-0">
+                <h1 class="text-center fw-bold">COLLECTIONS</h1>
             </div>
-        </div>
-        <div class="row row-cols-1 row-cols-md-3">
-            {% for stat in stats %}
-                <div class="col mb-4">
-                    <div class="card text-uppercase border-black">
-                        <div class="card-header bg-black bg-gradient d-flex justify-content-between">
-                            <h5 class="card-title mb-0 color-title">{{ stat.collectionName }}</h5>
-                            <a class="text-white" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
-                                <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
-                            </a>
-                        </div>
-                        <div class="card-body fs-5 p-0">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item border-black d-flex py-0">
-                                    <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
-                                    <b class="w-50 text-center align-self-center">{{ stat.totalItem }}</b>
-                                </li>
-                                <li class="list-group-item border-black d-flex py-0">
-                                    <div class="w-50 border-end border-black py-2">Montant total</div>
-                                    <b class="w-50 text-center align-self-center text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }}</b>
-                                </li>
-                                <li class="list-group-item d-flex py-0">
-                                    <div class="w-50 border-end border-black py-2">Montant moyen</div>
-                                    <b class="w-50 text-center align-self-center text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }}</b>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="card-footer text-start d-flex justify-content-between border-black">
-                            <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
-                            <div class="btn-group" role="group">
-                                <button
-                                    data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
-                                    data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
-                                    class="btn btn-primary btn-sm showModal"
-                                >
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <a href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}" class="btn btn-danger btn-sm">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </a>
-                            </div>
-                        </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col d-flex justify-content-start">
+                        <button
+                            type="button"
+                            class="btn btn-primary showModal"
+                            id="showModal"
+                            data-url="{{ absolute_url(path('app_collection_add')) }}"
+                            data-title="Créer une nouvelle collection"
+                        >
+                            Nouvelle collection
+                        </button>
                     </div>
                 </div>
-            {% endfor %}
+                <div class="row row-cols-1 row-cols-md-3">
+                    {% for stat in stats %}
+                        <div class="col mb-4">
+                            <div class="card text-uppercase border-black">
+                                <div class="card-header bg-black bg-gradient d-flex justify-content-between">
+                                    <h5 class="card-title mb-0 color-title">{{ stat.collectionName }}</h5>
+                                    <a class="text-white" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
+                                        <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
+                                    </a>
+                                </div>
+                                <div class="card-body fs-5 p-0">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
+                                            <b class="w-50 text-center align-self-center">{{ stat.totalItem }}</b>
+                                        </li>
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Montant total</div>
+                                            <b class="w-50 text-center align-self-center text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }}</b>
+                                        </li>
+                                        <li class="list-group-item d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Montant moyen</div>
+                                            <b class="w-50 text-center align-self-center text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }}</b>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="card-footer text-start d-flex justify-content-between border-black">
+                                    <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
+                                    <div class="btn-group" role="group">
+                                        <button
+                                            data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
+                                            data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
+                                            class="btn btn-primary btn-sm showModal"
+                                        >
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <a href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}" class="btn btn-danger btn-sm">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
     {% include "Modal/modal.html.twig" %}

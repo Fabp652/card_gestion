@@ -13,13 +13,13 @@
 {% block body %}
 {{ parent() }}
 <div class="mx-5" data-controller="modal">
-    <div class="row mb-2">
-        <h1 class="text-center fw-bold">{{ collection.name|upper }}</h1>
-    </div>
     <div class="row">
-        <div class="card p-0">
+        <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0">
-                <div class="d-flex">
+                <h1 class="text-center fw-bold">{{ collection.name|upper }}</h1>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-4">
                     <div class="dropdown me-3">
                         <button class="btn btn-outline-primary dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:160px;">
                             {{ category.name }}
@@ -42,8 +42,6 @@
                         Ajouter
                     </button>
                 </div>
-            </div>
-            <div class="card-body">
                 <table class="table table-hover table-responsive text-center table-bordered border-black align-middle">
                     <thead class="table-dark border-dark">
                         {% set hasRarities = collection.rarities|length > 0 %}
@@ -163,7 +161,7 @@
                                 </td>
                             </tr>
                         {% else %}
-                            <tr><td colspan="9">Il n'y a pas d'objet.</td></tr>
+                            <tr><td colspan="9" class="fw-bold fs-1 text-danger">IL N'Y A PAS D'OBJET !</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -174,13 +172,6 @@
             </div>
         </div>
     </div>
-    
-    {# <div class="row my-2">
-        
-    </div> #}
-    {# <div class="row mt-2">
-        
-    </div> #}
     {% include "Modal/modal.html.twig" %}
 </div>
 {% endblock %}

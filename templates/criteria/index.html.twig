@@ -4,103 +4,114 @@
     {{ knp_pagination_rel_links(criterias) }}
 {% endblock %}
 
-{% block title %}Dashboard{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('table') }}
+{% endblock %}
+
+{% block title %}Critères{% endblock %}
 
 {% block body %}
     {{ parent() }}
     
-    <div class="pb-5"></div>
-    <div class="container mt-5" data-controller="modal">
-        <div class="row mb-3 w-100">
-            <div class="col d-flex justify-content-start p-0">
-                <button
-                    type="button"
-                    class="btn btn-primary showModal"
-                    id="showModal"
-                    data-url="{{ absolute_url(path('app_criteria_add')) }}"
-                    data-title="Créer une nouvelle critère"
-                >
-                    Nouvelle critère
-                </button>
+    <div class="container mt-5 pt-5" data-controller="modal">
+        <div class="card px-4">
+            <div class="card-header border-bottom-0 bg-white pb-0">
+                <h1 class="text-center mb-5 fw-bold">CRITÈRES</h1>
             </div>
-        </div>
-        <div class="row w-100">
-            <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
-                <thead class="table-dark border-dark">
-                    <tr>
-                        <th>{{ knp_pagination_sortable(criterias, 'Nom', 'c.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                        <th>Description</th>
-                        <th>{{ knp_pagination_sortable(criterias, 'Point', 'c.point', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                        <th>Catégories</th>
-                        <th>Action</th>
-                    </tr>
-                    <tr>
-                        <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_criteria_list')) }}" method="get">
-                            {% set filterQuery = request.query.all('filter') %}
-                            <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                            <th></th>
-                            <th><input id="pointFilter" name="filter[point]" class="form-control rounded-0" type="number" value="{{ filterQuery.point ?? '' }}"></th>
-                            <th>
-                                <select id="categoryFilter" name="filter[category]" class="form-select rounded-0">
-                                    <option value="">---</option>
-                                    {% for category in categories %}
-                                        <option
-                                            value="{{ category.id }}"
-                                            {% if filterQuery.category is defined and filterQuery.category == category.id %}
-                                                selected
-                                            {% endif %}
-                                        >
-                                            {{ category.name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </th>
-                            <th>
-                                <a href="{{ path('app_criteria_list') }}" class="btn btn-secondary btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                                    </svg>
-                                </a>
-                            </th>
-                        </form>
-                    </tr>
-                </thead>
-                <tbody class="table-group-divider">
-                    {% for criteria in criterias %}
-                        <tr>
-                            <td>{{ criteria.name }}</td>
-                            <td>{{ criteria.description }}</td>
-                            <td>{{ criteria.point }}</td>
-                            <td>
-                                {% set categoriesString = '' %}
-                                {% for category in criteria.categories %}
-                                    {% set categoriesString = categoriesString ~ ' | ' ~ category.name %}
-                                {% endfor %}
-                                {{ categoriesString|trim(' | ') }}
-                            </td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button
-                                        data-url="{{ absolute_url(path('app_criteria_edit', {criteriaId: criteria.id})) }}"
-                                        data-title="{{ 'Modifier "' ~ criteria.name ~ '"' }}"
-                                        class="btn btn-primary btn-sm showModal"
-                                    >
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                    <a href="{{ path('app_criteria_delete', {criteriaId: criteria.id}) }}" class="btn btn-danger btn-sm">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                            <tr><td colspan="9">Il n'y a pas de critère.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col d-flex p-0">
+                        <button
+                            type="button"
+                            class="btn btn-primary showModal"
+                            id="showModal"
+                            data-url="{{ absolute_url(path('app_criteria_add')) }}"
+                            data-title="Créer une nouvelle critère"
+                        >
+                            Nouvelle critère
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
+                        <thead class="table-dark border-dark">
+                            <tr>
+                                <th>{{ knp_pagination_sortable(criterias, 'Nom', 'c.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                <th>Description</th>
+                                <th class="w-10">{{ knp_pagination_sortable(criterias, 'Point', 'c.point', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                <th>Catégories</th>
+                                <th>Action</th>
+                            </tr>
+                            <tr>
+                                <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_criteria_list')) }}" method="get">
+                                    {% set filterQuery = request.query.all('filter') %}
+                                    <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                    <th></th>
+                                    <th><input id="pointFilter" name="filter[point]" class="form-control rounded-0" type="number" value="{{ filterQuery.point ?? '' }}"></th>
+                                    <th>
+                                        <select id="categoryFilter" name="filter[category]" class="form-select rounded-0">
+                                            <option value="">---</option>
+                                            {% for category in categories %}
+                                                <option
+                                                    value="{{ category.id }}"
+                                                    {% if filterQuery.category is defined and filterQuery.category == category.id %}
+                                                        selected
+                                                    {% endif %}
+                                                >
+                                                    {{ category.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </th>
+                                    <th>
+                                        <a href="{{ path('app_criteria_list') }}" class="btn btn-secondary btn-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                            </svg>
+                                        </a>
+                                    </th>
+                                </form>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            {% for criteria in criterias %}
+                                <tr>
+                                    <td>{{ criteria.name }}</td>
+                                    <td>{{ criteria.description }}</td>
+                                    <td>{{ criteria.point }}</td>
+                                    <td>
+                                        {% set categoriesString = '' %}
+                                        {% for category in criteria.categories %}
+                                            {% set categoriesString = categoriesString ~ ' | ' ~ category.name %}
+                                        {% endfor %}
+                                        {{ categoriesString|trim(' | ') }}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button
+                                                data-url="{{ absolute_url(path('app_criteria_edit', {criteriaId: criteria.id})) }}"
+                                                data-title="{{ 'Modifier "' ~ criteria.name ~ '"' }}"
+                                                class="btn btn-primary btn-sm showModal"
+                                            >
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <a href="{{ path('app_criteria_delete', {criteriaId: criteria.id}) }}" class="btn btn-danger btn-sm">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                    <tr><td colspan="9">Il n'y a pas de critère.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
-            <div class="navigation">
-                {{ knp_pagination_render(criterias) }}
+                    <div class="navigation">
+                        {{ knp_pagination_render(criterias) }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

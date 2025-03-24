@@ -10,65 +10,80 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="pb-5"></div>
-    <div class="container mt-5" data-controller="modal">
-        <div class="row mb-3 w-100">
-            <div class="col d-flex justify-content-start p-0">
-                <button
-                    type="button"
-                    class="btn btn-primary showModal me-3"
-                    id="showModal"
-                    data-url="{{ absolute_url(path('app_storage_add')) }}"
-                    data-title="Ajouter un nouveau rangement"
-                >
-                    Nouveau rangement
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-primary showModal"
-                    id="showModal"
-                    data-url="{{ absolute_url(path('app_storage_type_add')) }}"
-                    data-title="Ajouter un nouveau type"
-                >
-                    Nouveau type
-                </button>
+    <div class="container mt-5 pt-5" data-controller="modal">
+        <div class="card">
+            <div class="card-header border-bottom-0 bg-white pb-0">
+                <h1 class="text-center fw-bold">RANGEMENTS</h1>
             </div>
-        </div>
-        <div class="row row-cols-1 row-cols-md-3">
-            {% for stat in stats %}
-                <div class="col mb-4">
-                    <div class="card text-uppercase">
-                        <div class="card-header text-bg-dark d-flex justify-content-between">
-                            <h5 class="card-title mb-0">{{ stat.storageName }}</h5>
-                            <a class="text-white" href="{{absolute_url(path('app_storage_view', {storageId: stat.storageId}))}}">
-                                <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
-                            </a>
-                        </div>
-                        <div class="card-body fs-5 text-bg-light p-0">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item text-bg-light">Nombre total d'objets : <b>{{ stat.totalItem }}</b></li>
-                                <li class="list-group-item text-bg-light">Montant total : <b class="text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }} </b></li>
-                                <li class="list-group-item text-bg-light">Montant moyen : <b class="text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }} </b></li>
-                            </ul>
-                        </div>
-                        <div class="card-footer text-start d-flex justify-content-between">
-                            <i class="align-content-center text-lowercase fw-semibold">{{ stat.type }}</i>
-                            <div class="btn-group" role="group">
-                                <button
-                                    data-url="{{ absolute_url(path('app_storage_edit', {storageId: stat.storageId})) }}"
-                                    data-title="{{ 'Modifier "' ~ stat.storageName ~ '"' }}"
-                                    class="btn btn-primary btn-sm showModal"
-                                >
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <a href="{{ path('app_storage_delete', {storageId: stat.storageId}) }}" class="btn btn-danger btn-sm">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </a>
-                            </div>
-                        </div>
+            <div class="card-body">
+                <div class="row mb-3 w-100">
+                    <div class="d-flex">
+                        <button
+                            type="button"
+                            class="btn btn-primary showModal me-3"
+                            id="showModal"
+                            data-url="{{ absolute_url(path('app_storage_add')) }}"
+                            data-title="Ajouter un nouveau rangement"
+                        >
+                            Nouveau rangement
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary showModal"
+                            id="showModal"
+                            data-url="{{ absolute_url(path('app_storage_type_add')) }}"
+                            data-title="Ajouter un nouveau type"
+                        >
+                            Nouveau type
+                        </button>
                     </div>
                 </div>
-            {% endfor %}
+                <div class="row row-cols-1 row-cols-md-3">
+                    {% for stat in stats %}
+                        <div class="col mb-4">
+                            <div class="card text-uppercase border-black">
+                                <div class="card-header bg-black bg-gradient d-flex justify-content-between">
+                                    <h5 class="card-title mb-0 color-title">{{ stat.storageName }}</h5>
+                                    <a class="text-white" href="{{absolute_url(path('app_storage_view', {storageId: stat.storageId}))}}">
+                                        <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
+                                    </a>
+                                </div>
+                                <div class="card-body fs-5 p-0">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
+                                            <b class="w-50 text-center align-self-center">{{ stat.totalItem }}</b>
+                                        </li>
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Montant total</div>
+                                            <b class="w-50 text-center align-self-center text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }}</b>
+                                        </li>
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Montant moyen</div>
+                                            <b class="w-50 text-center align-self-center text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }}</b>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="card-footer text-start d-flex justify-content-between border-black">
+                                    <i class="align-content-center text-lowercase fw-semibold">{{ stat.type }}</i>
+                                    <div class="btn-group" role="group">
+                                        <button
+                                            data-url="{{ absolute_url(path('app_storage_edit', {storageId: stat.storageId})) }}"
+                                            data-title="{{ 'Modifier "' ~ stat.storageName ~ '"' }}"
+                                            class="btn btn-primary btn-sm showModal"
+                                        >
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <a href="{{ path('app_storage_delete', {storageId: stat.storageId}) }}" class="btn btn-danger btn-sm">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
     {% include "Modal/modal.html.twig" %}
