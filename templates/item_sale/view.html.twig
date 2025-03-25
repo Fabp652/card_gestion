@@ -15,17 +15,10 @@
             <div class="card-body">
                 <form id="formUpdate" class="row my-2 justify-content-between" action="{{ path('app_item_sale_update', {itemSaleId: itemSale.id}) }}" method="post">
                     <div class="col ps-0">
-                        <select class="select2" id="updateItemQuality" name="itemQuality" placeholder="Ajouter un objet">
-                            <option value=""></option>
-                            {% for itemQualityOption in itemQualitiesOption %}
-                                {% set item = itemQualityOption.item %}
-                                <option value="{{ itemQualityOption.id }}">
-                                    N°{{ itemQualityOption.sort }} - {% if item.reference %} {{ item.reference }} -{% endif %} {{ item.name }} ({{ item.collection.name }})
-                                </option>
-                            {% endfor %}
+                        <select class="select2 w-75" id="updateItemQuality" name="itemQuality" placeholder="Ajouter un objet" data-placeholder="Ajouter un objet" data-ajax--url="{{ absolute_url(path('app_item_quality_search', {notSale: 1})) }}">
                         </select>
                     </div>
-                    <div class="col">
+                    <div class="col text-center">
                         <input type="number" id="updatePrice" name="price" value="{{ itemSale.price }}">
                         <label for="updatePrice">Prix (en €)</label>
                     </div>

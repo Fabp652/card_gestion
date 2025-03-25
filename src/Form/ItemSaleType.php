@@ -48,6 +48,8 @@ class ItemSaleType extends AbstractType
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('iq')
                         ->leftJoin('iq.item', 'i')
+                        ->where('iq.itemSale IS NULL')
+                        ->setMaxResults(30)
                     ;
                 },
                 'required' => true

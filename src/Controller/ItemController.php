@@ -239,22 +239,15 @@ class ItemController extends AbstractController
     public function search(Request $request, ItemQualityRepository $itemQualityRepository): Response
     {
         if ($search = $request->query->get('search')) {
-            $storageId = $request->query->get('storage');
-
-            if ($storageId) {
-                $items = $itemQualityRepository->search($search);
-            } else {
-                $items = $this->itemRepo->findByFilter(['search' => $search])
-                    ->select('i.id', 'i.name', 'i.reference, c.name AS collectionName')
-                    ->leftJoin('i.collection', 'c')
-                    ->getQuery()
-                    ->getResult()
-                ;
-            }
+            $items = $this->itemRepo->findByFilter(['search' => $search])
+                ->select('i.id', 'i.name', 'i.reference, c.name AS collectionName')
+                ->leftJoin('i.collection', 'c')
+                ->getQuery()
+                ->getResult()
+            ;
 
             $render = $this->render('item/search/result.html.twig', [
-                'items' => $items,
-                'storageId' => $storageId
+                'items' => $items
             ]);
 
             return $this->json(['result' => true, 'searchResult' => $render->getContent()]);

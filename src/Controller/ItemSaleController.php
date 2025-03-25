@@ -124,12 +124,9 @@ class ItemSaleController extends AbstractController
             $request->query->get('limit', 10)
         );
 
-        $itemQualitiesOption = $itemQualityRepository->findBy(['itemSale' => null]);
-
         return $this->render('item_sale/view.html.twig', [
             'itemSale' => $itemSale,
-            'itemQualities' => $itemQualities,
-            'itemQualitiesOption' => $itemQualitiesOption
+            'itemQualities' => $itemQualities
         ]);
     }
 
@@ -165,7 +162,7 @@ class ItemSaleController extends AbstractController
                 }
             }
         }
-        
+
         if ($flush) {
             $this->em->flush();
         }

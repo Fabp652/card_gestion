@@ -5,8 +5,8 @@ export default class extends Controller {
         $('#formUpdate').on('submit', function (e) {
             e.preventDefault();
             let formData = new FormData(document.querySelector('#formUpdate'));
-            if ($('#updateSold').length) {
-                formData.set('sold', $('#updateSold').prop('checked'));
+            if ($('input[role=switch]').length) {
+                formData.set($('input[role=switch]').attr('name'), $('input[role=switch]').prop('checked'));
             }
 
             fetch($(this).attr('action'), {
@@ -18,9 +18,9 @@ export default class extends Controller {
                         if (json.result) {
                             window.location.reload();
                         }
-                    })
+                    });
                 }
-            })
+            });
         });
 
         $('*[id^=update').on('change', function (e) {

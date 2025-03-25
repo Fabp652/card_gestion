@@ -80,35 +80,6 @@ class StorageController extends AbstractController
     }
 
     #[Route(
-        '/storage/{storageId}/item/{itemQualityId}/add',
-        name: 'app_storage_item_add',
-        requirements: ['storageId' => '\d+', 'itemQualityId' => '\d+']
-    )]
-    public function addItem(
-        Request $request,
-        ItemQualityRepository $itemQualityRepository,
-        int $storageId,
-        int $itemQualityId
-    ): Response {
-        $referer = $request->headers->get('referer');
-
-        $storage = $this->storageRepository->find($storageId);
-        if ($storage) {
-            $itemQuality = $itemQualityRepository->find($itemQualityId);
-            if ($itemQuality) {
-                $storage->addItemQuality($itemQuality);
-                $this->em->flush();
-            } else {
-                $this->addFlash('danger', 'Objet non trouvé');
-            }
-        } else {
-            $this->addFlash('danger', 'Rangement non trouvé');
-        }
-
-        return $this->redirect($referer);
-    }
-
-    #[Route(
         '/storage/{storageId}/item/{itemQualityId}/remove',
         name: 'app_storage_remove',
         requirements: ['storageId' => '\d+', 'itemQualityId' => '\d+']
@@ -135,26 +106,6 @@ class StorageController extends AbstractController
         }
 
         return $this->redirect($referer);
-    }
-
-    #[Route(
-        '/storage/{storageId}/full',
-        name: 'app_storage_full',
-        requirements: ['storageId' => '\d+']
-    )]
-    public function full(Request $request, int $storageId): Response
-    {
-        if ($request->request->has('full')) {
-            $storage = $this->storageRepository->find($storageId);
-            $full = $request->get('full') == 'true' ? true : false;
-
-            $storage->setFull($full);
-            $this->em->flush();
-
-            return $this->json(['result' => true]);
-        } else {
-            return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
-        }
     }
 
     #[Route(
@@ -191,5 +142,39 @@ class StorageController extends AbstractController
             'storage' => $storage,
             'request' => $request
         ]);
+    }
+
+    #[Route(
+        '/storage/{storageId}/update',
+        name: 'app_storage_update',
+        requirements: ['storageId' => '\d+']
+    )]
+    public function update(Request $request, ItemQualityRepository $itemQualityRepository, int $storageId): Response
+    {
+        $flush = false;
+        $itemSale = $this->storageRepository->find($storageId);
+
+        $datas = $request->request->all();
+        foreach ($datas as $dataKey => $dataValue) {
+            if ($dataKey === 'itemQuality' && $dataValue) {
+                $itemQuality = $itemQualityRepository->find($dataValue);
+                if (!$itemSale->getItemQualities()->contains($itemQuality)) {
+                    $itemSale->addItemQuality($itemQuality);
+                    $flush = true;
+                }
+            } elseif ($dataKey === 'full') {
+                $full = $dataValue == 'true';
+                if ($full != $itemSale->isFull()) {
+                    $itemSale->setFull($full);
+                    $flush = true;
+                }
+            }
+        }
+
+        if ($flush) {
+            $this->em->flush();
+        }
+
+        return $this->json(['result' => true]);
     }
 }

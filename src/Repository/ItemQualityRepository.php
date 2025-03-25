@@ -25,16 +25,34 @@ class ItemQualityRepository extends ServiceEntityRepository
 
     /**
      * @param string $search
+     * @param int $storageId
+     * @param bool $notSale
      */
-    public function search(string $search): array
+    public function search(string $search, int $storageId, bool $notSale): array
     {
-        return $this->createQueryBuilder('iq')
-            ->select('iq.id', 'i.name', 'i.reference, c.name AS collectionName, iq.sort')
+        $concat = "CASE WHEN i.reference IS NOT NULL THEN CONCAT('N°', iq.sort, ' ', i.reference, ' - ', i.name, ";
+        $concat .= "' (', c.name, ')') ELSE CONCAT('N°', iq.sort, ' ', i.name, ' (', c.name, ')') END AS text";
+
+        $qb = $this->createQueryBuilder('iq')
             ->leftJoin('iq.item', 'i')
             ->leftJoin('i.collection', 'c')
             ->andWhere('i.name LIKE :search OR i.reference LIKE :search')
             ->setParameter('search', $search . '%')
-            ->getQuery()
+            ->select('iq.id', $concat)
+            ->setMaxResults(30)
+        ;
+
+        if ($storageId) {
+            $qb->andWhere('iq.storage != :storage')
+                ->setParameter('storage', $storageId)
+            ;
+        }
+
+        if ($notSale) {
+            $qb->andWhere('iq.itemSale IS NULL');
+        }
+
+        return $qb->getQuery()
             ->getResult()
         ;
     }
