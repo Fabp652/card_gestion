@@ -27,6 +27,7 @@ Encore
     .addStyleEntry('item_view', './assets/styles/item_view.scss')
     .addStyleEntry('table', './assets/styles/table.scss')
     .addStyleEntry('accordion', './assets/styles/accordion.scss')
+    .addStyleEntry('select2', './assets/styles/select2.scss')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

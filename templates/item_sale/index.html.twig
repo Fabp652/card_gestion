@@ -3,6 +3,11 @@
     {{ knp_pagination_rel_links(itemSales) }}
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('select2') }}
+{% endblock %}
+
 {% block title %}Ventes{% endblock %}
 
 {% block body %}

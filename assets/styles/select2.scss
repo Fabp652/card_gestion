@@ -1,0 +1,42 @@
+$border-color: #000;
+
+@import '_variables.scss';
+@import "~select2/dist/css/select2.css";
+
+.select2-container--default .select2-selection--single {
+    border-radius: $radiusDefault;
+    border-color: $border-color;
+}
+
+.select2-container .select2-selection--single {
+    height: 30px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: $border-color transparent transparent transparent;
+}
+
+.select2-dropdown {
+    border-radius: $radiusDefault;
+    border-color: $border-color;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border-color: $border-color;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent $border-color transparent;
+}
+
+[type=search] {
+    outline-offset: 0;
+}
+
+.select2-results__message {
+    color: $danger;
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: $primary;
+}
