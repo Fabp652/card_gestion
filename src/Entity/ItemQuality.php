@@ -145,11 +145,11 @@ class ItemQuality
 
     public function getChoiceLabel(): string
     {
-        $choiceLabel = $this->sort;
+        $choiceLabel = 'N°' . $this->sort;
         if ($this->item->getReference()) {
             $choiceLabel .= ' - ' . $this->item->getReference();
         }
-        $choiceLabel .= ' - ' . $this->item->getName();
+        $choiceLabel .= ' - ' . $this->item->getName() . ' (' . $this->item->getCollection()->getName() . ')';
 
         return $choiceLabel;
     }

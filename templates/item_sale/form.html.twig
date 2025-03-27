@@ -16,5 +16,10 @@
         <div class="col-12">
             {{ form_row(form.itemQualities, {attr: {'data-ajax--url': absolute_url(path('app_item_quality_search', {notSale: 1}))}}) }}
         </div>
+        {% if form.sold is defined %}
+            <div class="col-12 mt-3">
+                {{ form_row(form.sold) }}
+            </div>
+        {% endif %}
     </div>
 {{ form_end(form) }}

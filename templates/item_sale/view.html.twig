@@ -23,9 +23,9 @@
                         <select class="select2 w-75" id="updateItemQuality" name="itemQuality" data-placeholder="Ajouter un objet" data-ajax--url="{{ absolute_url(path('app_item_quality_search', {notSale: 1})) }}">
                         </select>
                     </div>
-                    <div class="col text-center">
-                        <input type="number" id="updatePrice" name="price" value="{{ itemSale.price }}">
-                        <label for="updatePrice">Prix (en €)</label>
+                    <div class="col d-flex justify-content-center">
+                        <label for="updatePrice" class="form-label align-self-center mb-0 me-3">Prix (en €)</label>
+                        <input type="number" id="updatePrice" name="price" value="{{ itemSale.price }}" class="form-control form-control-sm w-25" step=".01">
                     </div>
                     <div class="form-check form-switch col d-flex justify-content-end align-self-center">
                         <input
