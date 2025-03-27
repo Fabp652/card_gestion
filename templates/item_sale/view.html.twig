@@ -20,7 +20,7 @@
             <div class="card-body">
                 <form id="formUpdate" class="row my-2 justify-content-between" action="{{ path('app_item_sale_update', {itemSaleId: itemSale.id}) }}" method="post">
                     <div class="col ps-0">
-                        <select class="select2 w-75" id="updateItemQuality" name="itemQuality" placeholder="Ajouter un objet" data-placeholder="Ajouter un objet" data-ajax--url="{{ absolute_url(path('app_item_quality_search', {notSale: 1})) }}">
+                        <select class="select2 w-75" id="updateItemQuality" name="itemQuality" data-placeholder="Ajouter un objet" data-ajax--url="{{ absolute_url(path('app_item_quality_search', {notSale: 1})) }}">
                         </select>
                     </div>
                     <div class="col text-center">

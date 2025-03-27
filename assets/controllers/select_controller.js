@@ -5,7 +5,7 @@ import { fr } from "../../node_modules/select2/dist/js/i18n/fr";
 export default class extends Controller {
     connect() {
         $(document).ready(function() {
-            $('.select2').select2({
+            let options = {
                 language: 'fr',
                 ajax: {
                     dataType: 'json',
@@ -22,7 +22,12 @@ export default class extends Controller {
                     }
                 },
                 minimumInputLength: 3
-            });
+            };
+
+            if ($('#modalForm').length > 0) {
+                options['dropdownParent'] = $('#modalForm');
+            }
+            $('.select2').select2(options);
         });
     }
 }

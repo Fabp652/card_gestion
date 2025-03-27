@@ -61,14 +61,17 @@ class ItemSaleController extends AbstractController
 
         $form = $this->createForm(ItemSaleType::class, $itemSale)->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($itemSale);
+            if (!$itemSale->getId()) {
+                $this->em->persist($itemSale);
+            }
             $this->em->flush();
 
             return $this->json(['result' => true]);
         }
 
         $render = $this->render('item_sale/form.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'itemSaleId' => $itemSaleId
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);

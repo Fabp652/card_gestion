@@ -4,8 +4,6 @@ namespace App\Form;
 
 use App\Entity\ItemQuality;
 use App\Entity\ItemSale;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -42,17 +40,14 @@ class ItemSaleType extends AbstractType
                 'choice_value' => 'id',
                 'choice_label' => 'choiceLabel',
                 'label' => 'Objets',
-                'attr' => ['class' => 'select2'],
+                'attr' => [
+                    'class' => self::ATTR_CLASS_CONTROL . ' select2',
+                    'data-width' => '100%'
+                ],
+                'label_attr' => ['class' => self::LABEL_CLASS],
                 'multiple' => true,
-                'by_reference' => false,
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('iq')
-                        ->leftJoin('iq.item', 'i')
-                        ->where('iq.itemSale IS NULL')
-                        ->setMaxResults(30)
-                    ;
-                },
-                'required' => true
+                'required' => false,
+                'by_reference' => false
             ])
             ->add('name', TextType::class, [
                 'label' => 'Nom',
