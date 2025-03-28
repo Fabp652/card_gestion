@@ -1,8 +1,8 @@
-$border-color: #000;
-$color-text-tags:  #fff;
-
 @import '_variables.scss';
 @import "~select2/dist/css/select2.css";
+
+$border-color: $black;
+$color-text-tags:  #fff;
 
 .select2-container--default .select2-selection--single {
     border-radius: $radiusDefault;

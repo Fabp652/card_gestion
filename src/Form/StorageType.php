@@ -56,9 +56,10 @@ class StorageType extends AbstractType
         $storage = $options['data'];
         if ($storage->getId()) {
             $builder->add('full', CheckboxType::class, [
-                'label' => 'Plein',
+                'label' => 'Plus de place',
                 'attr' => ['class' => 'form-check-input'],
-                'row_attr' => ['class' => 'form-check form-switch']
+                'row_attr' => ['class' => 'form-check form-switch'],
+                'label_attr' => ['class' => 'form-check-label fw-medium']
             ]);
         }
     }

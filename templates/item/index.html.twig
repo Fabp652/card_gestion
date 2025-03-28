@@ -61,11 +61,11 @@
                         <tr>
                             <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: category.id})) }}" method="get">
                                 {% set filterQuery = request.query.all('filter') %}
-                                <th><input id="nameFilter" name="filter[name]" class="form-control" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                                <th><input id="referenceFilter" name="filter[reference]" class="form-control" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
+                                <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
                                 {% if hasRarities %}
                                     <th>
-                                        <select id="rarityFilter" name="filter[rarity]" class="form-select">
+                                        <select id="rarityFilter" name="filter[rarity]" class="form-select input-table">
                                             <option value="">---</option>
                                             {% for rarity in collection.rarities %}
                                                 <option value="{{ rarity.id }}" {% if filterQuery.rarity is defined and filterQuery.rarity == rarity.id %}selected{% endif %}>{{ rarity.name }}</option>
@@ -74,13 +74,13 @@
                                     </th>
                                 {% endif %}
                                 <th class="input-group">
-                                    <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control border-black" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
-                                    <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control border-black" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
+                                    <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                                    <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
                                 </th>
                                 <th>
                                 </th>
                                 <th>
-                                    <select id="qualityFilter"name="filter[quality]" class="form-select">
+                                    <select id="qualityFilter"name="filter[quality]" class="form-select input-table">
                                         <option value="">---</option>
                                         {% set qualityDefined = filterQuery.quality is defined %}
                                         <option value="2" {% if qualityDefined and filterQuery.quality == '2' %}selected{% endif %}>Tous évalués</option>
@@ -90,7 +90,7 @@
                                 
                                 </th>
                                 <th>
-                                    <select id="numberFilter" name="filter[number]" class="form-select">
+                                    <select id="numberFilter" name="filter[number]" class="form-select input-table">
                                         <option value="">---</option>
                                         {% set numberDefined = filterQuery.number is defined %}
                                         <option value="1" {% if numberDefined and filterQuery.number == 1 %}selected{% endif %}>Plusieurs exemplaires</option>

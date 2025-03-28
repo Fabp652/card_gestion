@@ -35,7 +35,7 @@
                                 name="full"
                                 {% if storage.full %}checked{% endif %}
                             >
-                            <label class="form-check-label ms-2" for="storageFull">{{ storage.name }} est plein</label>
+                            <label class="form-check-label ms-2 fw-medium" for="storageFull">Plus de place</label>
                         </div>
                     </form>
                 </div>
@@ -54,17 +54,17 @@
                                 <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_storage_view', {storageId: storage.id})) }}" method="get">
                                     {% set filterQuery = request.query.all('filter') %}
                                     <th></th>
-                                    <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                                    <th><input id="referenceFilter" name="filter[reference]" class="form-control rounded-0" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
+                                    <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                    <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
                                     <th class="input-group">
-                                        <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control rounded-0 border-black" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
-                                        <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control rounded-0 border-black" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
+                                        <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                                        <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
                                     </th>
                                     <th>
-                                        <input id="qualityFilter" name="filter[quality]" class="form-control rounded-0" type="number" value="{{ filterQuery.quality ?? '' }}" min="0" max="10">
+                                        <input id="qualityFilter" name="filter[quality]" class="form-control input-table" type="number" value="{{ filterQuery.quality ?? '' }}" min="0" max="10">
                                     </th>
                                     <th>
-                                        <a href="{{ path('app_storage_view', {storageId: storage.id}) }}" class="btn btn-secondary btn-sm rounded-0">
+                                        <a href="{{ path('app_storage_view', {storageId: storage.id}) }}" class="btn btn-secondary btn-sm">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                                                 <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
                                             </svg>

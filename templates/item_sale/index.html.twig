@@ -6,6 +6,7 @@
 {% block stylesheets %}
     {{ parent() }}
     {{ encore_entry_link_tags('select2') }}
+    {{ encore_entry_link_tags('table') }}
 {% endblock %}
 
 {% block title %}Ventes{% endblock %}
@@ -44,13 +45,13 @@
                             <tr>
                                 <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_sale_list')) }}" method="get">
                                     {% set filterQuery = request.query.all('filter') %}
-                                    <th><input id="nameFilter" name="filter[name]" class="form-control rounded-0" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                    <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
                                     <th class="input-group">
-                                        <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control rounded-0 border-black" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
-                                        <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control rounded-0 border-black" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
+                                        <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                                        <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
                                     </th>
                                     <th>
-                                        <select id="soldFilter" name="filter[sold]" class="form-select rounded-0">
+                                        <select id="soldFilter" name="filter[sold]" class="form-select input-table">
                                             <option value="">---</option>
                                             <option
                                                 value="0"
