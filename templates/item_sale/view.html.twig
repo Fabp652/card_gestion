@@ -15,8 +15,8 @@
     {{ parent() }}
     <div class="mx-5" data-controller="select update">
         <div class="card px-5">
-            <div class="card-header border-bottom-0 bg-white pb-0">
-                <h1 class="text-center mb-5 fw-bold">{{ itemSale.name|upper }}</h1>
+            <div class="card-header border-bottom-0 bg-white pb-0 px-0">
+                <h1 class="text-center mb-5 fw-bold border-bottom border-2 pb-2">{{ itemSale.name|upper }}</h1>
             </div>
             <div class="card-body">
                 <form id="formUpdate" class="row my-2 justify-content-between" action="{{ path('app_item_sale_update', {itemSaleId: itemSale.id}) }}" method="post">
