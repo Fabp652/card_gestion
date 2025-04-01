@@ -39,7 +39,7 @@
                                         >
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
-                                        <a href="{{ path('app_category_delete', {categoryId: childSplitted|last}) }}" class="btn btn-danger">
+                                        <a href="{{ path('app_category_delete', {categoryId: childSplitted|last}) }}" class="btn btn-danger removeElement" data-sweetAlert-title="Suppression de la catégorie" data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ childSplitted|first|lower }} ?">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </a>
                                     </div>

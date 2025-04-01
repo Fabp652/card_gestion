@@ -128,19 +128,17 @@ class CollectionController extends AbstractController
         name: 'app_collection_delete',
         requirements: ['collectionId' => '\d+']
     )]
-    public function delete(Request $request, int $collectionId): Response
+    public function delete(int $collectionId): Response
     {
-        $referer = $request->headers->get('referer');
-
+        return $this->json(['result' => false, 'message' => 'La collection est déjà supprimée']);
         $collection = $this->collectionRepo->find($collectionId);
         if ($collection) {
             $this->em->remove($collection);
             $this->em->flush();
-            $this->addFlash('success', "L'objet est supprimé");
-        } else {
-            $this->addFlash('warning', "L'objet est déjà supprimer");
-        }
 
-        return $this->redirect($referer);
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false, 'message' => 'La collection est déjà supprimée']);
+        }
     }
 }

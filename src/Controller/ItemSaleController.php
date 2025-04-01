@@ -78,18 +78,17 @@ class ItemSaleController extends AbstractController
     }
 
     #[Route('/item/sale/{itemSaleId}/delete', name: 'app_item_sale_delete', requirements: ['itemSaleId' => '\d+'])]
-    public function delete(Request $request, int $itemSaleId): Response
+    public function delete(int $itemSaleId): Response
     {
-        $referer = $request->headers->get('referer');
-
         $itemSale = $this->itemSaleRepository->find($itemSaleId);
         if ($itemSale) {
             $itemSale->removeAllItemQualities();
             $this->em->remove($itemSale);
             $this->em->flush();
-            $this->addFlash('success', "La vente est supprimé");
+
+            return $this->json(['result' => true]);
         } else {
-            $this->addFlash('warning', "La vente est déjà supprimer");
+            return $this->json(['result' => false, 'message' => 'La vente est déjà supprimée']);
         }
 
         return $this->redirect($referer);
@@ -179,23 +178,19 @@ class ItemSaleController extends AbstractController
         requirements: ['itemSaleId' => '\d+', 'itemQualityId' => '\d+']
     )]
     public function remove(
-        Request $request,
         ItemQualityRepository $itemQualityRepository,
         int $itemSaleId,
         int $itemQualityId
     ): Response {
-        $referer = $request->headers->get('referer');
-
         $itemSale = $this->itemSaleRepository->find($itemSaleId);
         $itemQuality = $itemQualityRepository->find($itemQualityId);
         if ($itemSale) {
             $itemSale->removeItemQuality($itemQuality);
             $this->em->flush();
-            $this->addFlash('success', "L'objet est retiré");
-        } else {
-            $this->addFlash('warning', "L'objet est déjà retiré");
-        }
 
-        return $this->redirect($referer);
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false, 'message' => 'La vente est introuvable']);
+        }
     }
 }

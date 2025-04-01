@@ -115,19 +115,16 @@ class CategoryController extends AbstractController
         name: 'app_category_delete',
         requirements: ['categoryId' => '\d+']
     )]
-    public function delete(Request $request, int $categoryId): Response
+    public function delete(int $categoryId): Response
     {
-        $referer = $request->headers->get('referer');
-
         $collection = $this->categoryRepo->find($categoryId);
         if ($collection) {
             $this->em->remove($collection);
             $this->em->flush();
-            $this->addFlash('success', "La catégorie est supprimé");
-        } else {
-            $this->addFlash('warning', "La catégorie est déjà supprimer");
-        }
 
-        return $this->redirect($referer);
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false, 'message' => 'La catégorie est déjà supprimée']);
+        }
     }
 }

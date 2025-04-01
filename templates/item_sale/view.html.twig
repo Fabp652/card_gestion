@@ -80,7 +80,7 @@
                                             <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
-                                            <a href="{{ path('app_item_sale_remove', {itemSaleId: itemSale.id, itemQualityId: itemQuality.id}) }}" class="btn btn-danger btn-sm">
+                                            <a href="{{ path('app_item_sale_remove', {itemSaleId: itemSale.id, itemQualityId: itemQuality.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet de cette vente" data-sweetAlert-text="Voulez-vous retirer cet objet : {{ item.name|lower }} ?">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </a>
                                         </div>

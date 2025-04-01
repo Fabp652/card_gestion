@@ -96,7 +96,7 @@
                                             >
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
-                                            <a href="{{ path('app_criteria_delete', {criteriaId: criteria.id}) }}" class="btn btn-danger btn-sm">
+                                            <a href="{{ path('app_criteria_delete', {criteriaId: criteria.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de le critère" data-sweetAlert-text="Voulez-vous supprimer ce critère : {{ criteria.name|lower }} ?">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </a>
                                         </div>

@@ -83,19 +83,16 @@ class CriteriaController extends AbstractController
         name: 'app_criteria_delete',
         requirements: ['criteriaId' => '\d+']
     )]
-    public function delete(Request $request, int $criteriaId): Response
+    public function delete(int $criteriaId): Response
     {
-        $referer = $request->headers->get('referer');
-
         $item = $this->criteriaRepo->find($criteriaId);
         if ($item) {
             $this->em->remove($item);
             $this->em->flush();
-            $this->addFlash('success', "Le critère est supprimé");
-        } else {
-            $this->addFlash('warning', "Le critère est déjà supprimé");
-        }
 
-        return $this->redirect($referer);
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false, 'message' => 'Le critère est déjà supprimé']);
+        }
     }
 }

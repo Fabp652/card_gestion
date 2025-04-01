@@ -63,20 +63,17 @@ class StorageController extends AbstractController
     }
 
     #[Route('/storage/{storageId}/delete', name: 'app_storage_delete', requirements: ['storageId' => '\d+'])]
-    public function delete(Request $request, int $storageId): Response
+    public function delete(int $storageId): Response
     {
-        $referer = $request->headers->get('referer');
-
         $storage = $this->storageRepository->find($storageId);
         if ($storage) {
             $this->em->remove($storage);
             $this->em->flush();
-            $this->addFlash('success', "L'objet est supprimé");
-        } else {
-            $this->addFlash('warning', "L'objet est déjà supprimer");
-        }
 
-        return $this->redirect($referer);
+            return $this->json(['result' => true]);
+        } else {
+            return $this->json(['result' => false, 'message' => 'Le rangement est déjà supprimé']);
+        }
     }
 
     #[Route(
@@ -85,27 +82,24 @@ class StorageController extends AbstractController
         requirements: ['storageId' => '\d+', 'itemQualityId' => '\d+']
     )]
     public function removeItem(
-        Request $request,
         ItemQualityRepository $itemQualityRepository,
         int $storageId,
         int $itemQualityId
     ): Response {
-        $referer = $request->headers->get('referer');
-
         $storage = $this->storageRepository->find($storageId);
         if ($storage) {
             $itemQuality = $itemQualityRepository->find($itemQualityId);
             if ($itemQuality) {
                 $storage->removeItemQuality($itemQuality);
                 $this->em->flush();
+
+                return $this->json(['result' => true]);
             } else {
-                $this->addFlash('danger', 'Objet non trouvé');
+                return $this->json(['result' => false, 'message' => 'L\'objet est introuvable']);
             }
         } else {
-            $this->addFlash('danger', 'Rangement non trouvé');
+            return $this->json(['result' => false, 'message' => 'Le rangement est introuvable']);
         }
-
-        return $this->redirect($referer);
     }
 
     #[Route(
