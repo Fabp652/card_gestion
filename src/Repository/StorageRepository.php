@@ -34,7 +34,9 @@ class StorageRepository extends ServiceEntityRepository
                     s.name AS storageName,
                     s.id AS storageId,
                     SUM(i.price) / SUM(i.number) AS average,
-                    st.name As type
+                    st.name As type,
+                    s.capacity,
+                    s.full
                 '
             )
             ->leftJoin('s.itemQualities', 'iq')

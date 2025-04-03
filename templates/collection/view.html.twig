@@ -1,10 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('eye_icon') }}
-{% endblock %}
-
 {% block title %}{{ collection.name|upper }}{% endblock %}
 
 {% block body %}
@@ -38,15 +33,27 @@
                         {% set hasRarities = collection.rarities|length > 0 %}
                         {% for category, mostExpensive in mostExpensives %}
                             <div class="col-6">
-                                <div class="card">
+                                <div class="card border-black border-end-0 border-top-0">
                                     {% set categorySplitted = category|split('_') %}
                                     <div class="card-header bg-black bg-gradient d-flex justify-content-between">
-                                        <h5 class="card-title color-title text-uppercase align-middle my-auto">LES 10 {{ categorySplitted|first }} LES PLUS CHERS</h5>
-                                        <a class="text-white" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: categorySplitted|last}) }}">
-                                            <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
-                                        </a>
+                                        <h5 class="card-title color-title text-uppercase align-middle my-auto py-1">LES 10 {{ categorySplitted|first }} LES PLUS CHERS</h5>
+                                        <div class="btn-group position-absolute top-0 end-0" role="group">
+                                            <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: categorySplitted|last}))}}">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                            <button
+                                                data-url="{{ absolute_url(path('app_category_edit', {categoryId: categorySplitted|last})) }}"
+                                                data-title="{{ 'Modifier "' ~ categorySplitted|first ~ '"' }}"
+                                                class="btn btn-primary btn-sm showModal"
+                                            >
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <a href="{{ path('app_category_delete', {categoryId: categorySplitted|last}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la catégorie" data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ categorySplitted|first|lower }} ?">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </a>
+                                        </div>
                                     </div>
-                                    <div class="card-body">
+                                    <div class="card-body border-end border-black">
                                         <table class="table table-hover table-responsive align-middle">
                                             <thead>
                                                 <tr>
@@ -59,8 +66,8 @@
                                             <tbody>
                                                 {% for most in mostExpensive %}
                                                     <tr>
-                                                        <td>{{ most.name }}</td>
-                                                        {% if hasRarities %}<td>{{ most.rarityName }}</td>{% endif %}
+                                                        <td>{{ most.name|capitalize }}</td>
+                                                        {% if hasRarities %}<td>{{ most.rarityName|capitalize  }}</td>{% endif %}
                                                         <td><b class="text-success">{{ most.price|format_currency('EUR', locale = 'fr') }}</b></td>
                                                         <td class="text-center"><b>{{ most.number }}</b></td>
                                                     </tr>
@@ -77,11 +84,11 @@
                     {% if statRarities is defined %}
                         <div class="row mb-4">
                                 <div class="col">
-                                    <div class="card">
+                                    <div class="card border-black border-end-0 border-top-0">
                                         <div class="card-header bg-black bg-gradient">
-                                            <h5 class="card-title color-title">PAR RARETÉ</h5>
+                                            <h5 class="card-title color-title">RARETÉS</h5>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body border-end border-black">
                                             <table class="table table-hover table-responsive align-middle">
                                                 <thead>
                                                     <tr>
@@ -94,7 +101,7 @@
                                                 <tbody>
                                                     {% for rarity in statRarities %}
                                                         <tr>
-                                                            <td>{{ rarity.rarityName }}</td>
+                                                            <td>{{ rarity.rarityName|capitalize }}</td>
                                                             <td>{{ rarity.totalItem }}</td>
                                                             <td><b class="text-success">{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
                                                             <td><b class="text-success">{{ rarity.average|format_currency('EUR', locale = 'fr') }}</b></td>

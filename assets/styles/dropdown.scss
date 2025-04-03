@@ -1,3 +1,5 @@
+@import '_variables.scss';
+
 .dropdown-toggle::after {
     position: absolute;
     right: 20px;
@@ -6,6 +8,6 @@
 }
 
 .dropdown-item:hover {
-    background-color: #004fc3;
+    background-color: $primary;
     color: #fff;
 } 

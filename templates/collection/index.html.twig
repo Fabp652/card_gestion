@@ -1,10 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('eye_icon') }}
-{% endblock %}
-
 {% block title %}Collections{% endblock %}
 
 {% block body %}
@@ -29,17 +24,29 @@
                         </button>
                     </div>
                 </div>
-                <div class="row row-cols-1 row-cols-md-3">
+                <div class="row row-cols-1 row-cols-md-3 justify-content-center">
                     {% for stat in stats %}
                         <div class="col mb-4">
-                            <div class="card text-uppercase border-black">
+                            <div class="card text-uppercase border-black border-end-0 border-top-0">
                                 <div class="card-header bg-black bg-gradient d-flex justify-content-between">
-                                    <h5 class="card-title mb-0 color-title">{{ stat.collectionName }}</h5>
-                                    <a class="text-white" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
-                                        <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
-                                    </a>
+                                    <h5 class="card-title mb-0 color-title py-1">{{ stat.collectionName }}</h5>
+                                    <div class="btn-group position-absolute top-0 end-0" role="group">
+                                        <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <button
+                                            data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
+                                            data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
+                                            class="btn btn-primary btn-sm showModal"
+                                        >
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <a href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la collection" data-sweetAlert-text="Voulez-vous supprimer cette collection : {{ stat.collectionName|lower }} ?">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="card-body fs-5 p-0">
+                                <div class="card-body fs-5 p-0 border-end border-black">
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item border-black d-flex py-0">
                                             <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
@@ -55,20 +62,8 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="card-footer text-start d-flex justify-content-between border-black">
+                                <div class="card-footer text-start d-flex justify-content-between border-black border-end">
                                     <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
-                                    <div class="btn-group" role="group">
-                                        <button
-                                            data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
-                                            data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
-                                            class="btn btn-primary btn-sm showModal"
-                                        >
-                                            <i class="fa-solid fa-pen"></i>
-                                        </button>
-                                        <a href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la collection" data-sweetAlert-text="Voulez-vous supprimer cette collection : {{ stat.collectionName|lower }} ?">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </a>
-                                    </div>
                                 </div>
                             </div>
                         </div>

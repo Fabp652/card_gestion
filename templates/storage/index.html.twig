@@ -1,10 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('eye_icon') }}
-{% endblock %}
-
 {% block title %}Rangements{% endblock %}
 
 {% block body %}
@@ -38,35 +33,16 @@
                         </button>
                     </div>
                 </div>
-                <div class="row row-cols-1 row-cols-md-3">
+                <div class="row row-cols-1 row-cols-md-2 justify-content-center">
                     {% for stat in stats %}
                         <div class="col mb-4">
-                            <div class="card text-uppercase border-black">
+                            <div class="card text-uppercase border-black border-end-0 border-top-0">
                                 <div class="card-header bg-black bg-gradient d-flex justify-content-between">
-                                    <h5 class="card-title mb-0 color-title">{{ stat.storageName }}</h5>
-                                    <a class="text-white" href="{{absolute_url(path('app_storage_view', {storageId: stat.storageId}))}}">
-                                        <i class="fa-solid fa-eye fa-xl eye-icon-white"></i>
-                                    </a>
-                                </div>
-                                <div class="card-body fs-5 p-0">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item border-black d-flex py-0">
-                                            <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
-                                            <b class="w-50 text-center align-self-center">{{ stat.totalItem }}</b>
-                                        </li>
-                                        <li class="list-group-item border-black d-flex py-0">
-                                            <div class="w-50 border-end border-black py-2">Montant total</div>
-                                            <b class="w-50 text-center align-self-center text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }}</b>
-                                        </li>
-                                        <li class="list-group-item border-black d-flex py-0">
-                                            <div class="w-50 border-end border-black py-2">Montant moyen</div>
-                                            <b class="w-50 text-center align-self-center text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }}</b>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="card-footer text-start d-flex justify-content-between border-black">
-                                    <i class="align-content-center text-lowercase fw-semibold">{{ stat.type }}</i>
-                                    <div class="btn-group" role="group">
+                                    <h5 class="card-title mb-0 color-title py-1">{{ stat.storageName }}</h5>
+                                    <div class="btn-group position-absolute top-0 end-0" role="group">
+                                        <a class="btn btn-outline-primary btn-sm" href="{{ path('app_storage_view', {storageId: stat.storageId}) }}">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
                                         <button
                                             data-url="{{ absolute_url(path('app_storage_edit', {storageId: stat.storageId})) }}"
                                             data-title="{{ 'Modifier "' ~ stat.storageName ~ '"' }}"
@@ -78,6 +54,32 @@
                                             <i class="fa-solid fa-trash-can"></i>
                                         </a>
                                     </div>
+                                </div>
+                                <div class="card-body fs-5 p-0 text-center border-end border-black">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
+                                            <b class="w-50 align-self-center">{{ stat.totalItem }} {% if stat.capacity %}/ {{ stat.capacity }}{% endif %}</b>
+                                        </li>
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Montant total</div>
+                                            <b class="w-50 align-self-center text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }}</b>
+                                        </li>
+                                        <li class="list-group-item border-black d-flex py-0">
+                                            <div class="w-50 border-end border-black py-2">Montant moyen</div>
+                                            <b class="w-50 align-self-center text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }}</b>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="card-footer text-start d-flex justify-content-between border-black border-end text-lowercase">
+                                    <i class="align-content-center fw-semibold">{{ stat.type }}</i>
+                                    {% if stat.full %}
+                                        <b class="text-danger-emphasis">Remplis !</b>
+                                    {% elseif stat.totalItem > 0 %}
+                                        <b class="text-warning-emphasis">Partiellement remplis</b>
+                                    {% else %}
+                                        <b class="text-secondary-emphasis">Vide</b>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

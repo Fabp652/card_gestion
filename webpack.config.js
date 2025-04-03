@@ -23,7 +23,6 @@ Encore
     .addEntry('app', './assets/app.js')
     .addStyleEntry('dropdown', './assets/styles/dropdown.scss')
     .addStyleEntry('canvas', './assets/styles/canvas.scss')
-    .addStyleEntry('eye_icon', './assets/styles/eye_icon.scss')
     .addStyleEntry('item_view', './assets/styles/item_view.scss')
     .addStyleEntry('table', './assets/styles/table.scss')
     .addStyleEntry('accordion', './assets/styles/accordion.scss')
