@@ -91,6 +91,13 @@ class StorageController extends AbstractController
             $itemQuality = $itemQualityRepository->find($itemQualityId);
             if ($itemQuality) {
                 $storage->removeItemQuality($itemQuality);
+                if (
+                    $storage->getCapacity() &&
+                    $storage->isFull() &&
+                    $storage->getItemQualities()->count() < $storage->getCapacity()
+                ) {
+                    $storage->setFull(false);
+                }
                 $this->em->flush();
 
                 return $this->json(['result' => true]);
@@ -146,26 +153,36 @@ class StorageController extends AbstractController
     public function update(Request $request, ItemQualityRepository $itemQualityRepository, int $storageId): Response
     {
         $flush = false;
-        $itemSale = $this->storageRepository->find($storageId);
+        $storage = $this->storageRepository->find($storageId);
 
         $datas = $request->request->all();
         foreach ($datas as $dataKey => $dataValue) {
             if ($dataKey === 'itemQuality' && $dataValue) {
                 $itemQuality = $itemQualityRepository->find($dataValue);
-                if (!$itemSale->getItemQualities()->contains($itemQuality)) {
-                    $itemSale->addItemQuality($itemQuality);
+                if (!$storage->getItemQualities()->contains($itemQuality)) {
+                    $storage->addItemQuality($itemQuality);
                     $flush = true;
                 }
             } elseif ($dataKey === 'full') {
                 $full = $dataValue == 'true';
-                if ($full != $itemSale->isFull()) {
-                    $itemSale->setFull($full);
+                if ($full != $storage->isFull()) {
+                    $storage->setFull($full);
                     $flush = true;
                 }
+            } elseif ($dataKey === 'capacity' && $dataValue != $storage->getCapacity()) {
+                $storage->setCapacity((int) $dataValue);
+                $flush = true;
             }
         }
 
         if ($flush) {
+            if ($storage->getCapacity()) {
+                if ($storage->getItemQualities()->count() == $storage->getCapacity()) {
+                    $storage->setFull(true);
+                } else {
+                    $storage->setFull(false);
+                }
+            }
             $this->em->flush();
         }
 

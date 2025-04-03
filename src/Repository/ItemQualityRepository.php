@@ -43,7 +43,7 @@ class ItemQualityRepository extends ServiceEntityRepository
         ;
 
         if ($storageId) {
-            $qb->andWhere('iq.storage != :storage')
+            $qb->andWhere('iq.storage != :storage OR iq.storage IS NULL')
                 ->setParameter('storage', $storageId)
             ;
         }
