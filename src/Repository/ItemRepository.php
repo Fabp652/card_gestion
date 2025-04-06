@@ -138,7 +138,7 @@ class ItemRepository extends ServiceEntityRepository
         foreach ($filters as $filterKey => $filterValue) {
             if ($filterKey == 'name' || $filterKey == 'reference') {
                 $qb->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
-                    ->setParameter($filterKey, $filterValue . '%')
+                    ->setParameter($filterKey, '%' . $filterValue . '%')
                 ;
             } elseif (str_contains($filterKey, 'min')) {
                 $filterKeyExplode = explode('_', $filterKey);
@@ -173,7 +173,7 @@ class ItemRepository extends ServiceEntityRepository
                 }
             } elseif ($filterKey == 'search') {
                 $qb->andWhere('i.name LIKE :search OR i.reference LIKE :search')
-                    ->setParameter('search', $filterValue . '%')
+                    ->setParameter('search', '%' . $filterValue . '%')
                 ;
             } else {
                 if (is_numeric($filterValue)) {

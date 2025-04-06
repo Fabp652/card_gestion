@@ -81,4 +81,17 @@ class FileManager
 
         return 'data:' . $mimeType . ';base64, ' . base64_encode(file_get_contents($filePath));
     }
+
+    /**
+     * @param string $filename
+     * @param string $folder
+     * @return bool
+     */
+    public function removeFile(string $filename, string $folder): bool
+    {
+        $directory = $this->getDirectory($folder);
+        $filePath = $directory . '/' . $filename;
+
+        return unlink($filePath);
+    }
 }

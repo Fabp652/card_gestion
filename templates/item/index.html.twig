@@ -15,8 +15,14 @@
 <div class="mx-5" data-controller="modal">
     <div class="row">
         <div class="card">
-            <div class="card-header border-bottom-0 bg-white pb-0">
-                <h1 class="text-center fw-bold border-bottom border-2 pb-2">{{ collection.name|upper }}</h1>
+            <div class="card-header border-bottom-0 bg-white pb-0 text-center" style="height:120px;">
+            {% if collection.file %}
+                <div class="border-bottom border-2 pb-2 h-100">
+                    <img class="h-100" src="{{ file_encoded(collection.file) }}">
+                </div>
+            {% else %}
+                <h1 class="fw-bold border-bottom border-2 pb-2">{{ collection.name|upper }}</h1>
+            {% endif %}
             </div>
             <div class="card-body">
                 <div class="d-flex mb-4">

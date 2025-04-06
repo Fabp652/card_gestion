@@ -7,14 +7,18 @@ use App\Entity\Collections;
 use App\Form\CollectionType;
 use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
+use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class CollectionController extends AbstractController
 {
+    private const FOLDER = 'collection';
+
     public function __construct(
         private CollectionsRepository $collectionRepo,
         private ItemRepository $itemRepo,
@@ -85,34 +89,25 @@ class CollectionController extends AbstractController
         name: 'app_collection_edit',
         requirements: ['collectionId' => '\d+']
     )]
-    public function form(Request $request, ?int $collectionId): Response
+    public function form(Request $request, FileManager $fileManager, ?int $collectionId): Response
     {
         if ($collectionId) {
             $collection = $this->collectionRepo->find($collectionId);
         } else {
             $collection = new Collections();
         }
+
         $form = $this->createForm(CollectionType::class, $collection)->handleRequest($request);
-
+        $file = $form->get('file')->getData();
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$collection->getCategory() || ( $collection->getId() && $request->get('newCategory'))) {
-                $newCategoryName = $request->get('newCategory');
-                if (!$newCategoryName) {
-                    return $this->json([
-                        'result' => false,
-                        'message' => 'Une catégorie doit être attribué à la collection.'
-                    ]);
-                }
-                $category = new Category();
-                $category->setName($newCategoryName);
-                $this->em->persist($category);
-
-                $collection->setCategory($category);
+            $result = $this->createOrUpdate($collection, $fileManager, $file);
+            return $this->json($result);
+        } elseif ($form->isSubmitted() && $collection->getName()) {
+            $categoryQuery = $request->request->all('collection')['category'];
+            if (!empty($categoryQuery) && !is_numeric($categoryQuery)) {
+                $result = $this->createOrUpdate($collection, $fileManager, $file, $categoryQuery);
+                return $this->json($result);
             }
-            $this->em->persist($collection);
-            $this->em->flush();
-
-            return $this->json(['result' => true]);
         }
 
         $render = $this->render('collection/form.html.twig', [
@@ -140,5 +135,52 @@ class CollectionController extends AbstractController
         } else {
             return $this->json(['result' => false, 'message' => 'La collection est déjà supprimée']);
         }
+    }
+
+    private function createOrUpdate(
+        Collections $collection,
+        FileManager $fileManager,
+        ?UploadedFile $file,
+        ?string $categoryName = null
+    ): array {
+        if ($file) {
+            if ($collection->getFile()) {
+                $result = $fileManager->removeFile(
+                    $collection->getFile()->getName(),
+                    $collection->getFile()->getFolder()
+                );
+                if (!$result) {
+                    return [
+                        'result' => false,
+                        'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
+                    ];
+                }
+            }
+
+            $fileManagerEntity = $fileManager->upload(self::FOLDER, $collection->getName(), $file);
+            if (!$fileManagerEntity) {
+                return [
+                    'result' => false,
+                    'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
+                ];
+            }
+            $this->em->persist($fileManagerEntity);
+            $collection->setFile($fileManagerEntity);
+        }
+
+        if ($categoryName) {
+            $category = new Category();
+            $category->setName($categoryName);
+            $this->em->persist($category);
+
+            $collection->setCategory($category);
+        }
+
+        if (!$collection->getId()) {
+            $this->em->persist($collection);
+        }
+        $this->em->flush();
+
+        return ['result' => true];
     }
 }

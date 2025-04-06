@@ -45,9 +45,6 @@ class Category
     #[ORM\OneToMany(targetEntity: Item::class, mappedBy: 'category')]
     private Collection $items;
 
-    #[ORM\ManyToOne]
-    private ?FileManager $file = null;
-
     public function __construct()
     {
         $this->criterias = new ArrayCollection();
@@ -195,18 +192,6 @@ class Category
                 $item->setCategory(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getFile(): ?FileManager
-    {
-        return $this->file;
-    }
-
-    public function setFile(?FileManager $file): static
-    {
-        $this->file = $file;
 
         return $this;
     }

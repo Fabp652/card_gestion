@@ -37,7 +37,7 @@ class ItemQualityRepository extends ServiceEntityRepository
             ->leftJoin('iq.item', 'i')
             ->leftJoin('i.collection', 'c')
             ->andWhere('i.name LIKE :search OR i.reference LIKE :search')
-            ->setParameter('search', $search . '%')
+            ->setParameter('search', '%' . $search . '%')
             ->select('iq.id', $concat)
             ->setMaxResults(30)
         ;

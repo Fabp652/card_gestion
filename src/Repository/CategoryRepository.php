@@ -60,4 +60,33 @@ class CategoryRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    /**
+     * @param string $search
+     * @param int|null $parentId
+     * @param bool $onlyParent
+     * @return array
+     */
+    public function search(string $search, ?int $parentId = null, bool $onlyParent = false): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('c.id', 'CONCAT(UPPER(SUBSTRING(c.name,1,1)),LOWER(SUBSTRING(c.name,2,LENGTH(c.name)))) AS text')
+            ->where('c.name LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+        ;
+
+        if ($parentId) {
+            $qb->andWhere('c.parent = :parent')
+                ->setParameter('parent', $parentId)
+            ;
+        }
+
+        if ($onlyParent) {
+            $qb->andWhere('c.parent IS NULL');
+        }
+
+        return $qb->getQuery()
+            ->getResult()
+        ;
+    }
 }

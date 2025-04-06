@@ -17,7 +17,7 @@ export default class extends Controller {
                     },
                     processResults: function (data) {
                         return {
-                            results: data.items
+                            results: data.searchResults
                         };
                     }
                 },

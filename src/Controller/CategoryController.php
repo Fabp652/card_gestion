@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
-use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -126,5 +125,19 @@ class CategoryController extends AbstractController
         } else {
             return $this->json(['result' => false, 'message' => 'La catégorie est déjà supprimée']);
         }
+    }
+
+    #[Route('/category/search', name: 'app_category_search')]
+    public function search(Request $request): Response
+    {
+        if ($search = $request->query->get('search')) {
+            $onlyParent = $request->query->get('onlyParent') == 1;
+            $parentId = $request->query->get('parentId');
+            $categories = $this->categoryRepo->search($search, $parentId, $onlyParent);
+
+            return $this->json(['result' => true, 'searchResults' => $categories]);
+        }
+
+        return $this->json(['result' => false]);
     }
 }

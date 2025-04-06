@@ -4,13 +4,13 @@ namespace App\Form;
 
 use App\Entity\Category;
 use App\Entity\Collections;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 
 class CollectionType extends AbstractType
 {
@@ -35,13 +35,33 @@ class CollectionType extends AbstractType
                     'choice_value' => 'id',
                     'choice_label' => 'name',
                     'label_attr' => ['class' => self::LABEL_CLASS],
-                    'attr' => ['class' => self::ATTR_CLASS_SELECT],
-                    'query_builder' => function (EntityRepository $er): QueryBuilder {
-                        return $er->createQueryBuilder('c')
-                            ->orderBy('c.name', 'ASC')
-                            ->where('c.parent IS NULL')
-                        ;
-                    },
+                    'attr' => [
+                        'class' => self::ATTR_CLASS_SELECT . ' select2',
+                        'data-tags' => 'true',
+                        'data-width' => '100%'
+                    ],
+                    'required' => false
+                ]
+            )
+            ->add(
+                'file',
+                FileType::class,
+                [
+                    'label' => 'Logo',
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => [
+                        'class' => self::ATTR_CLASS_CONTROL
+                    ],
+                    'mapped' => false,
+                    'constraints' => [
+                        new File([
+                            'mimeTypes' => [
+                                'image/jpeg',
+                                'image/png'
+                            ],
+                            'mimeTypesMessage' => 'Seuls les image au formats jpeg ou png sont acceptés'
+                        ])
+                    ],
                     'required' => false
                 ]
             )

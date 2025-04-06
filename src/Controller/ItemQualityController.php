@@ -30,7 +30,7 @@ class ItemQualityController extends AbstractController
 
             $items = $this->itemQualityRepository->search($search, $storageId, $notSale);
 
-            return $this->json(['result' => true, 'items' => $items]);
+            return $this->json(['result' => true, 'searchResults' => $items]);
         }
 
         return $this->json(['result' => false]);
@@ -85,6 +85,18 @@ class ItemQualityController extends AbstractController
             if ($form->has('file')) {
                 $file = $form->get('file')->getData();
                 if ($file) {
+                    if ($itemQuality->getFile()) {
+                        $result = $fileManager->removeFile(
+                            $itemQuality->getFile()->getName(),
+                            $itemQuality->getFile()->getFolder()
+                        );
+                        if (!$result) {
+                            return $this->json([
+                                'result' => false,
+                                'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
+                            ]);
+                        }
+                    }
                     $fileManagerEntity = $fileManager->upload('item', $item->getName(), $file);
 
                     if (!$fileManagerEntity) {
