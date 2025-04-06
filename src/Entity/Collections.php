@@ -15,7 +15,7 @@ class Collections
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(length: 45)]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'collections')]
@@ -35,6 +35,12 @@ class Collections
 
     #[ORM\ManyToOne]
     private ?FileManager $file = null;
+
+    #[ORM\Column]
+    private ?bool $complete = false;
+
+    #[ORM\Column]
+    private ?bool $hasRarities = false;
 
     public function __construct()
     {
@@ -139,6 +145,30 @@ class Collections
     public function setFile(?FileManager $file): static
     {
         $this->file = $file;
+
+        return $this;
+    }
+
+    public function isComplete(): ?bool
+    {
+        return $this->complete;
+    }
+
+    public function setComplete(bool $complete): static
+    {
+        $this->complete = $complete;
+
+        return $this;
+    }
+
+    public function hasRarities(): ?bool
+    {
+        return $this->hasRarities;
+    }
+
+    public function setHasRarities(bool $hasRarities): static
+    {
+        $this->hasRarities = $hasRarities;
 
         return $this;
     }
