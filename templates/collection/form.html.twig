@@ -12,6 +12,12 @@
         </div>
         <div class="col-12 mb-3">
             {{ form_row(form.file) }}
+            {% if file %}
+                <div class="text-center">
+                    <h6 class="text-start">Logo actuel :</h6>
+                    <img class="w-75" src="{{ file_encoded(file) }}">
+                </div>
+            {% endif %}            
         </div>
     </div>
 {{ form_end(form) }}

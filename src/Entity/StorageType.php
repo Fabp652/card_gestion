@@ -13,7 +13,7 @@ class StorageType
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 10)]
     private ?string $name = null;
 
     public function getId(): ?int

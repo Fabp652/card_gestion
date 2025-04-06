@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ collection.name|upper }}{% endblock %}
+{% block title %}{{ collection.name|capitalize }}{% endblock %}
 
 {% block body %}
     {{ parent() }}
@@ -62,7 +62,7 @@
                                                     <th>Nom</th>
                                                     {% if hasRarities %}<th>Rareté</th>{% endif %}
                                                     <th>Prix</th>
-                                                    <th>Quantité</th>
+                                                    <th class="text-center">Quantité</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -83,7 +83,7 @@
                             </div>
                         {% endfor %}
                     </div>
-                    {% if statRarities is defined %}
+                    {% if statRarities %}
                         <div class="row mb-4">
                                 <div class="col">
                                     <div class="card border-black border-end-0 border-top-0">

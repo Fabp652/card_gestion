@@ -112,7 +112,8 @@ class CollectionController extends AbstractController
 
         $render = $this->render('collection/form.html.twig', [
             'form' => $form->createView(),
-            'collectionId' => $collectionId
+            'collectionId' => $collectionId,
+            'file' => $collection->getFile()
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);
@@ -125,7 +126,6 @@ class CollectionController extends AbstractController
     )]
     public function delete(int $collectionId): Response
     {
-        return $this->json(['result' => false, 'message' => 'La collection est déjà supprimée']);
         $collection = $this->collectionRepo->find($collectionId);
         if ($collection) {
             $this->em->remove($collection);

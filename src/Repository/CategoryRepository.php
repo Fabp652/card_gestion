@@ -40,6 +40,7 @@ class CategoryRepository extends ServiceEntityRepository
             )
             ->leftJoin('c.collections', 'col')
             ->leftJoin('col.items', 'i')
+            ->where('c.parent IS NULL')
             ->groupBy('c.id')
             ->getQuery()
             ->getResult()
