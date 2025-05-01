@@ -24,9 +24,9 @@
                         </button>
                     </div>
                 </div>
-                <div class="row mb-4 justify-content-center">
+                <div class="row" data-masonry='{"percentPosition": true }'>
                     {% for child, mostExpensive in mostExpensives %}
-                        <div class="col-6">
+                        <div class="col-6 py-3">
                             <div class="card border-black border-end-0 border-top-0">
                                 {% set childSplitted = child|split('_') %}
                                 <div class="card-header bg-black bg-gradient d-flex justify-content-between">
