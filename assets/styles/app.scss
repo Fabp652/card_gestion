@@ -56,3 +56,7 @@
 .btn-sm {
     border-radius: $radiusDefault!important;
 }
+
+.form-control, .form-select {
+    background-color: $light !important;
+}
