@@ -4,13 +4,9 @@ namespace App\Form;
 
 use App\Entity\Category;
 use App\Entity\Collections;
-use App\Form\DataTransformer\Model\CategoryTransformer as ModelCategoryTransformer;
-use App\Form\DataTransformer\View\CategoryTransformer;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Event\PreSetDataEvent;
 use Symfony\Component\Form\Event\PreSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -24,13 +20,6 @@ class CollectionType extends AbstractType
     private const LABEL_CLASS = 'form-label';
     private const ATTR_CLASS_CONTROL = 'form-control';
     private const ATTR_CLASS_SELECT = 'form-select select2';
-
-    public function __construct(
-        private CategoryTransformer $Viewtransformer,
-        private ModelCategoryTransformer $ModelTransformer,
-        private EntityManagerInterface $em
-    ) {
-    }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

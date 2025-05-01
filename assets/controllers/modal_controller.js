@@ -32,6 +32,9 @@ export default class extends Controller {
             e.preventDefault();
 
             $('.msg').remove();
+            $('input').removeClass('is-invalid');
+            $('select').removeClass('is-invalid');
+            
             let formData = new FormData(document.querySelector('#modalForm'));
             let requiredData = $('input[required="required"]');
             let valid = true;
@@ -63,7 +66,6 @@ export default class extends Controller {
                                     )
                                 } else {
                                     for (const [key, value] of Object.entries(json.messages)) {
-                                        let select2 = $('span[id$="' + key + '_container"]');
                                         let msg = '<div class="msg invalid-feedback">' + value + '</div>';
                                         let input = $('input[name$="' + key + ']"]');
                                         if (input.length == 0) {
@@ -71,11 +73,7 @@ export default class extends Controller {
                                         }
 
                                         input.parent().append(msg);
-                                        if (select2.length > 0) {
-                                            select2.addClass('is-invalid');
-                                        } else {
-                                            input.addClass('is-invalid');
-                                        }
+                                        input.addClass('is-invalid');
                                     }
                                 }
                             }
