@@ -6,16 +6,23 @@ use App\Repository\ItemQualityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ItemQualityRepository::class)]
+#[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: false)]
 class ItemQuality
 {
+    use SoftDeleteableEntity;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'La note de qualité doit être supérieur ou égal à 0')]
     private ?int $quality = null;
 
     #[ORM\ManyToOne(inversedBy: 'itemQualities')]

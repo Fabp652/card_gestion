@@ -39,7 +39,7 @@ export default class extends Controller {
             requiredData.each(function (index) {
                 if (!$(this).val()) {
                     $(this).parent().append(
-                        '<span class="msg pt-0 fw-bold text-danger">Cet élément est requis</span>'
+                        '<b class="msg text-danger">Cet élément est requis</b>'
                     );
                     valid = false;
                 }
@@ -59,14 +59,24 @@ export default class extends Controller {
                             } else {
                                 if (json.message) {
                                     $('#modalBody').prepend(
-                                        '<b class="text-danger">' + json.message + '</b>'
+                                        '<b class="msg text-danger">' + json.message + '</b>'
                                     )
                                 } else {
-                                    json.messages.forEach(message => {
-                                        $('#modalBody').prepend(
-                                            '<b class="text-danger">' + message + '</b>'
-                                        )
-                                    });
+                                    for (const [key, value] of Object.entries(json.messages)) {
+                                        let select2 = $('span[id$="' + key + '_container"]');
+                                        let msg = '<div class="msg invalid-feedback">' + value + '</div>';
+                                        let input = $('input[name$="' + key + ']"]');
+                                        if (input.length == 0) {
+                                            input = $('select[name$="' + key + ']"]')
+                                        }
+
+                                        input.parent().append(msg);
+                                        if (select2.length > 0) {
+                                            select2.addClass('is-invalid');
+                                        } else {
+                                            input.addClass('is-invalid');
+                                        }
+                                    }
                                 }
                             }
                         })

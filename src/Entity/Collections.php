@@ -6,8 +6,11 @@ use App\Repository\CollectionsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CollectionsRepository::class)]
+#[UniqueEntity(fields: ['name', 'category'], message: 'La collection existe déjà')]
 class Collections
 {
     #[ORM\Id]
@@ -16,9 +19,13 @@ class Collections
     private ?int $id = null;
 
     #[ORM\Column(length: 45)]
+    #[Assert\NotBlank(message: 'La collection doit avoir un nom')]
+    #[Assert\Length(max: 45, maxMessage: 'Le nom doit avoir au maximum 45 caractères')]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'collections')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank(message: 'La collection doit avoir une catégorie')]
     private ?Category $category = null;
 
     /**

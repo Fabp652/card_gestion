@@ -6,8 +6,11 @@ use App\Repository\RarityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RarityRepository::class)]
+#[UniqueEntity(fields: ['name', 'collection'], message: 'La rareté existe déjà')]
 class Rarity
 {
     #[ORM\Id]
@@ -16,12 +19,14 @@ class Rarity
     private ?int $id = null;
 
     #[ORM\Column(length: 45)]
+    #[Assert\NotBlank(message: 'La rareté doit avoir un nom')]
+    #[Assert\Length(max: 45, maxMessage: 'Le nom doit avoir au maximum 45 caractères')]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'La rareté doit avoir un grade')]
+    #[Assert\PositiveOrZero(message: 'Le grade doit être supérieur ou égal à 0')]
     private ?int $grade = null;
-
-    private Collection $cards;
 
     #[ORM\ManyToOne(inversedBy: 'rarities')]
     #[ORM\JoinColumn(nullable: false)]
@@ -38,7 +43,7 @@ class Rarity
 
     public function __construct()
     {
-        $this->cards = new ArrayCollection();
+        $this->items = new ArrayCollection();
     }
 
     public function getId(): ?int

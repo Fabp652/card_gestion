@@ -6,8 +6,11 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
+#[UniqueEntity(fields: ['name', 'parent'], message: 'La catégorie existe déjà')]
 class Category
 {
     #[ORM\Id]
@@ -16,6 +19,8 @@ class Category
     private ?int $id = null;
 
     #[ORM\Column(length: 45)]
+    #[Assert\NotBlank(message: 'La catégorie doit avoir un nom')]
+    #[Assert\Length(max: 45, maxMessage: 'Le nom doit avoir au maximum 45 caractères')]
     private ?string $name = null;
 
     /**

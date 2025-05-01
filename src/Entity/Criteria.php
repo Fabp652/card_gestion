@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CriteriaRepository::class)]
 class Criteria
@@ -17,12 +18,16 @@ class Criteria
     private ?int $id = null;
 
     #[ORM\Column(length: 45, unique: true)]
+    #[Assert\NotBlank(message: 'Le critère doit avoir un nom')]
+    #[Assert\Length(max: 45, maxMessage: 'Le nom doit avoir au maximum 45 caractères')]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: 'La description ne peut pas être vide', allowNull: true)]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Assert\Positive(message: 'Le point doit être supérieur à 0')]
     private ?int $point = null;
 
     /**
@@ -30,6 +35,11 @@ class Criteria
      */
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'criterias')]
     private Collection $categories;
+
+    #[ORM\Column(length: 1)]
+    #[Assert\NotBlank(message: 'Le critère doit avoir un signe')]
+    #[Assert\Choice(['+', '-'], message: 'Le signe doit "+" ou "-"')]
+    private ?string $sign = null;
 
     public function __construct()
     {
@@ -100,6 +110,18 @@ class Criteria
         if ($this->categories->removeElement($category)) {
             $category->removeCriteria($this);
         }
+
+        return $this;
+    }
+
+    public function getSign(): ?string
+    {
+        return $this->sign;
+    }
+
+    public function setSign(string $sign): static
+    {
+        $this->sign = $sign;
 
         return $this;
     }

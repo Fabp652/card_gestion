@@ -3,6 +3,8 @@
 
 $border-color: $black;
 $color-text-tags:  #fff;
+$input-py: 0.375rem;
+$input-px: 0.75rem;
 
 .select2-container--default .select2-selection--single {
     border-radius: $radiusDefault;
@@ -10,7 +12,8 @@ $color-text-tags:  #fff;
 }
 
 .select2-container .select2-selection--single {
-    height: 30px;
+    height: 38px;
+    padding: $input-py $input-px;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow b {
@@ -62,4 +65,31 @@ $color-text-tags:  #fff;
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
     padding-left: 3px;
+}
+
+.is-invalid + .select2 .select2-selection {
+    border-color: $danger!important;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 12 12%27 width=%2712%27 height=%2712%27 fill=%27none%27 stroke=%27%23bf0d0d%27%3e%3ccircle cx=%276%27 cy=%276%27 r=%274.5%27/%3e%3cpath stroke-linejoin=%27round%27 d=%27M5.8 3.6h.4L6 6.5z%27/%3e%3ccircle cx=%276%27 cy=%278.2%27 r=%27.6%27 fill=%27%23bf0d0d%27 stroke=%27none%27/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.9em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-invalid + .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: $danger transparent transparent transparent!important;
+}
+
+.is-invalid + .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent $danger transparent!important;
+}
+
+.select2-container--default .selection .select2-selection .select2-selection__rendered {
+    padding-left: 0;
+    line-height: normal;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 50%;
+    transform: translateY(-50%);
 }

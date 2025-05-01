@@ -6,8 +6,11 @@ use App\Repository\StorageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: StorageRepository::class)]
+#[UniqueEntity(fields: ['name', 'storageType'], message: 'Le rangement existe déjà')]
 class Storage
 {
     #[ORM\Id]
@@ -16,9 +19,12 @@ class Storage
     private ?int $id = null;
 
     #[ORM\Column(length: 45)]
+    #[Assert\NotBlank(message: 'Le rangement doit avoir un nom')]
+    #[Assert\Length(max: 45, maxMessage: 'Le nom doit avoir au maximum 45 caractères')]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\Positive(message: 'La capacité de rangement doit être supérieur à 0')]
     private ?int $capacity = null;
 
     #[ORM\Column]
@@ -26,6 +32,7 @@ class Storage
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank(message: 'Le rangement doit avoir un type de rangement')]
     private ?StorageType $storageType = null;
 
     #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'storage')]

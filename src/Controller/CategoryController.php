@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CategoryController extends AbstractController
 {
@@ -80,15 +81,17 @@ class CategoryController extends AbstractController
         name: 'app_category_add_child',
         requirements: ['parentId' => '\d+']
     )]
-    public function form(Request $request, ?int $categoryId, ?int $parentId): Response
-    {
+    public function form(
+        Request $request,
+        ?int $categoryId,
+        ?int $parentId
+    ): Response {
         if ($categoryId) {
             $category = $this->categoryRepo->find($categoryId);
         } else {
             $category = new Category();
         }
         $form = $this->createForm(CategoryType::class, $category)->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             if ($parentId) {
                 $parent = $this->categoryRepo->find($parentId);
@@ -98,6 +101,14 @@ class CategoryController extends AbstractController
             $this->em->flush();
 
             return $this->json(['result' => true]);
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            $messages = [];
+            foreach ($form->getErrors(true) as $error) {
+                $propertyPath = $error->getCause()->getPropertyPath();
+                $propertyPathExplode = explode('.', $propertyPath);
+                $messages[$propertyPathExplode[1]] = $error->getMessage();
+            }
+            return $this->json(['result' => false, 'messages' => $messages]);
         }
 
         $render = $this->render('category/form.html.twig', [
@@ -130,14 +141,12 @@ class CategoryController extends AbstractController
     #[Route('/category/search', name: 'app_category_search')]
     public function search(Request $request): Response
     {
-        if ($search = $request->query->get('search')) {
-            $onlyParent = $request->query->get('onlyParent') == 1;
-            $parentId = $request->query->get('parentId');
-            $categories = $this->categoryRepo->search($search, $parentId, $onlyParent);
+        $search = $request->query->get('search', '');
+        $onlyParent = $request->query->get('onlyParent') == 1;
+        $parentId = $request->query->get('parentId');
 
-            return $this->json(['result' => true, 'searchResults' => $categories]);
-        }
+        $categories = $this->categoryRepo->search($search, $parentId, $onlyParent);
 
-        return $this->json(['result' => false]);
+        return $this->json(['result' => true, 'searchResults' => $categories]);
     }
 }

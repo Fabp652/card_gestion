@@ -4,8 +4,11 @@ namespace App\Entity;
 
 use App\Repository\StorageTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: StorageTypeRepository::class)]
+#[UniqueEntity('name', 'Le type de rangement existe déjà')]
 class StorageType
 {
     #[ORM\Id]
@@ -13,7 +16,9 @@ class StorageType
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(length: 10, unique: true)]
+    #[Assert\NotBlank(message: 'Le type de rangement doit avoir un nom')]
+    #[Assert\Length(max: 10, maxMessage: 'Le nom doit au avoir maximum 10 caractères')]
     private ?string $name = null;
 
     public function getId(): ?int

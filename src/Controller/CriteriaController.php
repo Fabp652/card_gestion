@@ -68,6 +68,14 @@ class CriteriaController extends AbstractController
             $this->em->flush();
 
             return $this->json(['result' => true]);
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            $messages = [];
+            foreach ($form->getErrors(true) as $error) {
+                $propertyPath = $error->getCause()->getPropertyPath();
+                $propertyPathExplode = explode('.', $propertyPath);
+                $messages[$propertyPathExplode[1]] = $error->getMessage();
+            }
+            return $this->json(['result' => false, 'messages' => $messages]);
         }
 
         $render = $this->render('criteria/form.html.twig', [

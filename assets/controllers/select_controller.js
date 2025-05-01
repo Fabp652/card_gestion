@@ -20,8 +20,7 @@ export default class extends Controller {
                             results: data.searchResults
                         };
                     }
-                },
-                minimumInputLength: 3
+                }
             };
 
             if ($('#modalForm').length > 0) {

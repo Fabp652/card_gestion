@@ -10,10 +10,13 @@ use App\Repository\ItemRepository;
 use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CollectionController extends AbstractController
 {
@@ -89,8 +92,12 @@ class CollectionController extends AbstractController
         name: 'app_collection_edit',
         requirements: ['collectionId' => '\d+']
     )]
-    public function form(Request $request, FileManager $fileManager, ?int $collectionId): Response
-    {
+    public function form(
+        Request $request,
+        FileManager $fileManager,
+        ValidatorInterface $validator,
+        ?int $collectionId
+    ): Response {
         if ($collectionId) {
             $collection = $this->collectionRepo->find($collectionId);
         } else {
@@ -98,16 +105,69 @@ class CollectionController extends AbstractController
         }
 
         $form = $this->createForm(CollectionType::class, $collection)->handleRequest($request);
-        $file = $form->get('file')->getData();
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        if ($form->isSubmitted()) {
+            if (!$collection->getCategory() && $categoryData = $form->get('category')->getData()) {
+                $category = new Category();
+                $category->setName($categoryData);
+
+                $violations = $validator->validate($category);
+                $errors = $this->getViolationsMessage($violations);
+
+                if (!empty($errors)) {
+                    $messages = $this->getFormErrors($form);
+                    $messages['category'] = $errors['name'];
+
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
+
+                $this->em->persist($category);
+                $collection->setCategory($category);
+            } elseif (!$form->isValid()) {
+                $messages = $this->getFormErrors($form);
+                return $this->json(['result' => false, 'messages' => $messages]);
+            }
+
+            $file = $form->get('file')->getData();
+            if ($file) {
+                if ($collection->getFile()) {
+                    $result = $fileManager->removeFile(
+                        $collection->getFile()->getName(),
+                        $collection->getFile()->getFolder()
+                    );
+                    if (!$result) {
+                        return $this->json([
+                            'result' => false,
+                            'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
+                        ]);
+                    }
+                }
+
+                $fileManagerEntity = $fileManager->upload(self::FOLDER, $collection->getName(), $file);
+                if (!$fileManagerEntity) {
+                    return $this->json([
+                        'result' => false,
+                        'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
+                    ]);
+                }
+                $this->em->persist($fileManagerEntity);
+                $collection->setFile($fileManagerEntity);
+            }
+
+            $violations = $validator->validate($collection);
+            if ($violations->count() > 0) {
+                $messages = $this->getViolationsMessage($violations);
+                return $this->json(['result' => false, 'messages' => $messages]);
+            }
+
+            if (!$collection->getId()) {
+                $this->em->persist($collection);
+            }
+            $this->em->flush();
+
+            return $this->json(['result' => true]);
             $result = $this->createOrUpdate($collection, $fileManager, $file);
             return $this->json($result);
-        } elseif ($form->isSubmitted() && $collection->getName()) {
-            $categoryQuery = $request->request->all('collection')['category'];
-            if (!empty($categoryQuery) && !is_numeric($categoryQuery)) {
-                $result = $this->createOrUpdate($collection, $fileManager, $file, $categoryQuery);
-                return $this->json($result);
-            }
         }
 
         $render = $this->render('collection/form.html.twig', [
@@ -182,5 +242,29 @@ class CollectionController extends AbstractController
         $this->em->flush();
 
         return ['result' => true];
+    }
+
+    private function getViolationsMessage(ConstraintViolationListInterface $violations)
+    {
+        $messages = [];
+        if ($violations->count() > 0) {
+            foreach ($violations as $violation) {
+                $messages[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+        }
+
+        return $messages;
+    }
+
+    private function getFormErrors(FormInterface $form)
+    {
+        $messages = [];
+        foreach ($form->getErrors(true) as $error) {
+            $propertyPath = $error->getCause()->getPropertyPath();
+            $propertyPathExplode = explode('.', $propertyPath);
+            $messages[$propertyPathExplode[1]] = $error->getMessage();
+        }
+
+        return $messages;
     }
 }

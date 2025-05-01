@@ -1,23 +1,21 @@
 {% if collectionId %}
-    {{ form_start(form, {method: 'POST', action: path('app_collection_edit', {collectionId: collectionId}), attr: {'id': 'modalForm'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_collection_edit', {collectionId: collectionId}), attr: {'id': 'modalForm', 'class': 'row', 'data-controller': 'select'}}) }}
 {% else %}
-    {{ form_start(form, {method: 'POST', action: path('app_collection_add'), attr: {'id': 'modalForm'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_collection_add'), attr: {'id': 'modalForm', 'class': 'row', 'data-controller': 'select'}}) }}
 {% endif %}
-    <div class="row" data-controller="select">
-        <div class="col-6 mb-3">
-            {{ form_row(form.name) }}
-        </div>
-        <div class="col-6 mb-3">
-            {{ form_row(form.category, {attr: {'data-ajax--url': absolute_url(path('app_category_search', {onlyParent: 1}))}}) }}
-        </div>
-        <div class="col-12 mb-3">
-            {{ form_row(form.file) }}
-            {% if file %}
-                <div class="text-center">
-                    <h6 class="text-start">Logo actuel :</h6>
-                    <img class="w-75" src="{{ file_encoded(file) }}">
-                </div>
-            {% endif %}            
-        </div>
+    <div class="col-6 mb-3">
+        {{ form_row(form.name) }}
+    </div>
+    <div class="col-6 mb-3">
+        {{ form_row(form.category, {attr: {'data-ajax--url': absolute_url(path('app_category_search', {onlyParent: 1}))}}) }}
+    </div>
+    <div class="col-12 mb-3">
+        {{ form_row(form.file) }}
+        {% if file %}
+            <div class="text-center">
+                <h6 class="text-start">Logo actuel :</h6>
+                <img class="w-75" src="{{ file_encoded(file) }}">
+            </div>
+        {% endif %}            
     </div>
 {{ form_end(form) }}

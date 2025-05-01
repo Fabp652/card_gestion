@@ -7,22 +7,34 @@ use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: ItemRepository::class), HasLifecycleCallbacks]
+#[ORM\Entity(repositoryClass: ItemRepository::class)]
+#[UniqueEntity(fields: ['name', 'parent', 'reference', 'category', 'collection'])]
 class Item
 {
+    use TimestampableEntity;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'L\'objet doit avoir un nom')]
+    #[Assert\Length(max: 100, maxMessage: 'Le nom doit avoir au maximum 100 caractères')]
     private ?string $name = null;
 
     #[ORM\Column(length: 45, nullable: true)]
+    #[Assert\Length(
+        max: 45,
+        min: 1,
+        maxMessage: 'Le nom doit avoir au maximum 45 caractères',
+        minMessage: 'Le nom doit avoir au minimum 1 caractère'
+    )]
     private ?string $reference = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'childs')]
@@ -35,35 +47,41 @@ class Item
     private Collection $childs;
 
     #[ORM\ManyToOne(inversedBy: 'items')]
+    #[Assert\NotBlank(message: 'L\'objet doit avoir une catégorie')]
     private ?Category $category = null;
 
     #[ORM\ManyToOne(inversedBy: 'items')]
     private ?Rarity $rarity = null;
 
     #[ORM\ManyToOne(inversedBy: 'items')]
+    #[Assert\NotBlank(message: 'L\'objet doit appartenir à une collection')]
     private ?Collections $collection = null;
 
     #[ORM\Column]
-    private ?int $number = 1;
+    #[Assert\PositiveOrZero(message: 'La quantité doit être supérieur ou égal à 0')]
+    private ?int $number = 0;
 
     #[ORM\Column]
+    #[Assert\Positive(message: 'La prix doit être supérieur à 0')]
     private ?float $price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'L\'URL du lien n\'est pas valide')]
     private ?string $link = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\OneToMany(targetEntity: ItemQuality::class, mappedBy: 'item', cascade: ['remove'])]
     private Collection $itemQualities;
 
+    /**
+     * @var Collection<int, ItemPurchase>
+     */
+    #[ORM\OneToMany(targetEntity: ItemPurchase::class, mappedBy: 'item')]
+    private Collection $itemPurchases;
+
     public function __construct()
     {
         $this->itemQualities = new ArrayCollection();
+        $this->itemPurchases = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -221,31 +239,6 @@ class Item
         return $this;
     }
 
-    #[ORM\PrePersist]
-    public function presPersit(): void
-    {
-        $this->createdAt = new DateTimeImmutable();
-        $this->updatedAt = new DateTime();
-    }
-
-    public function getUpdatedAt(): ?\DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
-    #[ORM\PreUpdate]
-    public function preUpdate(): void
-    {
-        $this->updatedAt = new DateTime();
-    }
-
     /**
      * @return Collection<int, ItemQuality>
      */
@@ -309,5 +302,35 @@ class Item
         });
 
         return $notEvaluated + $itemQualitiesNotEvaluated->count();
+    }
+
+    /**
+     * @return Collection<int, ItemPurchase>
+     */
+    public function getItemPurchases(): Collection
+    {
+        return $this->itemPurchases;
+    }
+
+    public function addItemPurchase(ItemPurchase $itemPurchase): static
+    {
+        if (!$this->itemPurchases->contains($itemPurchase)) {
+            $this->itemPurchases->add($itemPurchase);
+            $itemPurchase->setItem($this);
+        }
+
+        return $this;
+    }
+
+    public function removeItemPurchase(ItemPurchase $itemPurchase): static
+    {
+        if ($this->itemPurchases->removeElement($itemPurchase)) {
+            // set the owning side to null (unless already changed)
+            if ($itemPurchase->getItem() === $this) {
+                $itemPurchase->setItem(null);
+            }
+        }
+
+        return $this;
     }
 }
