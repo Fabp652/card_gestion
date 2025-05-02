@@ -1,9 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
-import { Modal } from 'bootstrap';
+import { Modal, Tooltip } from 'bootstrap';
 
 export default class extends Controller {
     connect() {
         const modal = new Modal('#modal');
+
         $('.showModal').on('click', function (e) {
             let url = $(this).data('url');
             let title = $(this).data('title');
@@ -18,6 +19,11 @@ export default class extends Controller {
                             $('#modalBody').html(json.content);
 
                             modal.show();
+
+                            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                            if (tooltipTriggerList.length > 0) {
+                                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
+                            }
                         }
                     });
                 }
@@ -42,8 +48,9 @@ export default class extends Controller {
             requiredData.each(function (index) {
                 if (!$(this).val()) {
                     $(this).parent().append(
-                        '<b class="msg text-danger">Cet élément est requis</b>'
+                        '<div class="msg invalid-feedback">Cet élément est requis</div>'
                     );
+                    $(this).addClass('is-invalid');
                     valid = false;
                 }
             });

@@ -1,0 +1,21 @@
+{% if rarityId %}
+    {{ form_start(form, {method: 'POST', action: path('app_rarity_edit', {rarityId: rarityId}), attr: {'id': 'modalForm', 'class': 'row'}}) }}
+{% else %}
+    {{ form_start(form, {method: 'POST', action: path('app_rarity_add', {collectionId: collectionId}), attr: {'id': 'modalForm', 'class': 'row'}}) }}
+{% endif %}
+    <div class="col-6 mb-3">
+        {{ form_row(form.name) }}
+    </div>
+    <div class="col-6 mb-3">
+        {{ form_row(form.grade) }}
+    </div>
+    <div class="col-12 mb-3">
+        {{ form_row(form.file) }}
+        {% if file %}
+            <div class="mt-2">
+                <h6>Icône actuel :</h6>
+                <img src="{{ file_encoded(file) }}">
+            </div>
+        {% endif %}            
+    </div>
+{{ form_end(form) }}

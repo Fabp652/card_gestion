@@ -7,6 +7,7 @@ use App\Entity\Collections;
 use App\Form\CollectionType;
 use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
+use App\Repository\RarityRepository;
 use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,7 +25,6 @@ class CollectionController extends AbstractController
 
     public function __construct(
         private CollectionsRepository $collectionRepo,
-        private ItemRepository $itemRepo,
         private EntityManagerInterface $em
     ) {
     }
@@ -47,19 +47,22 @@ class CollectionController extends AbstractController
         name: 'app_collection_view',
         requirements: ['collectionId' => '\d+']
     )]
-    public function view(int $collectionId): Response
-    {
+    public function view(
+        ItemRepository $itemRepo,
+        RarityRepository $rarityRepository,
+        int $collectionId
+    ): Response {
         $collection = $this->collectionRepo->find($collectionId);
         $categories = $collection->getCategory()->getChilds();
 
-        if (!$collection->getRarities()->isEmpty()) {
-            $statRarities = $this->itemRepo->statByRarity($collectionId);
+        if ($collection->hasRarities()) {
+            $statRarities = $rarityRepository->stats($collectionId);
         }
 
         $mostExpensives = [];
         foreach ($categories as $category) {
             $index = $category->getName() . '_' . $category->getId();
-            $mostExpensives[$index] = $this->itemRepo->findMostExpensives($collectionId, $category->getId());
+            $mostExpensives[$index] = $itemRepo->findMostExpensives($collectionId, $category->getId());
         }
 
         return $this->render('collection/view.html.twig', [
@@ -166,8 +169,6 @@ class CollectionController extends AbstractController
             $this->em->flush();
 
             return $this->json(['result' => true]);
-            $result = $this->createOrUpdate($collection, $fileManager, $file);
-            return $this->json($result);
         }
 
         $render = $this->render('collection/form.html.twig', [
@@ -197,54 +198,7 @@ class CollectionController extends AbstractController
         }
     }
 
-    private function createOrUpdate(
-        Collections $collection,
-        FileManager $fileManager,
-        ?UploadedFile $file,
-        ?string $categoryName = null
-    ): array {
-        if ($file) {
-            if ($collection->getFile()) {
-                $result = $fileManager->removeFile(
-                    $collection->getFile()->getName(),
-                    $collection->getFile()->getFolder()
-                );
-                if (!$result) {
-                    return [
-                        'result' => false,
-                        'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
-                    ];
-                }
-            }
-
-            $fileManagerEntity = $fileManager->upload(self::FOLDER, $collection->getName(), $file);
-            if (!$fileManagerEntity) {
-                return [
-                    'result' => false,
-                    'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
-                ];
-            }
-            $this->em->persist($fileManagerEntity);
-            $collection->setFile($fileManagerEntity);
-        }
-
-        if ($categoryName) {
-            $category = new Category();
-            $category->setName($categoryName);
-            $this->em->persist($category);
-
-            $collection->setCategory($category);
-        }
-
-        if (!$collection->getId()) {
-            $this->em->persist($collection);
-        }
-        $this->em->flush();
-
-        return ['result' => true];
-    }
-
-    private function getViolationsMessage(ConstraintViolationListInterface $violations)
+    private function getViolationsMessage(ConstraintViolationListInterface $violations): array
     {
         $messages = [];
         if ($violations->count() > 0) {
@@ -256,7 +210,7 @@ class CollectionController extends AbstractController
         return $messages;
     }
 
-    private function getFormErrors(FormInterface $form)
+    private function getFormErrors(FormInterface $form): array
     {
         $messages = [];
         foreach ($form->getErrors(true) as $error) {

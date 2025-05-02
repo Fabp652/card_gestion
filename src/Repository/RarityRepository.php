@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Rarity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,28 +22,31 @@ class RarityRepository extends ServiceEntityRepository
         parent::__construct($registry, Rarity::class);
     }
 
-    //    /**
-    //     * @return Rarity[] Returns an array of Rarity objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Rarity
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * @param int $collectionId
+     * @return array
+     */
+    public function stats(int $collectionId): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.collection = :collection')
+            ->setParameter('collection', $collectionId)
+            ->leftJoin('r.items', 'i')
+            ->leftJoin('r.file', 'f')
+            ->select(
+                '
+                    SUM(i.price * i.number) AS totalAmount,
+                    SUM(i.number) AS totalItem,
+                    r.name AS rarityName,
+                    r.grade,
+                    r.id,
+                    f.id AS fileId
+                '
+            )
+            ->groupBy('r.id')
+            ->orderBy('r.grade')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

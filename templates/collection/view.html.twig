@@ -89,27 +89,53 @@
                                     <div class="card border-black border-end-0 border-top-0">
                                         <div class="card-header bg-black bg-gradient">
                                             <h5 class="card-title color-title">RARETÉS</h5>
+                                            <div class="btn-group position-absolute top-0 end-0" role="group">
+                                                <button
+                                                    data-url="{{ absolute_url(path('app_rarity_add', {collectionId: collection.id})) }}"
+                                                    data-title="{{ 'Ajouter une rareté' }}"
+                                                    class="btn btn-primary btn-sm showModal"
+                                                >
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="card-body border-end border-black">
                                             <table class="table table-hover table-responsive align-middle">
                                                 <thead>
                                                     <tr>
                                                         <th>Nom</th>
+                                                        <th>Icône</th>
+                                                        <th>Niveau de rareté</th>
                                                         <th>Total</th>
                                                         <th>Montant total</th>
-                                                        <th>Moyenne</th>
+                                                        <th>Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {% for rarity in statRarities %}
                                                         <tr>
                                                             <td>{{ rarity.rarityName|capitalize }}</td>
-                                                            <td>{{ rarity.totalItem }}</td>
+                                                            <td>{% if rarity.fileId %}<img src="{{ file_encoded(rarity.fileId) }}">{% endif %}</td>
+                                                            <td>{{ rarity.grade }}</td>
+                                                            <td>{{ rarity.totalItem ?? 0 }}</td>
                                                             <td><b class="text-success">{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>
-                                                            <td><b class="text-success">{{ rarity.average|format_currency('EUR', locale = 'fr') }}</b></td>
+                                                            <td>
+                                                                <div class="btn-group" role="group">
+                                                                    <button
+                                                                        data-url="{{ absolute_url(path('app_rarity_edit', {rarityId: rarity.id})) }}"
+                                                                        data-title="{{ 'Modifier "' ~ rarity.rarityName ~ '"' }}"
+                                                                        class="btn btn-primary btn-sm showModal"
+                                                                    >
+                                                                        <i class="fa-solid fa-pen"></i>
+                                                                    </button>
+                                                                    <a href="{{ path('app_rarity_delete', {rarityId: rarity.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la rareté" data-sweetAlert-text="Voulez-vous supprimer cette rareté : {{ rarity.rarityName|lower }} ?">
+                                                                        <i class="fa-solid fa-trash-can"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                     {% else %}
-                                                        <tr><td colspan="4" class="text-center fw-bold fs-1 text-danger">IL N'Y A PAS D'OBJET !</td></tr>
+                                                        <tr><td colspan="6" class="text-center fw-bold fs-1 text-danger">IL N'Y A PAS DE RARETÉ !</td></tr>
                                                     {% endfor %}
                                                 </tbody>
                                             </table>

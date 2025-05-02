@@ -84,30 +84,6 @@ class ItemRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $collectionId
-     * @return array
-     */
-    public function statByRarity(int $collectionId): array
-    {
-        return $this->createQueryBuilder('i')
-            ->andWhere('i.collection = :collection')
-            ->setParameter('collection', $collectionId)
-            ->select(
-                '
-                    SUM(i.price * i.number) AS totalAmount,
-                    SUM(i.number) AS totalItem,
-                    r.name AS rarityName,
-                    SUM(i.price * i.number) / SUM(i.number) AS average
-                '
-            )
-            ->join('i.rarity', 'r')
-            ->groupBy('i.rarity')
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
      * @param array $filters
      * @param int|null $collectionId
      * @param int|null $categoryId
