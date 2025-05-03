@@ -20,10 +20,6 @@ class ItemPurchase
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le nom doit avoir au moins 1 caractères', allowNull: true)]
-    private ?string $name = null;
-
     #[ORM\Column(scale: 2)]
     #[Assert\NotBlank(message: 'L\'achat doit avoir un prix')]
     #[Assert\Positive(message: 'Le prix doit être supérieur à 0')]
@@ -51,7 +47,7 @@ class ItemPurchase
     #[ORM\Column(nullable: true)]
     private ?bool $refundRequest = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $refundReason = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -60,24 +56,13 @@ class ItemPurchase
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $refundAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $buyAt = null;
+    #[ORM\ManyToOne(inversedBy: 'itemsPurchase')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Purchase $purchase = null;
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     public function getPrice(): ?float
@@ -200,14 +185,14 @@ class ItemPurchase
         return $this;
     }
 
-    public function getBuyAt(): ?\DateTimeInterface
+    public function getPurchase(): ?Purchase
     {
-        return $this->buyAt;
+        return $this->purchase;
     }
 
-    public function setBuyAt(?\DateTimeInterface $buyAt): static
+    public function setPurchase(?Purchase $purchase): static
     {
-        $this->buyAt = $buyAt;
+        $this->purchase = $purchase;
 
         return $this;
     }
