@@ -22,7 +22,7 @@ class Purchase
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Assert\NotBlank(message: 'Le prix d\'achat doit être renseigné')]
     #[Assert\Positive(message: 'Le prix doit être supérieur à 0')]
     private ?float $price = null;
@@ -51,6 +51,10 @@ class Purchase
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $buyAt = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'L\'URL du lien n\'est pas valide')]
+    private ?string $link = null;
 
     /**
      * @var Collection<int, ItemPurchase>
@@ -172,6 +176,18 @@ class Purchase
     public function setBuyAt(?\DateTimeInterface $buyAt): static
     {
         $this->buyAt = $buyAt;
+
+        return $this;
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+
+    public function setLink(?string $link): static
+    {
+        $this->link = $link;
 
         return $this;
     }
