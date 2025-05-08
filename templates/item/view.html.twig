@@ -10,7 +10,7 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="container mt-5" data-controller="modal update">
+    <div class="container-fluid mt-container mx-4" data-controller="modal update">
         <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0">
                 {% if item.link %}
@@ -25,135 +25,141 @@
                 {% endif %}
             </div>
             <div class="card-body">
-                <div class="row my-2">
-                    <div class="col">
-                        <button
-                            type="button"
-                            class="btn btn-primary showModal me-3"
-                            id="showModal"
-                            data-url="{{ absolute_url(path('app_item_edit', {itemId: item.id, collectionId: item.collection.id})) }}"
-                            data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
-                        >
-                            Modifier
-                        </button>
+                <div class="main-content">
+                    <div class="row my-2">
+                        <div class="col-12 px-0">
+                            <button
+                                type="button"
+                                class="btn btn-primary showModal me-3"
+                                id="showModal"
+                                data-url="{{ absolute_url(path('app_item_edit', {itemId: item.id, collectionId: item.collection.id})) }}"
+                                data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
+                            >
+                                Modifier
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <table class="text-center table">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Collection</th>
-                            <th>Catégorie</th>
-                            <th>Référence</th>
-                            {% if item.rarity %}
-                                <th>Rareté</th>
-                            {% endif %}
-                            <th>Quantité</th>
-                            <th>Prix</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <form id="formUpdate" action="{{ path('app_item_update', {itemId: item.id}) }}" method="post">
-                                <td>{{ item.collection.name|capitalize }}</td>
-                                <td>{{ item.category.name|capitalize }}</td>
-                                <td>{{ item.reference }}</td>
-                                {% if item.rarity %}
-                                    <td>{{ item.rarity.name|capitalize }}</td>
-                                {% endif %}
-                                <td>
-                                    <input type="number" id="updateNumber" name="number" value="{{ item.number }}" class="form-control form-control-sm">
-                                </td>
-                                <td>
-                                    <input type="number" id="updatePrice" name="price" value="{{ item.price }}" class="form-control form-control-sm">
-                                </td>
-                            </form>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="card px-3">
-                    <div class="card-body">
-                        {% if item.itemQualities|length < item.number %}
-                            <div class="row">
-                                <div class="col ps-0">
-                                    <button
-                                        type="button"
-                                        class="btn btn-primary showModal"
-                                        id="showModal"
-                                        data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
-                                        data-title="Évaluer un exemplaire"
-                                    >
-                                        Évaluer un exemplaire
-                                    </button>
-                                </div>
-                            </div>
-                        {% endif %}
-                        {% for itemQuality in item.itemQualities %}
-                            <div class="row mt-5 mb-3 border border-black" style="height:400px;">
-                                <div class="col-5 position-relative py-3 text-center border-end border-black mh-100{{ not itemQuality.file ? ' no-image' : ''}}">
-                                    <div class="sort-item position-absolute top-0 start-0 border-bottom border-end border-black bg-light">
-                                        <h1 class="fw-bold">{{ itemQuality.sort }}</h1>
-                                    </div>
-                                    {% if itemQuality.file %}
-                                        <img class="mh-100" src="{{ file_encoded(itemQuality.file) }}">
+                    <div class="row">
+                        <table class="col-12 text-center table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Collection</th>
+                                    <th>Catégorie</th>
+                                    <th>Référence</th>
+                                    {% if item.rarity %}
+                                        <th>Rareté</th>
                                     {% endif %}
-                                </div>
-                                <div class="col py-3 position-relative text-bg-dark overflow-auto mh-100">
-                                    <div class="position-absolute top-0 end-0 btn-group">
-                                        {% if itemQuality.storage %}
-                                            <a
-                                                class="btn btn-outline-light border-top-0 showModal"
-                                                href="{{ absolute_url(path('app_storage_view', {storageId: itemQuality.storage.id}))}} }}"
-                                            >
-                                                {{ itemQuality.storage.name }}
-                                            </a>
+                                    <th>Quantité</th>
+                                    <th>Prix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <form id="formUpdate" action="{{ path('app_item_update', {itemId: item.id}) }}" method="post">
+                                        <td>{{ item.collection.name|capitalize }}</td>
+                                        <td>{{ item.category.name|capitalize }}</td>
+                                        <td>{{ item.reference }}</td>
+                                        {% if item.rarity %}
+                                            <td>{{ item.rarity.name|capitalize }}</td>
                                         {% endif %}
-                                        {% if itemQuality.itemSale %}
-                                            <a 
+                                        <td>
+                                            <input type="number" id="updateNumber" name="number" value="{{ item.number }}" class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input type="number" id="updatePrice" name="price" value="{{ item.price }}" class="form-control form-control-sm">
+                                        </td>
+                                    </form>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 card px-3">
+                            <div class="card-body">
+                                {% if item.itemQualities|length < item.number %}
+                                    <div class="row">
+                                        <div class="col-12 ps-0">
+                                            <button
                                                 type="button"
-                                                class="btn btn-outline-success border-top-0"
-                                                href="{{ path('app_item_sale_view', {itemSaleId: itemQuality.itemSale.id}) }}"
+                                                class="btn btn-primary showModal"
+                                                id="showModal"
+                                                data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
+                                                data-title="Évaluer un exemplaire"
                                             >
-                                                <i class="fa-solid fa-coins"></i>
-                                            </a>
-                                        {% endif %}
-                                        <button 
-                                            type="button"
-                                            class="btn btn-primary showModal"
-                                            data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
-                                            data-title="Évaluer l'objet"
-                                        >
-                                            <i class="fa-solid fa-gear"></i>
-                                        </button>
+                                                Évaluer un exemplaire
+                                            </button>
+                                        </div>
                                     </div>
-                                    {% if itemQuality.quality is not null %}
-                                            {% set quality = itemQuality.quality %}
-                                            <h2 class="fw-bold {{ quality < 4 ? 'text-danger' : (quality < 6 ? 'text-warning' : 'text-success') }}">{{ quality }}/10</h2>
-                                            {% for criteria in itemQuality.criterias %}
-                                                <div class="mt-5 border-bottom">
-                                                    <h3 class="ms-4 mb-1 text-warning">{{ criteria.name }}</h3>
-                                                    <p class="ms-5 fst-italic">{{ criteria.description }} ({{ criteria.point }} point{% if criteria.point > 1 %}s{% endif %})</p>
-                                                </div>
+                                {% endif %}
+                                {% for itemQuality in item.itemQualities %}
+                                    <div class="row mt-5 mb-3 border border-black" style="height:400px;">
+                                        <div class="col-5 position-relative py-3 text-center border-end border-black mh-100{{ not itemQuality.file ? ' no-image' : ''}}">
+                                            <div class="sort-item position-absolute top-0 start-0 border-bottom border-end border-black bg-light">
+                                                <h1 class="fw-bold">{{ itemQuality.sort }}</h1>
+                                            </div>
+                                            {% if itemQuality.file %}
+                                                <img class="mh-100" src="{{ file_encoded(itemQuality.file) }}">
+                                            {% endif %}
+                                        </div>
+                                        <div class="col py-3 position-relative text-bg-dark overflow-auto mh-100">
+                                            <div class="position-absolute top-0 end-0 btn-group">
+                                                {% if itemQuality.storage %}
+                                                    <a
+                                                        class="btn btn-outline-light border-top-0 showModal"
+                                                        href="{{ absolute_url(path('app_storage_view', {storageId: itemQuality.storage.id}))}} }}"
+                                                    >
+                                                        {{ itemQuality.storage.name }}
+                                                    </a>
+                                                {% endif %}
+                                                {% if itemQuality.itemSale %}
+                                                    <a 
+                                                        type="button"
+                                                        class="btn btn-outline-success border-top-0"
+                                                        href="{{ path('app_item_sale_view', {itemSaleId: itemQuality.itemSale.id}) }}"
+                                                    >
+                                                        <i class="fa-solid fa-coins"></i>
+                                                    </a>
+                                                {% endif %}
+                                                <button 
+                                                    type="button"
+                                                    class="btn btn-primary showModal"
+                                                    data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
+                                                    data-title="Évaluer l'objet"
+                                                >
+                                                    <i class="fa-solid fa-gear"></i>
+                                                </button>
+                                            </div>
+                                            {% if itemQuality.quality is not null %}
+                                                    {% set quality = itemQuality.quality %}
+                                                    <h2 class="fw-bold {{ quality < 4 ? 'text-danger' : (quality < 6 ? 'text-warning' : 'text-success') }}">{{ quality }}/10</h2>
+                                                    {% for criteria in itemQuality.criterias %}
+                                                        <div class="mt-5 border-bottom">
+                                                            <h3 class="ms-4 mb-1 text-warning">{{ criteria.name }}</h3>
+                                                            <p class="ms-5 fst-italic">{{ criteria.description }} ({{ criteria.point }} point{% if criteria.point > 1 %}s{% endif %})</p>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="mt-5">
+                                                            <h3 class="ms-4 mb-1 text-success">Aucun défaut</h3>
+                                                            <p class="ms-5 fst-italic">L'objet est en parfait état.</p>
+                                                        </div>
+                                                    {% endfor %}
                                             {% else %}
-                                                <div class="mt-5">
-                                                    <h3 class="ms-4 mb-1 text-success">Aucun défaut</h3>
-                                                    <p class="ms-5 fst-italic">L'objet est en parfait état.</p>
-                                                </div>
-                                            {% endfor %}
-                                    {% else %}
-                                        <h1 class="text-center position-absolute start-0 end-0 top-50 translate-middle-y mb-0 fw-bold">Pas encore évalué</h1>
-                                    {% endif %}
-                                </div>
+                                                <h1 class="text-center position-absolute start-0 end-0 top-50 translate-middle-y mb-0 fw-bold">Pas encore évalué</h1>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center mt-5 py-5 text-danger fw-bold">
+                                        <h1 class="mb-4"><i class="fa-solid fa-triangle-exclamation fa-2xl"></i></h1>
+                                        <h1>AUCUN OBJETS N'A ÉTÉ ÉVALUÉ !</h1>
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% else %}
-                            <div class="text-center mt-5 py-5 text-danger fw-bold">
-                                <h1 class="mb-4"><i class="fa-solid fa-triangle-exclamation fa-2xl"></i></h1>
-                                <h1>AUCUN OBJETS N'A ÉTÉ ÉVALUÉ !</h1>
-                            </div>
-                        {% endfor %}
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
+    </div>
     {% include "Modal/modal.html.twig" %}
 {% endblock %}

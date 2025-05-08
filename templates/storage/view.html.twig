@@ -12,14 +12,14 @@
 
 {% block body %}
     {{ parent() }}
-    <div class="mx-5">
-        <div class="card px-5">
+    <div class="container-fluid mt-container mx-4">
+        <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0 px-0">
                 <h1 class="text-center fw-bold border-bottom border-2 pb-2">{{ storage.name|upper }}</h1>
             </div>
             <div class="card-body">
-                <div class="row justify-content-center my-2" data-controller="update">
-                    <form id="formUpdate" class="row my-2 px-0 justify-content-between" action="{{ path('app_storage_update', {storageId: storage.id}) }}" method="post">
+                <div class="main-content">
+                    <form id="formUpdate" class="row my-2 px-0 justify-content-between" action="{{ path('app_storage_update', {storageId: storage.id}) }}" method="post" data-controller="update">
                         {% if not storage.full %}
                             <div class="col-6 ps-0" data-controller="select">
                                 <select class="select2 w-50" id="updateItemQuality" name="itemQuality" data-placeholder="Ajouter un objet" data-ajax--url="{{ absolute_url(path('app_item_quality_search', {storageId: storage.id})) }}">
@@ -45,69 +45,69 @@
                             </div>
                         {% endif %}
                     </form>
-                </div>
-                <div class="row mt-2">
-                    <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
-                        <thead class="table-dark border-dark">
-                            <tr>
-                                <th class="w-10">Numéro</th>
-                                <th>{{ knp_pagination_sortable(itemQualities, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                                <th>{{ knp_pagination_sortable(itemQualities, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                                <th class="w-10">{{ knp_pagination_sortable(itemQualities, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                                <th class="w-10">{{ knp_pagination_sortable(itemQualities, 'Qualité', 'iq.quality', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                                <th>Action</th>
-                            </tr>
-                            <tr>
-                                <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_storage_view', {storageId: storage.id})) }}" method="get">
-                                    {% set filterQuery = request.query.all('filter') %}
-                                    <th></th>
-                                    <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                                    <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
-                                    <th class="input-group">
-                                        <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
-                                        <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
-                                    </th>
-                                    <th>
-                                        <input id="qualityFilter" name="filter[quality]" class="form-control input-table" type="number" value="{{ filterQuery.quality ?? '' }}" min="0" max="10">
-                                    </th>
-                                    <th>
-                                        <a href="{{ path('app_storage_view', {storageId: storage.id}) }}" class="btn btn-secondary btn-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                                            </svg>
-                                        </a>
-                                    </th>
-                                </form>
-                            </tr>
-                        </thead>
-                        <tbody class="table-group-divider">
-                            {% for itemQuality in itemQualities %}
-                                {% set item = itemQuality.item %}
+                    <div class="row mt-2">
+                        <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
+                            <thead class="table-dark border-dark">
                                 <tr>
-                                    <td>{{ itemQuality.sort }}</td>
-                                    <td>{{ item.name }}</td>
-                                    <td>{{ item.reference }}</td>
-                                    <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
-                                    <td>{{ itemQuality.quality }}</td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </a>
-                                            <a href="{{ path('app_storage_remove', {storageId: storage.id, itemQualityId: itemQuality.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet de ce rangement" data-sweetAlert-text="Voulez-vous retirer cet objet : {{ item.name|lower }} ?">
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <th class="w-10">Numéro</th>
+                                    <th>{{ knp_pagination_sortable(itemQualities, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>{{ knp_pagination_sortable(itemQualities, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th class="w-10">{{ knp_pagination_sortable(itemQualities, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th class="w-10">{{ knp_pagination_sortable(itemQualities, 'Qualité', 'iq.quality', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>Action</th>
                                 </tr>
-                            {% else %}
-                                <tr><td colspan="9" class="fw-bold fs-1 text-danger">IL N'Y A PAS D'OBJET !</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                <tr>
+                                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_storage_view', {storageId: storage.id})) }}" method="get">
+                                        {% set filterQuery = request.query.all('filter') %}
+                                        <th></th>
+                                        <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                        <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
+                                        <th class="input-group">
+                                            <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                                            <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
+                                        </th>
+                                        <th>
+                                            <input id="qualityFilter" name="filter[quality]" class="form-control input-table" type="number" value="{{ filterQuery.quality ?? '' }}" min="0" max="10">
+                                        </th>
+                                        <th>
+                                            <a href="{{ path('app_storage_view', {storageId: storage.id}) }}" class="btn btn-secondary btn-sm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                                </svg>
+                                            </a>
+                                        </th>
+                                    </form>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                {% for itemQuality in itemQualities %}
+                                    {% set item = itemQuality.item %}
+                                    <tr>
+                                        <td>{{ itemQuality.sort }}</td>
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.reference }}</td>
+                                        <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
+                                        <td>{{ itemQuality.quality }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                                <a href="{{ path('app_storage_remove', {storageId: storage.id, itemQualityId: itemQuality.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet de ce rangement" data-sweetAlert-text="Voulez-vous retirer cet objet : {{ item.name|lower }} ?">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="9" class="fw-bold fs-1 text-danger">IL N'Y A PAS D'OBJET !</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
 
-                    <div class="navigation">
-                        {{ knp_pagination_render(itemQualities) }}
+                        <div class="navigation">
+                            {{ knp_pagination_render(itemQualities) }}
+                        </div>
                     </div>
                 </div>
             </div>

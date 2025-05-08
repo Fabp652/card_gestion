@@ -10,69 +10,71 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="container mt-5 pt-5" data-controller="modal">
+    <div class="container-fluid mt-container mx-4" data-controller="modal">
         <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0">
                 <h1 class="text-center fw-bold border-bottom border-2 pb-2">COLLECTIONS</h1>
             </div>
-            <div class="card-body">
-                <div class="row mb-4">
-                    <div class="col d-flex justify-content-start">
-                        <button
-                            type="button"
-                            class="btn btn-primary showModal"
-                            id="showModal"
-                            data-url="{{ absolute_url(path('app_collection_add')) }}"
-                            data-title="Créer une nouvelle collection"
-                        >
-                            Nouvelle collection
-                        </button>
+            <div class="card-body px-0">
+                <div class="main-content">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <button
+                                type="button"
+                                class="btn btn-primary showModal"
+                                id="showModal"
+                                data-url="{{ absolute_url(path('app_collection_add')) }}"
+                                data-title="Créer une nouvelle collection"
+                            >
+                                Nouvelle collection
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="row row-cols-1 row-cols-md-2 justify-content-center">
-                    {% for stat in stats %}
-                        <div class="col mb-4">
-                            <div class="card text-uppercase border-black border-end-0 border-top-0">
-                                <div class="card-header bg-black bg-gradient d-flex justify-content-between">
-                                    <h5 class="card-title mb-0 color-title py-1">{{ stat.collectionName }}</h5>
-                                    <div class="btn-group position-absolute top-0 end-0" role="group">
-                                        <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </a>
-                                        <button
-                                            data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
-                                            data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
-                                            class="btn btn-primary btn-sm showModal"
-                                        >
-                                            <i class="fa-solid fa-pen"></i>
-                                        </button>
-                                        <a href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la collection" data-sweetAlert-text="Voulez-vous supprimer cette collection : {{ stat.collectionName|lower }} ?">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </a>
+                    <div class="row row-cols-1 row-cols-md-2 justify-content-center">
+                        {% for stat in stats %}
+                            <div class="col mb-4">
+                                <div class="card text-uppercase border-black border-end-0 border-top-0">
+                                    <div class="card-header bg-black bg-gradient d-flex justify-content-between">
+                                        <h5 class="card-title mb-0 color-title py-1">{{ stat.collectionName }}</h5>
+                                        <div class="btn-group position-absolute top-0 end-0" role="group">
+                                            <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                            <button
+                                                data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
+                                                data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
+                                                class="btn btn-primary btn-sm showModal"
+                                            >
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <a href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la collection" data-sweetAlert-text="Voulez-vous supprimer cette collection : {{ stat.collectionName|lower }} ?">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="card-body fs-5 p-0 border-end border-black">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item border-black d-flex py-0">
+                                                <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
+                                                <b class="w-50 text-center align-self-center">{{ stat.totalItem }}</b>
+                                            </li>
+                                            <li class="list-group-item border-black d-flex py-0">
+                                                <div class="w-50 border-end border-black py-2">Montant total</div>
+                                                <b class="w-50 text-center align-self-center text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }}</b>
+                                            </li>
+                                            <li class="list-group-item d-flex py-0">
+                                                <div class="w-50 border-end border-black py-2">Montant moyen</div>
+                                                <b class="w-50 text-center align-self-center text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }}</b>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer text-start d-flex justify-content-between border-black border-end">
+                                        <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
                                     </div>
                                 </div>
-                                <div class="card-body fs-5 p-0 border-end border-black">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item border-black d-flex py-0">
-                                            <div class="w-50 border-end border-black py-2">Nombre d'objets</div>
-                                            <b class="w-50 text-center align-self-center">{{ stat.totalItem }}</b>
-                                        </li>
-                                        <li class="list-group-item border-black d-flex py-0">
-                                            <div class="w-50 border-end border-black py-2">Montant total</div>
-                                            <b class="w-50 text-center align-self-center text-success">{{ stat.totalAmount|format_currency('EUR', locale = 'fr') }}</b>
-                                        </li>
-                                        <li class="list-group-item d-flex py-0">
-                                            <div class="w-50 border-end border-black py-2">Montant moyen</div>
-                                            <b class="w-50 text-center align-self-center text-success">{{ stat.average|format_currency('EUR', locale = 'fr') }}</b>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="card-footer text-start d-flex justify-content-between border-black border-end">
-                                    <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
-                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>

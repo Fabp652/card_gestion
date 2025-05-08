@@ -10,7 +10,10 @@
 }
 
 .breadcrumb-position {
-    padding-top: 4rem;
+    position: absolute;
+    left: 290px;
+    top: 85px;
+    --bs-breadcrumb-divider: '>';
 }
 
 .list-result {
@@ -59,4 +62,19 @@
 
 .form-control, .form-select {
     background-color: $light !important;
+}
+
+.nav-side {
+    width: 250px;
+    z-index: 9999;
+}
+
+.mt-container {
+    margin-top: $spacer * 7;
+}
+
+.main-content {
+    width: 91.66666667%;
+    margin-right: auto;
+    margin-left: auto;
 }

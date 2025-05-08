@@ -18,9 +18,9 @@
             <script src="https://kit.fontawesome.com/9f4d626518.js" crossorigin="anonymous"></script>
         {% endblock %}
     </head>
-    <body class="bg-light">
+    <body class="bg-light d-flex">
         {% block body %}
-                <nav class="navbar border-bottom bg-white px-2 fixed-top justify-content-center" data-controller="global">
+                <nav class="navbar bg-light px-2 fixed-top justify-content-center" data-controller="global">
                     {% if collection is defined and collection %}
                         <button class="navbar-toggler rounded-0 ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
@@ -36,7 +36,7 @@
                         </div>
                         {{ render(path('app_collection_dropdown', {collectionId: collection.id})) }}
                     {% endif %}
-                    <form id="searchForm" class="w-50 d-flex justify-content-center ms-auto" role="search" action="{{ path('app_item_search') }}" method="GET">
+                    <form id="searchForm" class="w-50 d-flex justify-content-center" role="search" action="{{ path('app_item_search') }}" method="GET">
                         <div class="w-75 position-relative">
                             <input id="search" class="form-control" type="search" name="search" placeholder="Rechercher" aria-label="Rechercher" style="--bs-focus-ring-color: rgba(var(--bs-black-rgb), .25)">
                             <ul id="searchResult" class="list-result position-absolute top-100 start-0 end-0 z-3 p-0 overflow-y-scroll border border-black bg-white" style="display:none;">
@@ -46,8 +46,10 @@
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </form>
-
-                    <ul class="nav text-uppercase fw-semibold">
+                </nav>
+                <div class="d-flex flex-column flex-shrink-0 p-3 bg-white border border-right nav-side">
+                    <h3 class="d-flex align-items-center pb-3 mb-3 border-bottom">Collectors</h3>
+                    <ul class="navbar-nav text-uppercase fw-semibold flex-column">
                         <li class="nav-item">
                             <a class="nav-link{{ pathInfo == '/' ? ' disabled navbar-active' : ' navbar-link' }}" href="{{ path('app_collection') }}">
                                 Collections
@@ -78,10 +80,16 @@
                             </a>
                             <div class="{{ pathInfo == '/item/sale' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
+                        <li class="nav-item">
+                            <a {#href="{{ path('app_purchase_list') }}"#} class="nav-link{{ pathInfo == '/purchase' ? ' disabled navbar-active' : ' navbar-link' }}">
+                                Achats
+                            </a>
+                            <div class="{{ pathInfo == '/purchase' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                        </li>
                     </ul>
-                </nav>
+                </div>
             {% if collection is defined or category is defined or item is defined or storage is defined or itemSale is defined %}
-                <nav class="ms-4 mb-5 breadcrumb-position" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                <nav class="breadcrumb-position" {#style="--bs-breadcrumb-divider: '>';"#} aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">
                         {% if storage is defined and storage %}
                             <li class="breadcrumb-item">

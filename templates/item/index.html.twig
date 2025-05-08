@@ -12,7 +12,7 @@
 
 {% block body %}
 {{ parent() }}
-<div class="mx-5" data-controller="modal">
+<div class="mx-4 container-fluid mt-container" data-controller="modal">
     <div class="row">
         <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0 text-center" style="height:120px;">
@@ -25,155 +25,161 @@
             {% endif %}
             </div>
             <div class="card-body">
-                <div class="d-flex mb-4">
-                    <div class="dropdown me-3">
-                        <button class="btn btn-outline-primary dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:160px;">
-                            {{ category.name }}
-                        </button>
-                        <ul class="dropdown-menu w-100 p-0">
-                            {% for otherCategory in categories %}
-                                <li>
-                                    <a class="dropdown-item" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: otherCategory.id}) }}">{{ otherCategory.name }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                <div class="main-content">
+                    <div class="row mb-4">
+                        <div class="col-12 d-flex px-0">
+                            <div class="dropdown me-3">
+                                <button class="btn btn-outline-primary dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:160px;">
+                                    {{ category.name }}
+                                </button>
+                                <ul class="dropdown-menu w-100 p-0">
+                                    {% for otherCategory in categories %}
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: otherCategory.id}) }}">{{ otherCategory.name }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <button 
+                                type="button"
+                                class="btn btn-primary showModal"
+                                id="showModal"
+                                data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id, categoryId: category.id})) }}"
+                                data-title="Ajouter un objet"
+                            >
+                                Ajouter
+                            </button>
+                        </div>
                     </div>
-                    <button 
-                        type="button"
-                        class="btn btn-primary showModal"
-                        id="showModal"
-                        data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id, categoryId: category.id})) }}"
-                        data-title="Ajouter un objet"
-                    >
-                        Ajouter
-                    </button>
-                </div>
-                <table class="table table-hover table-responsive text-center table-bordered border-black align-middle">
-                    <thead class="table-dark border-dark">
-                        {% set hasRarities = collection.rarities|length > 0 %}
-                        <tr>
-                            <th class="w-25">{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                            <th>{{ knp_pagination_sortable(items, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                            {% if hasRarities %}
-                                <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                            {% endif %}
-                            <th class="w-10">{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                            <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                            <th class="w-10">Qualité (moyenne)</th>
-                            <th class="w-10">{{ knp_pagination_sortable(items, 'Quantité', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                            <th>Lien</th>
-                            <th>Action</th>
-                        </tr>
-                        <tr>
-                            <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: category.id})) }}" method="get">
-                                {% set filterQuery = request.query.all('filter') %}
-                                <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
-                                <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
-                                {% if hasRarities %}
-                                    <th>
-                                        <select id="rarityFilter" name="filter[rarity]" class="form-select input-table">
-                                            <option value="">---</option>
-                                            {% for rarity in collection.rarities %}
-                                                <option value="{{ rarity.id }}" {% if filterQuery.rarity is defined and filterQuery.rarity == rarity.id %}selected{% endif %}>{{ rarity.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </th>
-                                {% endif %}
-                                <th class="input-group">
-                                    <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
-                                    <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
-                                </th>
-                                <th>
-                                </th>
-                                <th>
-                                    <select id="qualityFilter"name="filter[quality]" class="form-select input-table">
-                                        <option value="">---</option>
-                                        {% set qualityDefined = filterQuery.quality is defined %}
-                                        <option value="2" {% if qualityDefined and filterQuery.quality == '2' %}selected{% endif %}>Tous évalués</option>
-                                        <option value="1" {% if qualityDefined and filterQuery.quality == '1' %}selected{% endif %}>Partiellement évalués</option>
-                                        <option value="0" {% if qualityDefined and filterQuery.quality == '0' %}selected{% endif %}>Aucun évalué</option>
-                                    </select>
-                                
-                                </th>
-                                <th>
-                                    <select id="numberFilter" name="filter[number]" class="form-select input-table">
-                                        <option value="">---</option>
-                                        {% set numberDefined = filterQuery.number is defined %}
-                                        <option value="1" {% if numberDefined and filterQuery.number == 1 %}selected{% endif %}>Plusieurs exemplaires</option>
-                                        <option value="0" {% if numberDefined and filterQuery.number is not null and filterQuery.number == 0 %}selected{% endif %}>Un seul exemplaire</option>
-                                    </select>
-                                </th>
-                                <th></th>
-                                <th>
-                                    <a href="{{ path('app_item_list', {collectionId: collection.id, categoryId: category.id}) }}" class="btn btn-secondary btn-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                                        </svg>
-                                    </a>
-                                </th>
-                            </form>
-                        </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                        {% for item in items %}
-                            <tr>
-                                <td>{{ item.name }}</td>
-                                <td>{{ item.reference }}</td>
-                                {% if hasRarities %}
-                                    <td>{% if item.rarity %}{{ item.rarity.name }}{% endif %}</td>
-                                {% endif %}
-                                <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
-                                <td>{{ item.updatedAt ? item.updatedAt|date('d/m/Y') : item.createdAt|date('d/m/Y') }}</td>
-                                <td class="position-relative">
-                                    {% set qualityAverage = item.qualityAverage %}
-                                    {{ qualityAverage }}
-                                    {% set notEvaluatedNumber = item.notEvaluatedNumber %}
-                                    {% if qualityAverage is not null and notEvaluatedNumber > 0 %}
-                                        <span
-                                            class="position-absolute top-0 end-0 text-danger pe-1"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            data-bs-custom-class="custom-tooltip"
-                                            data-bs-title="{{ notEvaluatedNumber }}"
-                                        >
-                                            <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
-                                        </span>
+                    <div class="row">
+                        <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
+                            <thead class="table-dark border-dark">
+                                {% set hasRarities = collection.rarities|length > 0 %}
+                                <tr>
+                                    <th class="w-25">{{ knp_pagination_sortable(items, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>{{ knp_pagination_sortable(items, 'Référence', 'i.reference', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    {% if hasRarities %}
+                                        <th>{{ knp_pagination_sortable(items, 'Rareté', 'r.grade', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
                                     {% endif %}
-                                </td>
-                                <td style="width:2%;">{{ item.number }}</td>
-                                <td>
-                                    {% if item.link %}
-                                        <a href="{{ item.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                            <i class="fa-solid fa-link"></i>
-                                        </a>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </a>
-                                        <button
-                                            data-url="{{ absolute_url(path('app_item_edit', {collectionId: collection.id, itemId: item.id})) }}"
-                                            data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
-                                            class="btn btn-primary btn-sm showModal"
-                                        >
-                                            <i class="fa-solid fa-pen"></i>
-                                        </button>
-                                        <a href="{{ path('app_item_delete', {id: item.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet" data-sweetAlert-text="Voulez-vous supprimer cet objet : {{ item.name|lower }} ?">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr><td colspan="9" class="fw-bold fs-1 text-danger">IL N'Y A PAS D'OBJET !</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                
-                <div class="navigation p-0">
-                    {{ knp_pagination_render(items) }}
+                                    <th class="w-10">{{ knp_pagination_sortable(items, 'Prix', 'i.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>{{ knp_pagination_sortable(items, 'Ajouté/Modifié', 'i.updatedAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th class="w-10">Qualité (moyenne)</th>
+                                    <th class="w-10">{{ knp_pagination_sortable(items, 'Quantité', 'i.number', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>Lien</th>
+                                    <th>Action</th>
+                                </tr>
+                                <tr>
+                                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: category.id})) }}" method="get">
+                                        {% set filterQuery = request.query.all('filter') %}
+                                        <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                        <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
+                                        {% if hasRarities %}
+                                            <th>
+                                                <select id="rarityFilter" name="filter[rarity]" class="form-select input-table">
+                                                    <option value="">---</option>
+                                                    {% for rarity in collection.rarities %}
+                                                        <option value="{{ rarity.id }}" {% if filterQuery.rarity is defined and filterQuery.rarity == rarity.id %}selected{% endif %}>{{ rarity.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </th>
+                                        {% endif %}
+                                        <th class="input-group">
+                                            <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                                            <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
+                                        </th>
+                                        <th>
+                                        </th>
+                                        <th>
+                                            <select id="qualityFilter"name="filter[quality]" class="form-select input-table">
+                                                <option value="">---</option>
+                                                {% set qualityDefined = filterQuery.quality is defined %}
+                                                <option value="2" {% if qualityDefined and filterQuery.quality == '2' %}selected{% endif %}>Tous évalués</option>
+                                                <option value="1" {% if qualityDefined and filterQuery.quality == '1' %}selected{% endif %}>Partiellement évalués</option>
+                                                <option value="0" {% if qualityDefined and filterQuery.quality == '0' %}selected{% endif %}>Aucun évalué</option>
+                                            </select>
+                                        
+                                        </th>
+                                        <th>
+                                            <select id="numberFilter" name="filter[number]" class="form-select input-table">
+                                                <option value="">---</option>
+                                                {% set numberDefined = filterQuery.number is defined %}
+                                                <option value="1" {% if numberDefined and filterQuery.number == 1 %}selected{% endif %}>Plusieurs exemplaires</option>
+                                                <option value="0" {% if numberDefined and filterQuery.number is not null and filterQuery.number == 0 %}selected{% endif %}>Un seul exemplaire</option>
+                                            </select>
+                                        </th>
+                                        <th></th>
+                                        <th>
+                                            <a href="{{ path('app_item_list', {collectionId: collection.id, categoryId: category.id}) }}" class="btn btn-secondary btn-sm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                                </svg>
+                                            </a>
+                                        </th>
+                                    </form>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                {% for item in items %}
+                                    <tr>
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.reference }}</td>
+                                        {% if hasRarities %}
+                                            <td>{% if item.rarity %}{{ item.rarity.name }}{% endif %}</td>
+                                        {% endif %}
+                                        <td>{{ item.price|format_currency('EUR', locale='fr') }}</td>
+                                        <td>{{ item.updatedAt ? item.updatedAt|date('d/m/Y') : item.createdAt|date('d/m/Y') }}</td>
+                                        <td class="position-relative">
+                                            {% set qualityAverage = item.qualityAverage %}
+                                            {{ qualityAverage }}
+                                            {% set notEvaluatedNumber = item.notEvaluatedNumber %}
+                                            {% if qualityAverage is not null and notEvaluatedNumber > 0 %}
+                                                <span
+                                                    class="position-absolute top-0 end-0 text-danger pe-1"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    data-bs-custom-class="custom-tooltip"
+                                                    data-bs-title="{{ notEvaluatedNumber }}"
+                                                >
+                                                    <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="width:2%;">{{ item.number }}</td>
+                                        <td>
+                                            {% if item.link %}
+                                                <a href="{{ item.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fa-solid fa-link"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                                <button
+                                                    data-url="{{ absolute_url(path('app_item_edit', {collectionId: collection.id, itemId: item.id})) }}"
+                                                    data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
+                                                    class="btn btn-primary btn-sm showModal"
+                                                >
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </button>
+                                                <a href="{{ path('app_item_delete', {id: item.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet" data-sweetAlert-text="Voulez-vous supprimer cet objet : {{ item.name|lower }} ?">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="9" class="fw-bold fs-1 text-danger">IL N'Y A PAS D'OBJET !</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        <div class="navigation p-0">
+                            {{ knp_pagination_render(items) }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
