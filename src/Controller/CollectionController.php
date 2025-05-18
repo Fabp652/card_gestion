@@ -214,9 +214,8 @@ class CollectionController extends AbstractController
     {
         $messages = [];
         foreach ($form->getErrors(true) as $error) {
-            $propertyPath = $error->getCause()->getPropertyPath();
-            $propertyPathExplode = explode('.', $propertyPath);
-            $messages[$propertyPathExplode[1]] = $error->getMessage();
+            $field = $error->getOrigin()->getName();
+            $messages[$field] = $error->getMessage();
         }
 
         return $messages;

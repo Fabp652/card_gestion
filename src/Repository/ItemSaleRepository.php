@@ -31,7 +31,7 @@ class ItemSaleRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('isl');
 
         foreach ($filters as $filterKey => $filterValue) {
-            if ($filterKey == 'name' || $filterKey == 'reference') {
+            if ($filterKey == 'name') {
                 $qb->andWhere('isl.' . $filterKey . ' LIKE :' . $filterKey)
                     ->setParameter($filterKey, $filterValue . '%')
                 ;

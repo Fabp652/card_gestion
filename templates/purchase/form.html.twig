@@ -1,0 +1,26 @@
+{% if purchaseId %}
+    {{ form_start(form, {method: 'POST', action: path('app_purchase_edit', {purchaseId: purchaseId}), attr: {'id': 'modalForm'}}) }}
+{% else %}
+    {{ form_start(form, {method: 'POST', action: path('app_purchase_add'), attr: {'id': 'modalForm'}}) }}
+{% endif %}
+    <div class="row">
+        <div class="col-12 mb-3">
+            {{ form_row(form.name) }}
+        </div>
+        <div class="col-6 mb-3">
+            {{ form_row(form.price) }}
+        </div>
+        <div class="col-6 mb-3">
+            {{ form_row(form.buyAt) }}
+        </div>
+        <div class="col-12 mb-3">
+            {{ form_row(form.link) }}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.received) }}
+        </div>
+        <div class="col-6">
+            {{ form_row(form.isOrder) }}
+        </div>
+    </div>
+{{ form_end(form) }}

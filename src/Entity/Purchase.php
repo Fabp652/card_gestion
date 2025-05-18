@@ -23,7 +23,6 @@ class Purchase
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\NotBlank(message: 'Le prix d\'achat doit être renseigné')]
     #[Assert\Positive(message: 'Le prix doit être supérieur à 0')]
     private ?float $price = null;
 
@@ -32,13 +31,13 @@ class Purchase
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?bool $received = null;
+    private ?bool $received = false;
 
     #[ORM\Column(nullable: true)]
     private ?bool $refunded = null;
 
     #[ORM\Column]
-    private ?bool $refundRequest = null;
+    private ?bool $refundRequest = false;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $refundedReason = null;
@@ -61,6 +60,9 @@ class Purchase
      */
     #[ORM\OneToMany(targetEntity: ItemPurchase::class, mappedBy: 'purchase')]
     private Collection $itemsPurchase;
+
+    #[ORM\Column]
+    private ?bool $isOrder = false;
 
     public function __construct()
     {
@@ -218,6 +220,18 @@ class Purchase
                 $itemsPurchase->setPurchase(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isOrder(): ?bool
+    {
+        return $this->isOrder;
+    }
+
+    public function setIsOrder(bool $isOrder): static
+    {
+        $this->isOrder = $isOrder;
 
         return $this;
     }

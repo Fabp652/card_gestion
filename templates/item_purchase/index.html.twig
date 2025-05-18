@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block head %}
+    {{ knp_pagination_rel_links(itemPurchases) }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('table') }}
+{% endblock %}
+
+{% block title %}{{ purchase.name }}{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <div class="container-fluid mt-container mx-4" data-controller="modal">
+        <div class="card h-100">
+            <div class="card-header border-2 bg-black bg-gradient px-0">
+                <h1 class="text-center fw-bold color-title">{{ purchase.name|upper }}</h1>
+            </div>
+            <div class="card-body">
+                <div class="main-content">
+                    <div class="row mb-3">
+                        <div class="col-12 px-0">
+                            <button
+                                type="button"
+                                class="btn btn-primary showModal"
+                                id="showModal"
+                                {# data-url="{{ absolute_url(path('app_item_purchase_add')) }}" #}
+                                data-title="Ajouter un objet"
+                            >
+                                Ajouter un objet
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
+                            <thead class="table-dark border-dark">
+                                <tr>
+                                    <th>{{ knp_pagination_sortable(itemPurchases, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>{{ knp_pagination_sortable(itemPurchases, 'Prix', 'ip.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>{{ knp_pagination_sortable(itemPurchases, 'Quantité', 'ip.quantité', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>Etat</th>
+                                    <th>Lien</th>
+                                    <th>Action</th>
+                                </tr>
+                                <tr>
+                                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_item_purchase_list', {purchaseId: purchase.id})) }}" method="get">
+                                        {% set filterQuery = request.query.all('filter') %}
+                                        <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                        <th class="input-group">
+                                            <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                                            <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
+                                        </th>
+                                        <th></th>
+                                        <th>
+                                            <select id="stateFilter" name="filter[state]" class="form-select input-table">
+                                                <option value="">---</option>
+                                                {% for stateKey, stateValue in states %}
+                                                    <option
+                                                        value="{{ stateKey }}"
+                                                        {% if filterQuery.state is defined and filterQuery.state == stateKey %}
+                                                            selected
+                                                        {% endif %}
+                                                    >
+                                                        {{ stateValue }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </th>
+                                        <th></th>
+                                        <th>
+                                            <a href="{{ path('app_item_purchase_list', {purchaseId: purchase.id}) }}" class="btn btn-secondary btn-sm rounded-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                                </svg>
+                                            </a>
+                                        </th>
+                                    </form>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                {% for itemPurchase in itemPurchases %}
+                                    <tr>
+                                        <td>{{ item.reference ? item.reference ~ ' - ' ~ item.name : item.name }}</td>
+                                        <td>{{ purchase.price|format_currency('EUR', locale='fr') }}</td>
+                                        <td>{{ purchase.quantity }}</td>
+                                        <td>
+                                            {% set state = '' %}
+                                            {% if not purchase.received and not purchase.refundRequest %}
+                                                {% set state = states|find((v, k) => k == 0) %}
+                                                {% set bg = 'text-bg-secondary' %}
+                                            {% else %}
+                                                {% if purchase.refunded or purchase.received %}
+                                                    {% set state = states|find((v, k) => k == 3) %}
+                                                    {% set bg = 'text-bg-success' %}
+                                                {% else %}
+                                                    {% set iPNotRefundedLength = purchase.itemPurchases|filter(v => v.refunded)|length %}
+                                                    {% set iPReceivedLength = purchase.itemPurchases|filter(v => v.received)|length %}
+                                                    {% if iPNotRefundedLength == 0 or iPReceivedLength == 0 %}
+                                                        {% set state = states|find((v, k) => k == 1) %}
+                                                        {% set bg = 'text-bg-danger' %}
+                                                    {% endif %}
+                                                {% endif %}
+                                                
+                                            {% endif %}
+                                            <span class="badge rounded-pill {{ bg }}">{{ state }}</span>
+                                        </td>
+                                        <td>{{ purchase.link }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="6"><b class="text-danger fs-1">AUCUN OBJET DISPONNIBLE !</b></td></tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="fs-5">
+                                    <td colspan="4" class="text-end table-dark"><b>TOTAL</b></td>
+                                    <td colspan="2"><b class="text-success">{{ purchase.price|format_currency('EUR', locale='fr') }}</b></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="navigation">
+                        {{ knp_pagination_render(itemPurchases) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "Modal/modal.html.twig" %}
+{% endblock %}

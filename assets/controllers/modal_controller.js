@@ -65,7 +65,11 @@ export default class extends Controller {
                         response.json().then(json => {
                             if (json.result === true) {
                                 modal.hide();
-                                window.location.reload();
+                                if (json.redirect != undefined) {
+                                    window.location.assign(json.redirect);
+                                } else {
+                                    window.location.reload();
+                                }
                             } else {
                                 if (json.message) {
                                     $('#modalBody').prepend(
@@ -74,9 +78,9 @@ export default class extends Controller {
                                 } else {
                                     for (const [key, value] of Object.entries(json.messages)) {
                                         let msg = '<div class="msg invalid-feedback">' + value + '</div>';
-                                        let input = $('input[name$="' + key + ']"]');
+                                        let input = $('input[id$="' + key + '"]');
                                         if (input.length == 0) {
-                                            input = $('select[name$="' + key + ']"]')
+                                            input = $('select[id$="' + key + '"]')
                                         }
 
                                         input.parent().append(msg);

@@ -18,7 +18,7 @@ class StorageTypeController extends AbstractController
     }
 
     #[Route('/storage/type', name: 'app_storage_type_add')]
-    public function index(Request $request, EntityManagerInterface $em): Response
+    public function form(Request $request, EntityManagerInterface $em): Response
     {
         $storageType = new StorageType();
 
@@ -31,9 +31,8 @@ class StorageTypeController extends AbstractController
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             $messages = [];
             foreach ($form->getErrors(true) as $error) {
-                $propertyPath = $error->getCause()->getPropertyPath();
-                $propertyPathExplode = explode('.', $propertyPath);
-                $messages[$propertyPathExplode[1]] = $error->getMessage();
+                $field = $error->getOrigin()->getName();
+                $messages[$field] = $error->getMessage();
             }
             return $this->json(['result' => false, 'messages' => $messages]);
         }

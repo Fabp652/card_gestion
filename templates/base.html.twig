@@ -18,7 +18,7 @@
             <script src="https://kit.fontawesome.com/9f4d626518.js" crossorigin="anonymous"></script>
         {% endblock %}
     </head>
-    <body class="bg-light d-flex">
+    <body class="bg-light d-flex min-vh-100">
         {% block body %}
                 <nav class="navbar bg-light px-2 fixed-top justify-content-center" data-controller="global">
                     {% if collection is defined and collection %}
@@ -81,7 +81,7 @@
                             <div class="{{ pathInfo == '/item/sale' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
                         <li class="nav-item">
-                            <a {#href="{{ path('app_purchase_list') }}"#} class="nav-link{{ pathInfo == '/purchase' ? ' disabled navbar-active' : ' navbar-link' }}">
+                            <a href="{{ path('app_purchase_list') }}" class="nav-link{{ pathInfo == '/purchase' ? ' disabled navbar-active' : ' navbar-link' }}">
                                 Achats
                             </a>
                             <div class="{{ pathInfo == '/purchase' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
@@ -89,7 +89,7 @@
                     </ul>
                 </div>
             {% if collection is defined or category is defined or item is defined or storage is defined or itemSale is defined %}
-                <nav class="breadcrumb-position" {#style="--bs-breadcrumb-divider: '>';"#} aria-label="breadcrumb">
+                <nav class="breadcrumb-position" aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">
                         {% if storage is defined and storage %}
                             <li class="breadcrumb-item">

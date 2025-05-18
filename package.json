@@ -26,6 +26,7 @@
     "dependencies": {
         "bootstrap-icons": "^1.11.3",
         "jquery-bridget": "^3.0.1",
+        "js-datepicker": "^5.18.4",
         "masonry-layout": "^4.2.2",
         "select2": "^4.1.0-rc.0",
         "sweetalert2": "^11.6.13"
