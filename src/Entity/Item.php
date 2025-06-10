@@ -333,4 +333,15 @@ class Item
 
         return $this;
     }
+
+    public function choiceLabel(): string
+    {
+        $choiceLabel = "";
+        if ($this->reference) {
+            $choiceLabel .= $this->reference . ' - ';
+        }
+        $choiceLabel .= $this->name . ' (' . $this->collection->getName() . ')';
+
+        return $choiceLabel;
+    }
 }

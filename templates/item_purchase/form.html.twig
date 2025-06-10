@@ -1,0 +1,14 @@
+<tr>
+    {{ form_start(form, {method: 'POST', action: path('app_item_purchase_add', {purchaseId: purchaseId}), attr: {id: 'formLine_' ~ index}, name: 'item_purchase_' ~ index}) }}
+        <td>{{ form_widget(form.item, {id: 'item_purchase_item_' ~ index}) }}</td>
+        <td>{{ form_widget(form.price, {id: 'item_purchase_price_' ~ index}) }}</td>
+        <td>{{ form_widget(form.quantity, {id: 'item_purchase_quantity_' ~ index}) }}</td>
+        <td>{{ form_widget(form.link, {id: 'item_purchase_link_' ~ index}) }}</td>
+    {{ form_end(form) }}
+    <td>
+        <div class="btn-group" role="group">
+            <button class="btn btn-sm btn-primary" id="line_submit_{{ index }}"><i class="fa-solid fa-check"></i></button>
+            <button class="btn btn-sm btn-danger" id="line_cancel_{{ index }}"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </td>
+</tr>

@@ -28,14 +28,14 @@ class ItemPurchase
     #[ORM\Column]
     #[Assert\NotBlank(message: 'L\'achat doit avoir une quantité')]
     #[Assert\Positive(message: 'La quantité doit être supérieur à 0')]
-    private ?int $quantity = null;
+    private ?int $quantity = 1;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Url(message: 'L\'URL du lien n\'est pas valide')]
     private ?string $link = null;
 
     #[ORM\Column]
-    private ?bool $received = null;
+    private ?bool $received = false;
 
     #[ORM\ManyToOne(inversedBy: 'itemPurchases')]
     #[ORM\JoinColumn(nullable: false)]

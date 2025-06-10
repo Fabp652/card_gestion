@@ -64,6 +64,12 @@ class Purchase
     #[ORM\Column]
     private ?bool $isOrder = false;
 
+    #[ORM\Column]
+    private ?bool $isValid = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $validatedAt = null;
+
     public function __construct()
     {
         $this->itemsPurchase = new ArrayCollection();
@@ -232,6 +238,41 @@ class Purchase
     public function setIsOrder(bool $isOrder): static
     {
         $this->isOrder = $isOrder;
+
+        return $this;
+    }
+
+    public function isValid(): ?bool
+    {
+        return $this->isValid;
+    }
+
+    public function setIsValid(?bool $isValid): static
+    {
+        $this->isValid = $isValid;
+
+        return $this;
+    }
+
+    public function getValidatedAt(): ?\DateTimeInterface
+    {
+        return $this->validatedAt;
+    }
+
+    public function setValidatedAt(?\DateTimeInterface $validatedAt): static
+    {
+        $this->validatedAt = $validatedAt;
+
+        return $this;
+    }
+
+    public function caclPrice(): static
+    {
+        $price = 0;
+        foreach ($this->itemsPurchase as $itemPurchase) {
+            $price += $itemPurchase->getPrice();
+        }
+        $this->price = $price;
 
         return $this;
     }

@@ -33,15 +33,5 @@ export default class extends Controller {
                 id: 1
             });
         }
-
-        $('#modal').on('show.bs.modal', function (e) {
-            const pickerModal = datepicker('.pickerModal', {
-                formatter: (input, date, instance) => {
-                    const value = date.toLocaleDateString();
-                    input.value = value;
-                },
-            });
-        });
-        
     }
 }

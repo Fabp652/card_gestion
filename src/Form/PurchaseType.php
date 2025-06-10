@@ -28,34 +28,11 @@ class PurchaseType extends AbstractType
                 'label_attr' => ['class' => self::LABEL_CLASS],
                 'attr' => ['class' => self::ATTR_CLASS_CONTROL]
             ])
-            ->add('price', NumberType::class, [
-                'label' => 'Prix',
-                'label_attr' => ['class' => self::LABEL_CLASS],
-                'attr' => ['class' => self::ATTR_CLASS_CONTROL],
-                'scale' => 2,
-                'required' => false
-            ])
             ->add('isOrder', CheckboxType::class, [
-                'label' => 'C\'est une commande',
+                'label' => 'Commande',
                 'attr' => ['class' => self::ATTR_CLASS_CHECK],
                 'row_attr' => ['class' => self::ATTR_CLASS_CHECK_ROW],
                 'label_attr' => ['class' => self::ATTR_CLASS_CHECK_LABEL],
-                'required' => false
-            ])
-            ->add('received', CheckboxType::class, [
-                'label' => 'Reçu',
-                'attr' => ['class' => self::ATTR_CLASS_CHECK],
-                'row_attr' => ['class' => self::ATTR_CLASS_CHECK_ROW],
-                'label_attr' => ['class' => self::ATTR_CLASS_CHECK_LABEL],
-                'required' => false
-            ])
-            ->add('buyAt', DateType::class, [
-                'label' => 'Payé le',
-                'widget' => 'single_text',
-                'format' => 'dd/MM/yyyy',
-                'label_attr' => ['class' => self::LABEL_CLASS],
-                'attr' => ['class' => self::ATTR_CLASS_CONTROL . ' pickerModal'],
-                'html5' => false,
                 'required' => false
             ])
             ->add(
@@ -69,6 +46,21 @@ class PurchaseType extends AbstractType
                 ]
             )
         ;
+
+        $purchase = $options['data'];
+        if ($purchase->getId()) {
+            $builder
+                ->add('buyAt', DateType::class, [
+                    'label' => 'Payé le',
+                    'widget' => 'single_text',
+                    'format' => 'dd/MM/yyyy',
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => ['class' => self::ATTR_CLASS_CONTROL . ' datepicker'],
+                    'html5' => false,
+                    'required' => false
+                ])
+            ;
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver)

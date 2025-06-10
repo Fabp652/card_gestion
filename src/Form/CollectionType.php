@@ -112,7 +112,7 @@ class CollectionType extends AbstractType
                     'required' => true,
                     'choices' => [$category->getName() => $category],
                     'data' => $data,
-                    'by_reference' => false,
+                    'by_reference' => false
                 ]
             );
         }

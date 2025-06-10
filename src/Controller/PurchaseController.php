@@ -45,18 +45,9 @@ final class PurchaseController extends AbstractController
     }
 
     #[Route('/purchase/add', name: 'app_purchase_add')]
-    #[Route(
-        '/purchase/{purchaseId}/edit',
-        name: 'app_purchase_edit',
-        requirements: ['purchaseId' => '\d+']
-    )]
-    public function form(Request $request, ?int $purchaseId): Response
+    public function form(Request $request): Response
     {
         $purchase = new Purchase();
-        if ($purchaseId) {
-            $purchase = $this->purchaseRepo->find($purchaseId);
-        }
-
         $form = $this->createForm(PurchaseType::class, $purchase)->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$purchase->getId()) {
@@ -66,7 +57,7 @@ final class PurchaseController extends AbstractController
 
             return $this->json([
                 'result' => true,
-                'redirect' => $this->generateUrl('app_item_purchase_list', ['purchaseId' => $purchase->getId()])
+                'redirect' => $this->generateUrl('app_purchase_edit', ['purchaseId' => $purchase->getId()])
             ]);
         } elseif ($form->isSubmitted()) {
             $messages = [];
@@ -78,8 +69,7 @@ final class PurchaseController extends AbstractController
         }
 
         $render = $this->render('purchase/form.html.twig', [
-            'form' => $form->createView(),
-            'purchaseId' => $purchaseId
+            'form' => $form->createView()
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);
@@ -93,14 +83,39 @@ final class PurchaseController extends AbstractController
     public function delete(int $purchaseId): Response
     {
         $purchase = $this->purchaseRepo->find($purchaseId);
-        dd($purchase);
         if ($purchase) {
             $this->em->remove($purchase);
             $this->em->flush();
 
             return $this->json(['result' => true]);
         } else {
-            return $this->json(['result' => false, 'message' => 'L\'a déjà est déjà supprimée']);
+            return $this->json(['result' => false, 'message' => 'L\'achat est déjà supprimée']);
         }
+    }
+
+    #[Route(
+        '/purchase/{purchaseId}/edit',
+        name: 'app_purchase_edit',
+        requirements: ['purchaseId' => '\d+']
+    )]
+    public function edit(Request $request, int $purchaseId): Response
+    {
+        $purchase = $this->purchaseRepo->find($purchaseId);
+        if (!$purchase) {
+            return $this->render('error/not_found.html.twig', [
+                'message' => 'L\'achat est introuvable.'
+            ]);
+        }
+
+        $form = $this->createForm(PurchaseType::class, $purchase)->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->em->flush();
+            return $this->json(['result' => true]);
+        }
+
+        return $this->render('purchase/edit_or_view.html.twig', [
+            'purchase' => $purchase,
+            'form' => $form
+        ]);
     }
 }

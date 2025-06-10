@@ -155,22 +155,18 @@ class ItemController extends AbstractController
     #[Route('/item/search', name: 'app_item_search')]
     public function search(Request $request): Response
     {
-        if ($search = $request->query->get('search')) {
-            $items = $this->itemRepo->findByFilter(['search' => $search])
-                ->select('i.id', 'i.name', 'i.reference, c.name AS collectionName')
-                ->leftJoin('i.collection', 'c')
-                ->getQuery()
-                ->getResult()
-            ;
+        $search = $request->query->get('search', '');
+        $concat = "CASE WHEN i.reference IS NOT NULL THEN CONCAT(i.reference, ' - ', i.name, ";
+        $concat .= "' (', c.name, ')') ELSE CONCAT(i.name, ' (', c.name, ')') END AS text";
+        $items = $this->itemRepo->findByFilter(['search' => $search])
+            ->select('i.id', $concat)
+            ->leftJoin('i.collection', 'c')
+            ->orderBy('i.name')
+            ->getQuery()
+            ->getResult()
+        ;
 
-            $render = $this->render('item/search/result.html.twig', [
-                'items' => $items
-            ]);
-
-            return $this->json(['result' => true, 'searchResult' => $render->getContent()]);
-        }
-
-        return $this->json(['result' => false]);
+        return $this->json(['result' => true, 'searchResults' => $items]);
     }
 
     #[Route(

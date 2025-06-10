@@ -15,6 +15,7 @@ use Doctrine\Persistence\ManagerRegistry;
 class PurchaseRepository extends ServiceEntityRepository
 {
     private const STATES = [
+        'Brouillon',
         'Non reçu',
         'Demande de remboursement',
         'Partiellement remboursé',

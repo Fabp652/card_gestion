@@ -115,14 +115,19 @@
                                         <td>
                                             {% set state = '' %}
                                             {% if not purchase.received and not purchase.refundRequest %}
-                                                {% set state = states|find((v, k) => k == 0) %}
-                                                {% set bg = 'text-bg-secondary' %}
+                                                {% if purchase.isValid %}
+                                                    {% set state = states|find((v, k) => k == 1) %}
+                                                    {% set bg = 'text-bg-secondary' %}
+                                                {% else %}
+                                                    {% set state = states|find((v, k) => k == 0) %}
+                                                    {% set bg = 'text-bg-dark' %}
+                                                {% endif %}
                                             {% else %}
                                                 {% if purchase.refunded or purchase.received %}
                                                     {% if purchase.refunded %}
-                                                        {% set state = states|find((v, k) => k == 3) %}
+                                                        {% set state = states|find((v, k) => k == 4) %}
                                                     {% else %}
-                                                        {% set state = states|find((v, k) => k == 5) %}
+                                                        {% set state = states|find((v, k) => k == 6) %}
                                                     {% endif %}
                                                     {% set bg = 'text-bg-success' %}
                                                 {% else %}
@@ -130,13 +135,13 @@
                                                     {% set iPReceivedLength = purchase.itemPurchases|filter(v => v.received)|length %}
                                                     {% if (iPNotRefundedLength > 0 and iPNotRefundedLength < purchase.itemPurchases|length) or (iPReceivedLength > 0 and iPReceivedLength < purchase.itemPurchases|length) %}
                                                         {% if iPNotRefundedLength > 0 and iPNotRefundedLength < purchase.itemPurchases|length %}
-                                                            {% set state = states|find((v, k) => k == 2) %}
+                                                            {% set state = states|find((v, k) => k == 3) %}
                                                         {% else %}
-                                                            {% set state = states|find((v, k) => k == 4) %}
+                                                            {% set state = states|find((v, k) => k == 5) %}
                                                         {% endif %}
                                                         {% set bg = 'text-bg-warning' %}
                                                     {% elseif iPNotRefundedLength == 0 or iPReceivedLength == 0 %}
-                                                        {% set state = states|find((v, k) => k == 1) %}
+                                                        {% set state = states|find((v, k) => k == 2) %}
                                                         {% set bg = 'text-bg-danger' %}
                                                     {% endif %}
                                                 {% endif %}
@@ -152,16 +157,15 @@
                                         <td>{{ purchase.link }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_purchase_list', {purchaseId: purchase.id}) }}">
-                                                    <i class="fa-solid fa-eye"></i>
-                                                </a>
-                                                <button
-                                                    data-url="{{ absolute_url(path('app_purchase_edit', {purchaseId: purchase.id})) }}"
-                                                    data-title="{{ 'Modifier "' ~ purchase.name ~ '"' }}"
-                                                    class="btn btn-primary btn-sm showModal"
-                                                >
-                                                    <i class="fa-solid fa-pen"></i>
-                                                </button>
+                                                {% if purchase.isValid %}
+                                                    <a class="btn btn-outline-primary btn-sm" {#href="{{ path('app_purchase_view', {purchaseId: purchase.id}) }}"#}>
+                                                        <i class="fa-solid fa-eye"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <a class="btn btn-primary btn-sm" href="{{ path('app_purchase_edit', {purchaseId: purchase.id}) }}">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </a>
+                                                {% endif %}
                                                 <a href="{{ path('app_purchase_delete', {purchaseId: purchase.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cette achat : {{ purchase.name|lower }} ?">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>

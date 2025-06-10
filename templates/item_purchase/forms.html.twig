@@ -1,0 +1,68 @@
+{{ form_start(form, {method: 'POST', attr: {id: 'mainForm'}}) }}{{ form_end(form) }}
+{% for itemPurchase in itemsPurchase %}
+    <tr class="line">
+        <td>
+            <select class="form-select select2 input" data-width="100%" name="item" required="required">
+                <option value="{{ itemPurchase.item.id }}" checked="checked">{{ itemPurchase.item.choiceLabel }}</option>
+            </select>
+        </td>
+        <td>
+            <input type="text" inputmode="decimal" value="{{ itemPurchase.price }}" required="required" class="form-control input price" name="price">
+        </td>
+        <td>
+            <input type="number" value="{{ itemPurchase.quantity }}" required="required" class="form-control input" name="quantity">
+        </td>
+        <td>
+            <input type="text" inputmode="url" value="{{ itemPurchase.link }}" class="form-control input" name="link">
+        </td>
+        <td>
+            <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-primary lineSubmit" data-url="{{ absolute_url(path('app_item_purchase_edit', {itemPurchaseId: itemPurchase.id})) }}">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+                <button class="btn btn-sm btn-secondary lineRefresh" data-url="{{ absolute_url(path('app_item_purchase_data', {itemPurchaseId: itemPurchase.id})) }}">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button
+                    class="btn btn-sm btn-danger lineCancel"
+                    data-sweetAlert-title="Supprimer la ligne"
+                    data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
+                    data-url="{{ absolute_url(path('app_item_purchase_delete', {itemPurchaseId: itemPurchase.id})) }}"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr class="line">
+        <td>
+            <select class="form-select select2 input" data-width="100%" name="item" required="required">
+            </select>
+        </td>
+        <td>
+            <input type="text" inputmode="decimal" required="required" class="form-control input price" name="price">
+        </td>
+        <td>
+            <input type="number" required="required" class="form-control input" name="quantity">
+        </td>
+        <td>
+            <input type="text" inputmode="url" class="form-control input" name="link">
+        </td>
+        <td>
+            <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-primary lineSubmit"  data-url="{{ absolute_url(path('app_item_purchase_add', {purchaseId: purchaseId}))}}"><i class="fa-solid fa-check"></i></button>
+                <button class="btn btn-sm btn-secondary lineRefresh">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button
+                    class="btn btn-sm btn-danger lineCancel"
+                    data-sweetAlert-title="Supprimer la ligne"
+                    data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+{% endfor %}

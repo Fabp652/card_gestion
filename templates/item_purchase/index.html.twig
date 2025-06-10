@@ -1,9 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block head %}
-    {{ knp_pagination_rel_links(itemPurchases) }}
-{% endblock %}
-
 {% block stylesheets %}
     {{ parent() }}
     {{ encore_entry_link_tags('table') }}
@@ -13,33 +9,17 @@
 
 {% block body %}
     {{ parent() }}
-    <div class="container-fluid mt-container mx-4" data-controller="modal">
+    <div class="container-fluid mt-container mx-4">
         <div class="card h-100">
-            <div class="card-header border-2 bg-black bg-gradient px-0">
-                <h1 class="text-center fw-bold color-title">{{ purchase.name|upper }}</h1>
-            </div>
             <div class="card-body">
                 <div class="main-content">
-                    <div class="row mb-3">
-                        <div class="col-12 px-0">
-                            <button
-                                type="button"
-                                class="btn btn-primary showModal"
-                                id="showModal"
-                                {# data-url="{{ absolute_url(path('app_item_purchase_add')) }}" #}
-                                data-title="Ajouter un objet"
-                            >
-                                Ajouter un objet
-                            </button>
-                        </div>
-                    </div>
                     <div class="row">
                         <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
                             <thead class="table-dark border-dark">
                                 <tr>
-                                    <th>{{ knp_pagination_sortable(itemPurchases, 'Nom', 'i.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                                    <th>{{ knp_pagination_sortable(itemPurchases, 'Prix', 'ip.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
-                                    <th>{{ knp_pagination_sortable(itemPurchases, 'Quantité', 'ip.quantité', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>Nom</th>
+                                    <th>Prix</th>
+                                    <th>Quantité</th>
                                     <th>Etat</th>
                                     <th>Lien</th>
                                     <th>Action</th>
@@ -120,12 +100,8 @@
                             </tfoot>
                         </table>
                     </div>
-                    <div class="navigation">
-                        {{ knp_pagination_render(itemPurchases) }}
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-    {% include "Modal/modal.html.twig" %}
 {% endblock %}
