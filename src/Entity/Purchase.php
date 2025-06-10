@@ -70,6 +70,9 @@ class Purchase
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $validatedAt = null;
 
+    #[ORM\ManyToOne]
+    private ?Seller $seller = null;
+
     public function __construct()
     {
         $this->itemsPurchase = new ArrayCollection();
@@ -273,6 +276,18 @@ class Purchase
             $price += $itemPurchase->getPrice();
         }
         $this->price = $price;
+
+        return $this;
+    }
+
+    public function getSeller(): ?Seller
+    {
+        return $this->seller;
+    }
+
+    public function setSeller(?Seller $seller): static
+    {
+        $this->seller = $seller;
 
         return $this;
     }
