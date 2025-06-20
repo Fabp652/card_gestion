@@ -66,7 +66,12 @@ export default class extends Controller {
                         if (response.status === 200) {
                             response.json().then(json => {
                                 if (json.result === true) {
-                                    window.location.reload();
+                                    if (json.redirect != undefined) {
+                                        window.location.assign(json.redirect);
+                                    } else {
+                                        window.location.reload();
+                                    }
+                                    
                                 } else {
                                     let toast = Swal.mixin({
                                         toast: true,

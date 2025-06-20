@@ -36,6 +36,18 @@
                         </div>
                     {% endif %}
                     <div class="row mt-4">
+                        {% if not purchase.isValid %}
+                            <div class="col-12 mb-3 d-flex justify-content-end p-0">
+                                <div class="btn-group">
+                                    <a class="btn btn-success" href="{{ absolute_url(path('app_purchase_validate', {purchaseId: purchase.id})) }}">
+                                        Valider
+                                    </a>
+                                    <a class="btn btn-danger removeElement" href="{{ absolute_url(path('app_purchase_delete', {purchaseId: purchase.id})) }}" data-sweetAlert-title="Annulation de l'achat" data-sweetAlert-text="Voulez-vous annuler cette achat : {{ purchase.name|lower }} ?">
+                                        Annuler
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
                         <table class="col-12 table table-responsive text-center table-bordered border-black align-middle">
                             <thead class="table-dark border-dark">
                                 <tr>
@@ -50,16 +62,18 @@
                                 </tr>
                             </thead>
                             <tbody class="table-group-divider" {% if not purchase.isValid %}data-url="{{ absolute_url(path('app_item_search')) }}" id="selectParent"{% endif %}>
-                                {{ render(path('app_item_purchase_list', {purchaseId: purchase.id, form: 1})) }}
-                                <tr>
-                                    <td colspan="5">
-                                        <button class="btn btn-primary" id="newLine" data-url="{{ absolute_url(path('app_item_purchase_add', {purchaseId: purchase.id}))}}"><i class="fa-solid fa-plus"></i></button>
-                                    </td>
-                                </tr>
+                                {{ render(path('app_item_purchase_list', {purchaseId: purchase.id, form: not purchase.isValid})) }}
+                                {% if not purchase.isValid %}
+                                    <tr>
+                                        <td colspan="5">
+                                            <button class="btn btn-primary" id="newLine" data-url="{{ absolute_url(path('app_item_purchase_add', {purchaseId: purchase.id}))}}"><i class="fa-solid fa-plus"></i></button>
+                                        </td>
+                                    </tr>
+                                {% endif %}
                             </tbody>
                             <tfoot>
                                 <tr class="fs-5">
-                                    <td colspan="3" class="text-end table-dark"><b>TOTAL</b></td>
+                                    <td colspan="{{ not purchase.isValid ? 3 : 4 }}" class="text-end table-dark"><b>TOTAL</b></td>
                                     <td colspan="2"><b class="text-success" id="totalPrice">{{ purchase.price|format_currency('EUR', locale='fr') }}</b></td>
                                 </tr>
                             </tfoot>

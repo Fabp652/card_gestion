@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Purchase;
 use App\Form\PurchaseType;
 use App\Repository\PurchaseRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -80,17 +81,26 @@ final class PurchaseController extends AbstractController
 
     #[Route(
         '/purchase/{purchaseId}/delete',
-        name: 'app_purchase_delete',
-        requirements: ['purchaseId' => '\d+']
+        'app_purchase_delete',
+        ['purchaseId' => '\d+']
     )]
-    public function delete(int $purchaseId): Response
+    public function delete(Request $request, int $purchaseId): Response
     {
         $purchase = $this->purchaseRepo->find($purchaseId);
         if ($purchase) {
             $this->em->remove($purchase);
             $this->em->flush();
 
-            return $this->json(['result' => true]);
+            $response = ['result' => true];
+            if (str_ends_with($request->headers->get('referer'), 'edit')) {
+                $response['redirect'] = $this->generateUrl(
+                    'app_purchase_list',
+                    [],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                );
+            }
+
+            return $this->json($response);
         } else {
             return $this->json(['result' => false, 'message' => 'L\'achat est déjà supprimée']);
         }
@@ -98,8 +108,8 @@ final class PurchaseController extends AbstractController
 
     #[Route(
         '/purchase/{purchaseId}/edit',
-        name: 'app_purchase_edit',
-        requirements: ['purchaseId' => '\d+']
+        'app_purchase_edit',
+        ['purchaseId' => '\d+']
     )]
     public function edit(Request $request, int $purchaseId): Response
     {
@@ -133,6 +143,54 @@ final class PurchaseController extends AbstractController
         return $this->render('purchase/edit_or_view.html.twig', [
             'purchase' => $purchase,
             'form' => $form
+        ]);
+    }
+
+    #[Route(
+        '/purchase/{purchaseId}/validate',
+        'app_purchase_validate',
+        ['purchaseId' => '\d+']
+    )]
+    public function validate(int $purchaseId): Response
+    {
+        /** @var Purchase $purchase */
+        $purchase = $this->purchaseRepo->find($purchaseId);
+        if (!$purchase) {
+            return $this->render('error/not_found.html.twig', [
+                'message' => 'L\'achat est introuvable.'
+            ]);
+        }
+
+        if ($purchase->getItemsPurchase()->isEmpty()) {
+            return $this->json(['result' => false, 'message' => 'L\'achat doit avoir au moins un objet.']);
+        }
+
+        $dateTime = new DateTime();
+        $purchase->setIsValid(true);
+        $purchase->setValidatedAt($dateTime);
+
+        $this->em->flush();
+
+        return $this->redirectToRoute('app_purchase_view', ['purchaseId' => $purchaseId]);
+    }
+
+    #[Route(
+        '/purchase/{purchaseId}/view',
+        'app_purchase_view',
+        ['purchaseId' => '\d+']
+    )]
+    public function view(int $purchaseId): Response
+    {
+        /** @var Purchase $purchase */
+        $purchase = $this->purchaseRepo->find($purchaseId);
+        if (!$purchase) {
+            return $this->render('error/not_found.html.twig', [
+                'message' => 'L\'achat est introuvable.'
+            ]);
+        }
+
+        return $this->render('purchase/edit_or_view.html.twig', [
+            'purchase' => $purchase
         ]);
     }
 }

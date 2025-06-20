@@ -134,8 +134,6 @@ class ItemController extends AbstractController
         } else {
             return $this->json(['result' => false, 'message' => 'L\'objet est déjà supprimé']);
         }
-
-        return $this->redirect($referer);
     }
 
     #[Route(

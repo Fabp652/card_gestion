@@ -97,8 +97,6 @@ class ItemSaleController extends AbstractController
         } else {
             return $this->json(['result' => false, 'message' => 'La vente est déjà supprimée']);
         }
-
-        return $this->redirect($referer);
     }
 
     #[Route(
