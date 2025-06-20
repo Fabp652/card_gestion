@@ -70,8 +70,8 @@ class Purchase
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $validatedAt = null;
 
-    #[ORM\ManyToOne]
-    private ?Seller $seller = null;
+    #[ORM\ManyToOne(inversedBy: 'purchases')]
+    private ?Market $market = null;
 
     public function __construct()
     {
@@ -280,14 +280,14 @@ class Purchase
         return $this;
     }
 
-    public function getSeller(): ?Seller
+    public function getMarket(): ?Market
     {
-        return $this->seller;
+        return $this->market;
     }
 
-    public function setSeller(?Seller $seller): static
+    public function setMarket(?Market $market): static
     {
-        $this->seller = $seller;
+        $this->market = $market;
 
         return $this;
     }

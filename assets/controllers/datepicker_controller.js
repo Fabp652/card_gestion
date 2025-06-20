@@ -8,6 +8,9 @@ export default class extends Controller {
                 formatter: (input, date, instance) => {
                     const value = date.toLocaleDateString();
                     input.value = value;
+                },
+                onSelect: (instance, date) => {
+                    $(instance.el).trigger('change');
                 }
             });
         }

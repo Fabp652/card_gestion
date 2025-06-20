@@ -13,7 +13,7 @@
 
 {% block body %}
     {{ parent() }}
-    <div class="container-fluid mt-container mx-4" {% if not purchase.isValid %}data-controller="form select calculate-price"{% endif %}>
+    <div class="container-fluid mt-container mx-4" {% if not purchase.isValid %}data-controller="form select calculate-price datepicker"{% endif %}>
         <div class="card h-100">
             <div class="card-header border-2 bg-black bg-gradient px-0">
                 <h1 class="text-center fw-bold color-title">{{ purchase.name|upper }}</h1>
@@ -21,22 +21,21 @@
             <div class="card-body">
                 <div class="main-content">
                     {% if not purchase.isValid %}
-                        <div class="row card">
-                            <div class="card-body">
-                                {{ form_start(form, {method: 'POST', action: path('app_purchase_edit', {purchaseId: purchase.id})}) }}
-                                    <div class="col-6">
-                                        {{ form_row(form.name) }}
-                                        {{ form_row(form.link) }}
-                                        {{ form_row(form.buyAt) }}
-                                        {{ form_row(form.isOrder) }}
-                                    </div>
-                                {{ form_end(form) }}
-                                {# <div class="col-6">
-                                </div> #}
-                            </div>
+                        <div class="row border-bottom pb-3">
+                            {{ form_start(form, {method: 'POST', action: path('app_purchase_edit', {purchaseId: purchase.id}), attr: {class: 'd-flex justify-content-between', id: 'formUpdate'}}) }}
+                                <div class="col-5">
+                                    {{ form_row(form.name, {id: 'update_name'}) }}
+                                    {{ form_row(form.link, {id: 'update_link'}) }}
+                                    {{ form_row(form.market, {id: 'update_market'}) }}
+                                </div>
+                                <div class="col-5">
+                                    {{ form_row(form.buyAt, {id: 'update_buyAt'}) }}
+                                    {{ form_row(form.isOrder, {id: 'update_isOrder'}) }}
+                                </div>
+                            {{ form_end(form) }}
                         </div>
                     {% endif %}
-                    <div class="row mt-2">
+                    <div class="row mt-4">
                         <table class="col-12 table table-responsive text-center table-bordered border-black align-middle">
                             <thead class="table-dark border-dark">
                                 <tr>

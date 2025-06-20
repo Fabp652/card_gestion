@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class PurchaseController extends AbstractController
 {
@@ -48,7 +49,9 @@ final class PurchaseController extends AbstractController
     public function form(Request $request): Response
     {
         $purchase = new Purchase();
-        $form = $this->createForm(PurchaseType::class, $purchase)->handleRequest($request);
+        $marketUrl = $this->generateUrl('app_market_search', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$purchase->getId()) {
                 $this->em->persist($purchase);
@@ -102,15 +105,29 @@ final class PurchaseController extends AbstractController
     {
         $purchase = $this->purchaseRepo->find($purchaseId);
         if (!$purchase) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            $message = 'L\'achat est introuvable.';
+            if ($request->isMethod('GET')) {
+                return $this->render('error/not_found.html.twig', [
+                    'message' => $message
+                ]);
+            } else {
+                return $this->json(['result' => false, 'message' => $message]);
+            }
         }
 
-        $form = $this->createForm(PurchaseType::class, $purchase)->handleRequest($request);
+        $marketUrl = $this->generateUrl('app_market_search', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->flush();
-            return $this->json(['result' => true]);
+            return $this->json(['result' => true, 'message' => 'Achat modifié avec succès']);
+        } elseif ($form->isSubmitted()) {
+            $messages = [];
+            foreach ($form->getErrors(true) as $error) {
+                $field = $error->getOrigin()->getName();
+                $messages[$field] = $error->getMessage();
+            }
+            return $this->json(['result' => false, 'messages' => $messages]);
         }
 
         return $this->render('purchase/edit_or_view.html.twig', [

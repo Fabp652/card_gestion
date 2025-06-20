@@ -2,14 +2,18 @@
 
 namespace App\Form;
 
+use App\Entity\Market;
 use App\Entity\Purchase;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Event\PreSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class PurchaseType extends AbstractType
@@ -19,6 +23,7 @@ class PurchaseType extends AbstractType
     private const ATTR_CLASS_CHECK = 'form-check-input';
     private const ATTR_CLASS_CHECK_ROW = 'form-check form-switch';
     private const ATTR_CLASS_CHECK_LABEL = 'form-check-label fw-medium';
+    private const ATTR_CLASS_SELECT = 'form-select select2';
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -45,6 +50,18 @@ class PurchaseType extends AbstractType
                     'required' => false
                 ]
             )
+            ->add('market', EntityType::class, [
+                'class' => Market::class,
+                'label' => 'Acheté à',
+                'label_attr' => ['class' => self::LABEL_CLASS],
+                'attr' => [
+                    'class' => self::ATTR_CLASS_SELECT,
+                    'data-width' => '100%',
+                    'data-ajax--url' => $options['marketUrl']
+                ],
+                'choice_label' => 'name',
+                'choice_value' => 'id',
+            ])
         ;
 
         $purchase = $options['data'];
@@ -66,7 +83,8 @@ class PurchaseType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Purchase::class
+            'data_class' => Purchase::class,
+            'marketUrl' => null
         ]);
     }
 }

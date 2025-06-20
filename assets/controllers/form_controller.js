@@ -105,7 +105,39 @@ export default class extends Controller {
                 if (response.status == 200) {
                     response.json().then(json => {
                         if (json.result) {
-                            window.location.reload();
+                            let toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                width: '400px',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true,
+                                customClass: {
+                                    popup: 'text-bg-success rounded-0'
+                                },
+                                iconColor: '#fff'
+                            });
+                            toast.fire({
+                                icon: 'success',
+                                title: json.message
+                            });
+                        } else {
+                            let toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                width: '400px',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true,
+                                customClass: {
+                                    popup: 'text-bg-danger rounded-0'
+                                },
+                                iconColor: '#fff'
+                            });
+                            toast.fire({
+                                icon: 'error',
+                                title: json.message
+                            });
                         }
                     });
                 }
