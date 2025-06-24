@@ -15,7 +15,7 @@
 
 {% block body %}
     {{ parent() }}
-    <div class="container-fluid mt-container mx-4" data-controller="modal datepicker">
+    <div class="container-fluid mt-container mx-4" data-controller="datepicker">
         <div class="card h-100">
             <div class="card-header border-bottom-0 bg-white pb-0 px-0">
                 <h1 class="text-center mb-5 fw-bold border-bottom border-2 pb-2">ACHATS</h1>
@@ -27,7 +27,6 @@
                             <button
                                 type="button"
                                 class="btn btn-primary showModal"
-                                id="showModal"
                                 data-url="{{ absolute_url(path('app_purchase_add')) }}"
                                 data-title="Nouvel achat"
                             >
@@ -124,29 +123,26 @@
                                                     {% set bg = 'text-bg-dark' %}
                                                 {% endif %}
                                             {% else %}
-                                                {% if purchase.refunded or purchase.received %}
+                                                {% set iPRefundedLength = purchase.itemsPurchase|filter(v => v.refunded)|length %}
+                                                {% set iPReceivedLength = purchase.itemsPurchase|filter(v => v.received)|length %}
+                                                {% if purchase.refundRequest and not purchase.refunded and iPRefundedLength == 0 %}
+                                                    {% set state = states|find((v, k) => k == 2) %}
+                                                    {% set bg = 'text-bg-danger' %}
+                                                {% elseif (iPRefundedLength > 0 and iPRefundedLength < purchase.itemsPurchase|length) or (iPReceivedLength > 0 and iPReceivedLength < purchase.itemsPurchase|length) %}
+                                                    {% if iPRefundedLength > 0 and iPRefundedLength < purchase.itemsPurchase|length %}
+                                                        {% set state = states|find((v, k) => k == 3) %}
+                                                    {% else %}
+                                                        {% set state = states|find((v, k) => k == 5) %}
+                                                    {% endif %}
+                                                    {% set bg = 'text-bg-warning' %}
+                                                {% else %}
                                                     {% if purchase.refunded %}
                                                         {% set state = states|find((v, k) => k == 4) %}
                                                     {% else %}
                                                         {% set state = states|find((v, k) => k == 6) %}
                                                     {% endif %}
                                                     {% set bg = 'text-bg-success' %}
-                                                {% else %}
-                                                    {% set iPNotRefundedLength = purchase.itemPurchases|filter(v => v.refunded)|length %}
-                                                    {% set iPReceivedLength = purchase.itemPurchases|filter(v => v.received)|length %}
-                                                    {% if (iPNotRefundedLength > 0 and iPNotRefundedLength < purchase.itemPurchases|length) or (iPReceivedLength > 0 and iPReceivedLength < purchase.itemPurchases|length) %}
-                                                        {% if iPNotRefundedLength > 0 and iPNotRefundedLength < purchase.itemPurchases|length %}
-                                                            {% set state = states|find((v, k) => k == 3) %}
-                                                        {% else %}
-                                                            {% set state = states|find((v, k) => k == 5) %}
-                                                        {% endif %}
-                                                        {% set bg = 'text-bg-warning' %}
-                                                    {% elseif iPNotRefundedLength == 0 or iPReceivedLength == 0 %}
-                                                        {% set state = states|find((v, k) => k == 2) %}
-                                                        {% set bg = 'text-bg-danger' %}
-                                                    {% endif %}
                                                 {% endif %}
-                                                
                                             {% endif %}
                                             <span class="badge rounded-pill {{ bg }}">{{ state }}</span>
                                         </td>
@@ -167,7 +163,7 @@
                                                         <i class="fa-solid fa-pen"></i>
                                                     </a>
                                                 {% endif %}
-                                                <a href="{{ path('app_purchase_delete', {purchaseId: purchase.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cette achat : {{ purchase.name|lower }} ?">
+                                                <a href="{{ path('app_purchase_delete', {purchaseId: purchase.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </div>

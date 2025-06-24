@@ -6,28 +6,46 @@ export default class extends Controller {
         const modal = new Modal('#modal');
 
         $('.showModal').on('click', function (e) {
+            console.log(1);
             let url = $(this).data('url');
             let title = $(this).data('title');
 
-            fetch(url, {
+            if (url) {
+                fetch(url, {
                 method: 'get'
-            }).then(response => {
-                if (response.status === 200) {
-                    response.json().then(json => {
-                        if (json.result === true) {
-                            $('#modalTitle').text(title);
-                            $('#modalBody').html(json.content);
+                }).then(response => {
+                    if (response.status === 200) {
+                        response.json().then(json => {
+                            if (json.result === true) {
+                                $('#modalTitle').text(title);
+                                $('#modalBody').html(json.content);
 
-                            modal.show();
+                                modal.show();
 
-                            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                            if (tooltipTriggerList.length > 0) {
-                                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
+                                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                                if (tooltipTriggerList.length > 0) {
+                                    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+                });
+            } else {
+                let submitUrl = $(this).data('submit-url');
+                let className = '.' + $(this).data('class');
+                let state = $(this).data('state');
+                $('#modalForm').children().addClass('d-none');
+                $('.modalInput').val('');
+
+                $('#modalTitle').text(title);
+                $('#modalForm').attr('action', submitUrl);
+                if (state) {
+                    $('#state').val(state);
                 }
-            });
+                $(className).removeClass('d-none');
+
+                modal.show();
+            }
         });
 
         $('#modalSubmit').on('click', function (e) {

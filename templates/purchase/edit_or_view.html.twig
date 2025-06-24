@@ -3,8 +3,8 @@
 {% block stylesheets %}
     {{ parent() }}
     {{ encore_entry_link_tags('table') }}
-    {% if not purchase.isValid %}
         {{ encore_entry_link_tags('datepicker') }}
+    {% if not purchase.isValid %}
         {{ encore_entry_link_tags('select2') }}
     {% endif %}
 {% endblock %}
@@ -25,8 +25,8 @@
                             {{ form_start(form, {method: 'POST', action: path('app_purchase_edit', {purchaseId: purchase.id}), attr: {class: 'd-flex justify-content-between', id: 'formUpdate'}}) }}
                                 <div class="col-5">
                                     {{ form_row(form.name, {id: 'update_name'}) }}
-                                    {{ form_row(form.link, {id: 'update_link'}) }}
                                     {{ form_row(form.market, {id: 'update_market'}) }}
+                                    {{ form_row(form.link, {id: 'update_link'}) }}
                                 </div>
                                 <div class="col-5">
                                     {{ form_row(form.buyAt, {id: 'update_buyAt'}) }}
@@ -34,20 +34,98 @@
                                 </div>
                             {{ form_end(form) }}
                         </div>
+                    {% else %}
+                        <div class="row border-bottom pb-3 justify-content-center">
+                            <div class="col-5">
+                                <dl class="row">
+                                    <dt class="col-6">Magasin</dt>
+                                    <dd class="col-6">
+                                        {% if purchase.market %}
+                                            {% if purchase.market.link %}
+                                                <a href="{{ purtchase.market.link }}">{{ purchase.market.name }}</a>
+                                            {% else %}
+                                                {{ purchase.market.name }}
+                                            {% endif %}
+                                        {% else %}
+                                            Non renseigné
+                                        {% endif %}
+                                    </dd>
+
+                                    <dt class="col-6">Lien de l'achat</dt>
+                                    <dd class="col-6">
+                                        {% if purchase.link %}
+                                            <a href="{{ purchase.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="fa-solid fa-link"></i>
+                                            </a>
+                                        {% else %}
+                                            Pas de lien
+                                        {% endif %}
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div class="col-5">
+                                <dl class="row">
+                                    <dt class="col-6">Date d'achat</dt>
+                                    <dd class="col-6">{{ purchase.buyAt|format_datetime('short', 'none', locale: 'fr') }}</dd>
+
+                                    <dt class="col-6">C'est une commande</dt>
+                                    <dd class="col-6">
+                                        {% if purchase.isOrder %}
+                                            <i class="fa-solid fa-square-check"></i>
+                                        {% else %}
+                                            <i class="fa-solid fa-square-xmark"></i>
+                                        {% endif %}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
                     {% endif %}
                     <div class="row mt-4">
-                        {% if not purchase.isValid %}
-                            <div class="col-12 mb-3 d-flex justify-content-end p-0">
-                                <div class="btn-group">
+                        <div class="col-12 mb-3 d-flex justify-content-end p-0">
+                            <div class="btn-group">
+                                {% if not purchase.isValid %}
                                     <a class="btn btn-success" href="{{ absolute_url(path('app_purchase_validate', {purchaseId: purchase.id})) }}">
                                         Valider
                                     </a>
-                                    <a class="btn btn-danger removeElement" href="{{ absolute_url(path('app_purchase_delete', {purchaseId: purchase.id})) }}" data-sweetAlert-title="Annulation de l'achat" data-sweetAlert-text="Voulez-vous annuler cette achat : {{ purchase.name|lower }} ?">
-                                        Annuler
-                                    </a>
-                                </div>
+                                {% else %}
+                                    {% if not purchase.received and not purchase.refundRequest %}
+                                        <button
+                                            class="btn btn-success showModal"
+                                            data-title="Réception de la commande entière"
+                                            data-class="received"
+                                            data-submit-url="{{ absolute_url(path('app_purchase_state', {purchaseId: purchase.id})) }}"
+                                            data-state="received"
+                                        >
+                                            Tous les objets reçus
+                                        </button>
+                                    {% endif %}
+                                    {% if not purchase.refundRequest %}
+                                        <button
+                                            class="btn btn-outline-danger showModal"
+                                            data-title="Remboursement de toute la commande"
+                                            data-class="refundRequest"
+                                            data-submit-url="{{ absolute_url(path('app_purchase_state', {purchaseId: purchase.id})) }}"
+                                            data-state="refundRequest"
+                                        >
+                                            Remboursement de la commande
+                                        </button>
+                                    {% elseif not purchase.refunded %}
+                                        <button
+                                            class="btn btn-success showModal"
+                                            data-title="Commande remboursée"
+                                            data-class="refunded"
+                                            data-submit-url="{{ absolute_url(path('app_purchase_state', {purchaseId: purchase.id})) }}"
+                                            data-state="refunded"
+                                        >
+                                            Commande remboursée
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                                <a class="btn btn-danger removeElement" href="{{ absolute_url(path('app_purchase_delete', {purchaseId: purchase.id})) }}" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?">
+                                    Supprimer
+                                </a>
                             </div>
-                        {% endif %}
+                        </div>
                         <table class="col-12 table table-responsive text-center table-bordered border-black align-middle">
                             <thead class="table-dark border-dark">
                                 <tr>
@@ -83,4 +161,7 @@
             </div>
         </div>
     </div>
+    {% if purchase.isValid %}
+        {% include "Modal/modal.html.twig" with {receivedOrRefund: true} %}
+    {% endif %}
 {% endblock %}

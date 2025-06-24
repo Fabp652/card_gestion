@@ -1,7 +1,7 @@
 {% for itemPurchase in itemPurchases %}
     {% set item = itemPurchase.item %}
     <tr>
-        <td>{{ item.reference ? item.reference ~ ' - ' ~ item.name ~ ' (' ~ item.collection.name ~ ')' : item.name ~ ' (' ~ item.collection.name ~ ')' }}</td>
+        <td>{{ item.choiceLabel }}</td>
         <td>{{ itemPurchase.price|format_currency('EUR', locale='fr') }}</td>
         <td>{{ itemPurchase.quantity }}</td>
         <td>
@@ -10,23 +10,64 @@
                 {% set state = states|find((v, k) => k == 0) %}
                 {% set bg = 'text-bg-secondary' %}
             {% else %}
-                {% if itemPurchase.refunded or itemPurchase.received %}
-                    {% set state = states|find((v, k) => k == 3) %}
-                    {% set bg = 'text-bg-success' %}
+                {% if itemPurchase.refundRequest and not itemPurchase.refunded %}
+                    {% set state = states|find((v, k) => k == 1) %}
+                    {% set bg = 'text-bg-danger' %}
                 {% else %}
-                    {% set iPNotRefundedLength = itemPurchase.itemPurchases|filter(v => v.refunded)|length %}
-                    {% set iPReceivedLength = itemPurchase.itemPurchases|filter(v => v.received)|length %}
-                    {% if iPNotRefundedLength == 0 or iPReceivedLength == 0 %}
-                        {% set state = states|find((v, k) => k == 1) %}
-                        {% set bg = 'text-bg-danger' %}
+                    {% if itemPurchase.refunded %}
+                        {% set state = states|find((v, k) => k == 2) %}
+                    {% else %}
+                        {% set state = states|find((v, k) => k == 3) %}
                     {% endif %}
+                    {% set bg = 'text-bg-success' %}
                 {% endif %}
                 
             {% endif %}
             <span class="badge rounded-pill {{ bg }}">{{ state }}</span>
         </td>
-        <td>{{ itemPurchase.link }}</td>
-        <td></td>
+        <td>
+            {% if itemPurchase.link %}
+                <a href="{{ itemPurchase.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                    <i class="fa-solid fa-link"></i>
+                </a>
+            {% endif %}
+        </td>
+        <td>
+            <div class="btn-group">
+                {% if not itemPurchase.received and not itemPurchase.refundRequest %}
+                    <button
+                        class="btn btn-sm btn-success showModal"
+                        data-title='Réception de "{{ item.choiceLabel }}"'
+                        data-class="received"
+                        data-submit-url="{{ absolute_url(path('app_item_purchase_state', {itemPurchaseId: itemPurchase.id})) }}"
+                        data-state="received"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                {% endif %}
+                {% if not itemPurchase.refundRequest %}
+                    <button
+                        class="btn btn-sm btn-danger showModal"
+                        data-title='Remboursement de "{{ item.choiceLabel }}"'
+                        data-class="refundRequest"
+                        data-submit-url="{{ absolute_url(path('app_item_purchase_state', {itemPurchaseId: itemPurchase.id})) }}"
+                        data-state="refundRequest"
+                    >
+                        <i class="fa-solid fa-reply"></i>
+                    </button>
+                {% elseif not itemPurchase.refunded %}
+                    <button
+                        class="btn btn-sm btn-success showModal"
+                        data-title='Objet "{{ item.choiceLabel }}" remboursé'
+                        data-class="refunded"
+                        data-submit-url="{{ absolute_url(path('app_item_purchase_state', {itemPurchaseId: itemPurchase.id})) }}"
+                        data-state="refunded"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                {% endif %}
+            </div>
+        </td>
     </tr>
 {% else %}
     <tr><td colspan="6"><b class="text-danger fs-1">AUCUN OBJET DISPONNIBLE !</b></td></tr>

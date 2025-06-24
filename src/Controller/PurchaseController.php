@@ -54,9 +54,11 @@ final class PurchaseController extends AbstractController
         $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$purchase->getId()) {
-                $this->em->persist($purchase);
+            if (!$purchase->isOrder()) {
+                $purchase->setReceived(true);
             }
+
+            $this->em->persist($purchase);
             $this->em->flush();
 
             return $this->json([
@@ -192,5 +194,84 @@ final class PurchaseController extends AbstractController
         return $this->render('purchase/edit_or_view.html.twig', [
             'purchase' => $purchase
         ]);
+    }
+
+    #[Route(
+        '/purchase/{purchaseId}/state',
+        'app_purchase_state',
+        ['purchaseId' => '\d+']
+    )]
+    public function state(Request $request, int $purchaseId): Response
+    {
+        /** @var Purchase $purchase */
+        $purchase = $this->purchaseRepo->find($purchaseId);
+        if (!$purchase) {
+            return $this->render('error/not_found.html.twig', [
+                'message' => 'L\'achat est introuvable.'
+            ]);
+        }
+
+        $data = $request->request->all();
+        switch ($data['state']) {
+            case 'received':
+                if (empty($data['date'])) {
+                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
+                }
+
+                $dateString = str_replace('/', '-', $data['date']);
+                $time = strtotime($dateString);
+                $purchase->setReceived(true)
+                    ->setReceivedAt(new DateTime(date('Y-m-d', $time)))
+                ;
+
+                foreach ($purchase->getItemsPurchase() as $itemPurchase) {
+                    if ($itemPurchase->isReceived() || $itemPurchase->isRefundRequest()) {
+                        continue;
+                    }
+                    $itemPurchase->setReceived(true);
+                }
+                break;
+
+            case 'refundRequest':
+                $purchase->setRefundRequest(true);
+                if (!empty($data['reason'])) {
+                    $purchase->setRefundedReason($data['reason']);
+                }
+
+                foreach ($purchase->getItemsPurchase() as $itemPurchase) {
+                    if (!$itemPurchase->isRefundRequest()) {
+                        $itemPurchase->setRefundRequest(true);
+                    }
+                }
+                break;
+
+            case 'refunded':
+                if (empty($data['date'])) {
+                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
+                }
+
+                $dateString = str_replace('/', '-', $data['date']);
+                $time = strtotime($dateString);
+                $dateTime = new DateTime(date('Y-m-d', $time));
+                $purchase->setRefunded(true)
+                    ->setRefundedAt($dateTime)
+                ;
+
+                foreach ($purchase->getItemsPurchase() as $itemPurchase) {
+                    if (!$itemPurchase->isRefunded()) {
+                        $itemPurchase->setRefunded(true)
+                            ->setRefundAt($dateTime);
+                        ;
+                    }
+                }
+                break;
+
+            default:
+                return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
+                break;
+        }
+        $this->em->flush();
+
+        return $this->json(['result' => true]);
     }
 }

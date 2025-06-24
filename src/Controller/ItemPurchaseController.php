@@ -8,6 +8,7 @@ use App\Form\FormHiddenType;
 use App\Form\ItemPurchaseType;
 use App\Repository\ItemPurchaseRepository;
 use App\Repository\PurchaseRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -111,6 +112,9 @@ final class ItemPurchaseController extends AbstractController
             $result = ['result' => true];
             $new = false;
             if (!$itemPurchase->getId()) {
+                if ($itemPurchase->getPurchase()->isReceived()) {
+                    $itemPurchase->setReceived(true);
+                }
                 $this->em->persist($itemPurchase);
                 $new = true;
             }
@@ -197,6 +201,85 @@ final class ItemPurchaseController extends AbstractController
                 'link' => $itemPurchase->getLink()
             ]
         ]);
+    }
+
+    #[Route(
+        '/purchase/item/{itemPurchaseId}/state',
+        'app_item_purchase_state',
+        ['itemPurchaseId' => '\d+']
+    )]
+    public function state(Request $request, int $itemPurchaseId): Response
+    {
+        /** @var ItemPurchase $itemPurchase */
+        $itemPurchase = $this->iPRepo->find($itemPurchaseId);
+        if (!$itemPurchase) {
+            return $this->json(['result' => false, 'message' => 'L\'objet est introuvable.']);
+        }
+
+        $data = $request->request->all();
+        switch ($data['state']) {
+            case 'received':
+                if (empty($data['date'])) {
+                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
+                }
+
+                $dateString = str_replace('/', '-', $data['date']);
+                $time = strtotime($dateString);
+                $itemPurchase->setReceived(true)
+                    ->setReceivedAt(new DateTime(date('Y-m-d', $time)))
+                ;
+
+                $purchase = $itemPurchase->getPurchase();
+                $iPReceivedOrRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
+                    return $itemPurchase->isReceived() || $itemPurchase->isRefundRequest();
+                });
+                if ($iPReceivedOrRefundRequest->count() == $purchase->getItemsPurchase()->count()) {
+                    $purchase->setReceived(true);
+                }
+                break;
+
+            case 'refundRequest':
+                $itemPurchase->setRefundRequest(true);
+                if (!empty($data['reason'])) {
+                    $itemPurchase->setRefundReason($data['reason']);
+                }
+
+                $purchase = $itemPurchase->getPurchase();
+                $iPRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
+                    return $itemPurchase->isRefundRequest();
+                });
+                if ($iPRefundRequest->count() == $purchase->getItemsPurchase()->count()) {
+                    $purchase->setRefundRequest(true);
+                }
+                break;
+
+            case 'refunded':
+                if (empty($data['date'])) {
+                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
+                }
+
+                $dateString = str_replace('/', '-', $data['date']);
+                $time = strtotime($dateString);
+                $itemPurchase->setRefunded(true)
+                    ->setRefundAt(new DateTime(date('Y-m-d', $time)))
+                ;
+
+                $purchase = $itemPurchase->getPurchase();
+                $iPRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
+                    return $itemPurchase->isRefunded();
+                });
+                if ($iPRefundRequest->count() == $purchase->getItemsPurchase()->count()) {
+                    $purchase->setRefunded(true);
+                }
+                break;
+
+            default:
+                return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
+                break;
+        }
+        $this->em->flush();
+
+        return $this->json(['result' => true]);
     }
 
     private function newForm(
