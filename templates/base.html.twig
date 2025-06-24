@@ -88,7 +88,7 @@
                         </li>
                     </ul>
                 </div>
-            {% if collection is defined or category is defined or item is defined or storage is defined or itemSale is defined %}
+            {% if collection is defined or category is defined or item is defined or storage is defined or itemSale is defined or purchase is defined %}
                 <nav class="breadcrumb-position" aria-label="breadcrumb">
                     <ol class="breadcrumb fw-semibold">
                         {% if storage is defined and storage %}
@@ -127,6 +127,15 @@
                                     Ventes
                                 </a>
                             </li>
+                        {% elseif purchase is defined %}
+                            <li class="breadcrumb-item">
+                                <a
+                                    class="link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover breadcrumb-color icon-link"
+                                    href="{{ path('app_purchase_list') }}"
+                                >
+                                    Achats
+                                </a>
+                            </li>
                         {% endif %}
                         {% if storage is defined and storage %}
                             <li class="breadcrumb-item">
@@ -135,6 +144,10 @@
                         {% elseif itemSale is defined and itemSale %}
                             <li class="breadcrumb-item">
                                 {{ itemSale.name }}
+                            </li>
+                        {% elseif purchase is defined and purchase %}
+                            <li class="breadcrumb-item">
+                                {{ purchase.name }}
                             </li>
                         {% elseif (category is defined and collection is defined) or item is defined %}
                             {% if item is defined %}
