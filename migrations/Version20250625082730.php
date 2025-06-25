@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250625081135 extends AbstractMigration
+final class Version20250625082730 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,7 @@ final class Version20250625081135 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            CREATE TABLE sale (id INT AUTO_INCREMENT NOT NULL, market_id INT DEFAULT NULL, name VARCHAR(255) NOT NULL, price DOUBLE PRECISION DEFAULT NULL, send TINYINT(1) DEFAULT NULL, refunded TINYINT(1) DEFAULT NULL, refund_request TINYINT(1) NOT NULL, refund_reason VARCHAR(255) DEFAULT NULL, send_at DATETIME DEFAULT NULL, refund_at DATETIME DEFAULT NULL, sold_at DATETIME DEFAULT NULL, is_order TINYINT(1) NOT NULL, sold TINYINT(1) NOT NULL, link VARCHAR(255) DEFAULT NULL, deleted_at DATETIME DEFAULT NULL, INDEX IDX_E54BC005622F3F37 (market_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+            CREATE TABLE sale (id INT AUTO_INCREMENT NOT NULL, market_id INT DEFAULT NULL, name VARCHAR(255) NOT NULL, price DOUBLE PRECISION DEFAULT NULL, send TINYINT(1) DEFAULT NULL, refunded TINYINT(1) DEFAULT NULL, refund_request TINYINT(1) NOT NULL, refund_reason VARCHAR(255) DEFAULT NULL, send_at DATETIME DEFAULT NULL, refund_at DATETIME DEFAULT NULL, sold_at DATETIME DEFAULT NULL, is_order TINYINT(1) NOT NULL, sold TINYINT(1) NOT NULL, link VARCHAR(255) DEFAULT NULL, is_valid TINYINT(1) NOT NULL, validated_at DATETIME DEFAULT NULL, deleted_at DATETIME DEFAULT NULL, INDEX IDX_E54BC005622F3F37 (market_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE sale ADD CONSTRAINT FK_E54BC005622F3F37 FOREIGN KEY (market_id) REFERENCES market (id)

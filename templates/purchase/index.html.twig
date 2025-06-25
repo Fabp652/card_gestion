@@ -114,17 +114,19 @@
                                         <td>{{ purchase.isOrder ? 'Oui' : 'Non' }}</td>
                                         <td>
                                             {% set state = '' %}
-                                            {% if not purchase.received and not purchase.refundRequest %}
+                                            {% set iPReceivedLength = purchase.itemsPurchase|filter(v => v.received)|length %}
+                                            {% if not purchase.isValid %}
+                                                {% set state = states|find((v, k) => k == 0) %}
+                                                {% set bg = 'text-bg-dark' %}
+                                            {% elseif not purchase.received and not purchase.refundRequest and iPReceivedLength == 0 %}
                                                 {% if purchase.isValid %}
                                                     {% set state = states|find((v, k) => k == 1) %}
                                                     {% set bg = 'text-bg-secondary' %}
                                                 {% else %}
-                                                    {% set state = states|find((v, k) => k == 0) %}
-                                                    {% set bg = 'text-bg-dark' %}
+                                                    
                                                 {% endif %}
                                             {% else %}
                                                 {% set iPRefundedLength = purchase.itemsPurchase|filter(v => v.refunded)|length %}
-                                                {% set iPReceivedLength = purchase.itemsPurchase|filter(v => v.received)|length %}
                                                 {% if purchase.refundRequest and not purchase.refunded and iPRefundedLength == 0 %}
                                                     {% set state = states|find((v, k) => k == 2) %}
                                                     {% set bg = 'text-bg-danger' %}
