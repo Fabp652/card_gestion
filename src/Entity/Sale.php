@@ -23,9 +23,12 @@ class Sale
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'La vente doit avoir un nom')]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\NotBlank(message: 'La vente doit avoir un prix')]
+    #[Assert\Positive(message: 'Le prix doit être supérieur à 0')]
     private ?float $price = null;
 
     #[ORM\Column(nullable: true)]
@@ -56,6 +59,7 @@ class Sale
     private ?bool $sold = false;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'L\'URL du lien n\'est pas valide')]
     private ?string $link = null;
 
     #[ORM\ManyToOne(inversedBy: 'sales')]

@@ -21,7 +21,7 @@ class ItemSale
     private ?int $id = null;
 
     #[ORM\Column(scale: 2)]
-    #[Assert\NotBlank(message: 'La vente doit avoir un prix')]
+    #[Assert\NotBlank(message: 'L\'objet doit avoir un prix')]
     #[Assert\Positive(message: 'Le prix doit être supérieur à 0')]
     private ?float $price = null;
 
