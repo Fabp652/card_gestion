@@ -62,19 +62,34 @@ class PurchaseRepository extends ServiceEntityRepository
                 $state = self::STATES[$filterValue];
                 switch ($state) {
                     case self::STATES[0]:
-                        $qb->andWhere('p.received = 0 AND p.refundRequest = 0');
+                        $qb->andWhere('p.isValid = 0');
                         break;
                     case self::STATES[1]:
+                        $subQueryIpReceived = $this->createQueryBuilder('p2')
+                            ->select('COUNT(ip2.id)')
+                            ->andWhere('p2.id = p.id')
+                            ->join('p2.itemsPurchase', 'ip2', Join::WITH, 'ip2.received = 1')
+                        ;
+
+                        $where = 'p.refundRequest = 0 AND (' . $subQueryIpReceived->getDQL() . ') = 0';
+                        $where .= ' AND p.received = 0 AND p.isValid = 1';
+
+                        $qb->andWhere($where);
+                        break;
+                    case self::STATES[2]:
                         $subQueryIpRefund = $this->createQueryBuilder('p2')
                             ->select('COUNT(ip2.id)')
                             ->andWhere('p2.id = p.id')
                             ->join('p2.itemsPurchase', 'ip2', Join::WITH, 'ip2.refunded = 1')
                         ;
 
-                        $where = 'p.refundRequest = 1 AND (' . $subQueryIpRefund->getDQL() . ') = 0 AND p.refunded = 0';
-                        $qb->andWhere($where);
+                        $where = 'p.refundRequest = 1 AND (' . $subQueryIpRefund->getDQL() . ') = 0';
+                        $where .= ' AND p.isValid = 1';
+                        $qb->andWhere($where)
+                            ->andWhere('p.refunded = 0 OR p.refunded IS NULL')
+                        ;
                         break;
-                    case self::STATES[2]:
+                    case self::STATES[3]:
                         $subQueryIp = $this->createQueryBuilder('p2')
                             ->select('COUNT(ip2.id)')
                             ->andWhere('p2.id = p.id')
@@ -94,17 +109,19 @@ class PurchaseRepository extends ServiceEntityRepository
                         ;
 
 
-                        $where = 'p.refundRequest = 1 AND p.refunded = 0 AND ';
+                        $where = 'p.refundRequest = 1 AND ';
                         $where .= '(' . $subQueryIp->getDQL() . ') ';
                         $where .= '> (' . $subQueryIpRefund->getDQL() . ') AND ';
                         $where .= '(' . $subQueryIpRefund2->getDQL() . ') > 0';
 
-                        $qb->andWhere($where);
-                        break;
-                    case self::STATES[3]:
-                        $qb->andWhere('p.refundRequest = 1 AND p.refunded = 1');
+                        $qb->andWhere($where)
+                            ->andWhere('p.refunded = 0 OR p.refunded IS NULL')
+                        ;
                         break;
                     case self::STATES[4]:
+                        $qb->andWhere('p.refundRequest = 1 AND p.refunded = 1');
+                        break;
+                    case self::STATES[5]:
                         $subQueryIp = $this->createQueryBuilder('p2')
                             ->select('COUNT(ip2.id)')
                             ->andWhere('p2.id = p.id')
@@ -130,8 +147,8 @@ class PurchaseRepository extends ServiceEntityRepository
 
                         $qb->andWhere($where);
                         break;
-                    case self::STATES[5]:
-                        $qb->andWhere('p.received = 1 AND p.refundRequest = 0');
+                    case self::STATES[6]:
+                        $qb->andWhere('p.received = 1 AND p.refundRequest = 0 AND p.isValid = 1');
                         break;
                 }
             } else {
