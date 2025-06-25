@@ -30,9 +30,16 @@ class Market
     #[ORM\OneToMany(targetEntity: Purchase::class, mappedBy: 'market')]
     private Collection $purchases;
 
+    /**
+     * @var Collection<int, Sale>
+     */
+    #[ORM\OneToMany(targetEntity: Sale::class, mappedBy: 'market')]
+    private Collection $sales;
+
     public function __construct()
     {
         $this->purchases = new ArrayCollection();
+        $this->sales = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -100,6 +107,36 @@ class Market
             // set the owning side to null (unless already changed)
             if ($purchase->getMarket() === $this) {
                 $purchase->setMarket(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Sale>
+     */
+    public function getSales(): Collection
+    {
+        return $this->sales;
+    }
+
+    public function addSale(Sale $sale): static
+    {
+        if (!$this->sales->contains($sale)) {
+            $this->sales->add($sale);
+            $sale->setMarket($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSale(Sale $sale): static
+    {
+        if ($this->sales->removeElement($sale)) {
+            // set the owning side to null (unless already changed)
+            if ($sale->getMarket() === $this) {
+                $sale->setMarket(null);
             }
         }
 

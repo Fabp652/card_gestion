@@ -36,13 +36,13 @@ class ItemQuality
     private ?FileManager $file = null;
 
     #[ORM\ManyToOne(inversedBy: 'itemQualities')]
-    private ?ItemSale $itemSale = null;
-
-    #[ORM\ManyToOne(inversedBy: 'itemQualities')]
     private ?Storage $storage = null;
 
     #[ORM\Column]
     private ?int $sort = null;
+
+    #[ORM\OneToOne(mappedBy: 'itemQuality', cascade: ['persist', 'remove'])]
+    private ?ItemSale $itemSale = null;
 
     public function __construct()
     {
@@ -114,18 +114,6 @@ class ItemQuality
         return $this;
     }
 
-    public function getItemSale(): ?ItemSale
-    {
-        return $this->itemSale;
-    }
-
-    public function setItemSale(?ItemSale $itemSale): static
-    {
-        $this->itemSale = $itemSale;
-
-        return $this;
-    }
-
     public function getStorage(): ?Storage
     {
         return $this->storage;
@@ -159,5 +147,22 @@ class ItemQuality
         $choiceLabel .= ' - ' . $this->item->getName() . ' (' . $this->item->getCollection()->getName() . ')';
 
         return $choiceLabel;
+    }
+
+    public function getItemSale(): ?ItemSale
+    {
+        return $this->itemSale;
+    }
+
+    public function setItemSale(ItemSale $itemSale): static
+    {
+        // set the owning side of the relation if necessary
+        if ($itemSale->getItemQuality() !== $this) {
+            $itemSale->setItemQuality($this);
+        }
+
+        $this->itemSale = $itemSale;
+
+        return $this;
     }
 }
