@@ -154,17 +154,25 @@ class ItemController extends AbstractController
     public function search(Request $request): Response
     {
         $search = $request->query->get('search', '');
-        $concat = "CASE WHEN i.reference IS NOT NULL THEN CONCAT(i.reference, ' - ', i.name, ";
-        $concat .= "' (', c.name, ')') ELSE CONCAT(i.name, ' (', c.name, ')') END AS text";
-        $items = $this->itemRepo->findByFilter(['search' => $search])
-            ->select('i.id', $concat)
-            ->leftJoin('i.collection', 'c')
-            ->orderBy('i.name')
-            ->getQuery()
-            ->getResult()
-        ;
+        $items = $this->itemRepo->findByFilter(['search' => $search]);
+        if ($request->query->get('searchBar')) {
+            $render = $this->render('item/search/result.html.twig', [
+                'items' => $items->orderBy('i.name')->getQuery()->getResult()
+            ]);
 
-        return $this->json(['result' => true, 'searchResults' => $items]);
+            return $this->json(['result' => true, 'searchResult' => $render->getContent()]);
+        } else {
+            $concat = "CASE WHEN i.reference IS NOT NULL THEN CONCAT(i.reference, ' - ', i.name, ";
+            $concat .= "' (', c.name, ')') ELSE CONCAT(i.name, ' (', c.name, ')') END AS text";
+
+            $items = $items->select('i.id', $concat)
+                ->leftJoin('i.collection', 'c')
+                ->orderBy('i.name')
+                ->getQuery()
+                ->getResult()
+            ;
+            return $this->json(['result' => true, 'searchResults' => $items]);
+        }
     }
 
     #[Route(

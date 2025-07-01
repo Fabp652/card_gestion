@@ -20,7 +20,7 @@ export default class extends Controller {
 
             if ($('#search').val().length >= 3) {
                 let url = $('#searchForm').attr('action');
-                url += '?search=' + $('#search').val();
+                url += '&search=' + $('#search').val();
 
                 fetch(url, {
                     method: $('#searchForm').attr('method'),
