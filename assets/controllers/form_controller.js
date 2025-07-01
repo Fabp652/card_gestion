@@ -24,7 +24,7 @@ export default class extends Controller {
                 });
 
                 let formData = new FormData(document.querySelector('#mainForm'));
-                fetch($(this).data('url'), {
+                fetch($(this).attr('data-url'), {
                     method: mainForm.attr('method'),
                     body: formData
                 }).then(response => {

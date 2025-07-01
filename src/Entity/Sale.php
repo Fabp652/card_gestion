@@ -27,7 +27,7 @@ class Sale
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\NotBlank(message: 'La vente doit avoir un prix')]
+    #[Assert\NotBlank(message: 'La vente doit avoir un prix', allowNull: true)]
     #[Assert\Positive(message: 'Le prix doit être supérieur à 0')]
     private ?float $price = null;
 
@@ -64,6 +64,12 @@ class Sale
 
     #[ORM\ManyToOne(inversedBy: 'sales')]
     private ?Market $market = null;
+
+    #[ORM\Column]
+    private ?bool $isValid = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $validatedAt = null;
 
     /**
      * @var Collection<int, ItemSale>
@@ -263,6 +269,41 @@ class Sale
                 $itemSale->setSale(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isValid(): ?bool
+    {
+        return $this->isValid;
+    }
+
+    public function setIsValid(?bool $isValid): static
+    {
+        $this->isValid = $isValid;
+
+        return $this;
+    }
+
+    public function getValidatedAt(): ?\DateTimeInterface
+    {
+        return $this->validatedAt;
+    }
+
+    public function setValidatedAt(?\DateTimeInterface $validatedAt): static
+    {
+        $this->validatedAt = $validatedAt;
+
+        return $this;
+    }
+
+    public function caclPrice(): static
+    {
+        $price = 0;
+        foreach ($this->itemSales as $itemSale) {
+            $price += $itemSale->getPrice();
+        }
+        $this->price = $price;
 
         return $this;
     }

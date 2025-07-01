@@ -1,0 +1,56 @@
+{{ form_start(form, {method: 'POST', attr: {id: 'mainForm'}}) }}{{ form_end(form) }}
+{% for itemSale in itemSales %}
+    <tr class="line">
+        <td>
+            <select class="form-select select2 input" data-width="100%" name="itemQuality" required="required">
+                <option value="{{ itemSale.itemQuality.id }}" checked="checked">{{ itemSale.itemQuality.choiceLabel }}</option>
+            </select>
+        </td>
+        <td>
+            <input type="text" inputmode="decimal" value="{{ itemSale.price }}" required="required" class="form-control input price" name="price">
+        </td>
+        <td>
+            <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-primary lineSubmit" data-url="{{ absolute_url(path('app_item_sale_edit', {itemSaleId: itemSale.id})) }}">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+                <button class="btn btn-sm btn-secondary lineRefresh" data-url="{{ absolute_url(path('app_item_sale_data', {itemSaleId: itemSale.id})) }}">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button
+                    class="btn btn-sm btn-danger lineCancel"
+                    data-sweetAlert-title="Supprimer la ligne"
+                    data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
+                    data-url="{{ absolute_url(path('app_item_sale_delete', {itemSaleId: itemSale.id})) }}"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr class="line">
+        <td>
+            <select class="form-select select2 input" data-width="100%" name="itemQuality" required="required">
+            </select>
+        </td>
+        <td>
+            <input type="text" inputmode="decimal" required="required" class="form-control input price" name="price">
+        </td>
+        <td>
+            <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-primary lineSubmit" data-url="{{ absolute_url(path('app_item_sale_add', {saleId: saleId}))}}"><i class="fa-solid fa-check"></i></button>
+                <button class="btn btn-sm btn-secondary lineRefresh">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button
+                    class="btn btn-sm btn-danger lineCancel"
+                    data-sweetAlert-title="Supprimer la ligne"
+                    data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+{% endfor %}

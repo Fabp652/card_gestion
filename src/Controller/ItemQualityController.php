@@ -24,16 +24,13 @@ class ItemQualityController extends AbstractController
     #[Route('/item/quality/search', name: 'app_item_quality_search')]
     public function search(Request $request): Response
     {
-        if ($search = $request->query->get('search')) {
-            $storageId = (int) $request->query->get('storageId');
-            $notSale = $request->query->get('notSale') == 1;
+        $search = $request->query->get('search', '');
+        $storageId = (int) $request->query->get('storageId');
+        $notSale = $request->query->get('notSale') == 1;
 
-            $items = $this->itemQualityRepository->search($search, $storageId, $notSale);
+        $items = $this->itemQualityRepository->search($search, $storageId, $notSale);
 
-            return $this->json(['result' => true, 'searchResults' => $items]);
-        }
-
-        return $this->json(['result' => false]);
+        return $this->json(['result' => true, 'searchResults' => $items]);
     }
 
     #[Route(

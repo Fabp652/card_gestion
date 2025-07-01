@@ -156,8 +156,9 @@ class ItemQuality
 
     public function setItemSale(ItemSale $itemSale): static
     {
-        // set the owning side of the relation if necessary
-        if ($itemSale->getItemQuality() !== $this) {
+        if (!$itemSale && $this->itemSale) {
+            $this->itemSale->setItemQuality(null);
+        } elseif ($itemSale && $itemSale->getItemQuality() !== $this) {
             $itemSale->setItemQuality($this);
         }
 

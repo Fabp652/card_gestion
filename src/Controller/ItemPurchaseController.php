@@ -65,7 +65,6 @@ final class ItemPurchaseController extends AbstractController
             ]);
         } else {
             return $this->render('item_purchase/index.html.twig', [
-                'request' => $request,
                 'states' => $this->iPRepo->getStates(),
                 'itemPurchases' => $purchase->getItemsPurchase()
             ]);

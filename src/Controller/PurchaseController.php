@@ -115,6 +115,7 @@ final class PurchaseController extends AbstractController
     )]
     public function edit(Request $request, int $purchaseId): Response
     {
+        /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
         if (!$purchase) {
             $message = 'L\'achat est introuvable.';
@@ -128,9 +129,16 @@ final class PurchaseController extends AbstractController
         }
 
         $marketUrl = $this->generateUrl('app_market_search', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $isOrder = $purchase->isOrder();
 
         $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($isOrder != $purchase->isOrder()) {
+                $purchase->setReceived(!$purchase->isOrder());
+                foreach ($purchase->getItemsPurchase() as $itemPurchase) {
+                    $itemPurchase->setReceived(!$purchase->isOrder());
+                }
+            }
             $this->em->flush();
             return $this->json(['result' => true, 'message' => 'Achat modifié avec succès']);
         } elseif ($form->isSubmitted()) {

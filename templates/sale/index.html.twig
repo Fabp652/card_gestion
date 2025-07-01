@@ -1,20 +1,192 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello SaleController!{% endblock %}
+{% block head %}
+    {{ knp_pagination_rel_links(sales) }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('table') }}
+    {{ encore_entry_link_tags('datepicker') }}
+    {{ encore_entry_link_tags('select2') }}
+{% endblock %}
+
+{% block title %}Ventes{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    {{ parent() }}
+    <div class="container-fluid mt-container mx-4" data-controller="datepicker">
+        <div class="card h-100">
+            <div class="card-header border-bottom-0 bg-white pb-0 px-0">
+                <h1 class="text-center mb-5 fw-bold border-bottom border-2 pb-2">Ventes</h1>
+            </div>
+            <div class="card-body">
+                <div class="main-content">
+                    <div class="row mb-3">
+                        <div class="col-12 px-0">
+                            <button
+                                type="button"
+                                class="btn btn-primary showModal"
+                                data-url="{{ absolute_url(path('app_sale_add')) }}"
+                                data-title="Nouvelle vente"
+                            >
+                                Nouvelle vente
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <table class="col-12 table table-hover table-responsive text-center table-bordered border-black align-middle">
+                            <thead class="table-dark border-dark">
+                                <tr>
+                                    <th>{{ knp_pagination_sortable(sales, 'Nom', 's.name', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>{{ knp_pagination_sortable(sales, 'Prix', 's.price', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>Commande</th>
+                                    <th>Etat</th>
+                                    <th>{{ knp_pagination_sortable(sales, 'Vendu le', 's.soldAt', {class: 'link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'}) }}</th>
+                                    <th>Lien</th>
+                                    <th>Action</th>
+                                </tr>
+                                <tr>
+                                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_sale_list')) }}" method="get">
+                                        {% set filterQuery = request.query.all('filter') %}
+                                        <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
+                                        <th class="input-group">
+                                            <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
+                                            <input type="number" id="maxPriceFilter" name="filter[max_price]" class="form-control input-table" placeholder="Max" value="{{ filterQuery.max_price ?? '' }}">
+                                        </th>
+                                        <th>
+                                            <select id="orderFilter" name="filter[isOrder]" class="form-select input-table">
+                                                <option value="">---</option>
+                                                <option
+                                                    value="0"
+                                                    {% if filterQuery.isOrder is defined and filterQuery.isOrder == 0 %}
+                                                        selected
+                                                    {% endif %}
+                                                >
+                                                    Non
+                                                </option>
+                                                <option
+                                                    value="1"
+                                                    {% if filterQuery.isOrder is defined and filterQuery.isOrder == 1 %}
+                                                        selected
+                                                    {% endif %}
+                                                >
+                                                    Oui
+                                                </option>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>D:/laragon/www/card_gestion/src/Controller/SaleController.php</code></li>
-        <li>Your template at <code>D:/laragon/www/card_gestion/templates/sale/index.html.twig</code></li>
-    </ul>
-</div>
+                                            </select>
+                                        </th>
+                                        <th>
+                                            <select id="stateFilter" name="filter[state]" class="form-select input-table">
+                                                <option value="">---</option>
+                                                {% for stateKey, stateValue in states %}
+                                                    <option
+                                                        value="{{ stateKey }}"
+                                                        {% if filterQuery.state is defined and filterQuery.state == stateKey %}
+                                                            selected
+                                                        {% endif %}
+                                                    >
+                                                        {{ stateValue }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </th>
+                                        <th class="input-group">
+                                            <input type="text" id="minSoldAtFilter" name="filter[min_soldAt]" class="form-control input-table startDate" placeholder="Min" value="{{ filterQuery.min_soldAt ?? '' }}">
+                                            <input type="text" id="maxSoldAtFilter" name="filter[max_soldAt]" class="form-control input-table endDate" placeholder="Max" value="{{ filterQuery.max_soldAt ?? '' }}">
+                                        </th>
+                                        <th></th>
+                                        <th>
+                                            <a href="{{ path('app_sale_list') }}" class="btn btn-secondary btn-sm rounded-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                                </svg>
+                                            </a>
+                                        </th>
+                                    </form>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                {% for sale in sales %}
+                                    <tr>
+                                        <td>{{ sale.name }}</td>
+                                        <td>{{ sale.price|format_currency('EUR', locale='fr') }}</td>
+                                        <td>{{ sale.isOrder ? 'Oui' : 'Non' }}</td>
+                                        <td>
+                                            {% set state = '' %}
+                                            {% if not sale.isValid %}
+                                                {% set state = states|find((v, k) => k == 0) %}
+                                                {% set bg = 'text-bg-dark' %}
+                                            {% elseif sale.refundRequest %}
+                                                {% set iSRefundedLength = sale.itemSales|filter(v => v.refunded)|length %}                                                
+                                                {% if not sale.refunded and iSRefundedLength == 0 %}
+                                                    {% set state = states|find((v, k) => k == 3) %}
+                                                    {% set bg = 'text-bg-danger' %}
+                                                {% elseif iSRefundedLength > 0 and iSRefundedLength < sale.itemSales|length %}
+                                                    {% set state = states|find((v, k) => k == 4) %}
+                                                    {% set bg = 'text-bg-warning' %}
+                                                {% elseif sale.refunded %}
+                                                    {% set state = states|find((v, k) => k == 5) %}
+                                                    {% set bg = 'text-bg-success' %}
+                                                {% endif %}
+                                            {% elseif sale.sold %}
+                                                {% if sale.isOrder %}
+                                                    {% set iSSendLength = sale.itemSales|filter(v => v.send)|length %}
+                                                    {% if iSSendLength == 0 %}
+                                                        {% set state = states|find((v, k) => k == 2) %}
+                                                        {% set bg = 'text-bg-info' %}
+                                                    {% elseif iSSendLength > 0 and iSSendLength < sale.itemSales|length %}
+                                                        {% set state = states|find((v, k) => k == 6) %}
+                                                        {% set bg = 'text-bg-warning' %}
+                                                    {% else %}
+                                                        {% set state = states|find((v, k) => k == 7) %}
+                                                        {% set bg = 'text-bg-success' %}
+                                                    {% endif %}
+                                                {% else %}
+                                                    {% set state = states|find((v, k) => k == 8) %}
+                                                    {% set bg = 'text-bg-success' %}
+                                                {% endif %}
+                                            {% else %}
+                                                {% set state = states|find((v, k) => k == 1) %}
+                                                {% set bg = 'text-bg-info' %}
+                                            {% endif %}
+                                            <span class="badge rounded-pill {{ bg }}">{{ state }}</span>
+                                        </td>
+                                        <td>
+                                            {% if sale.soldAt %}
+                                                {{ sale.soldAt|format_datetime('short', 'none', locale: 'fr') }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ sale.link }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                {% if sale.isValid %}
+                                                    <a class="btn btn-outline-primary btn-sm" href="{{ path('app_sale_view', {saleId: sale.id}) }}">
+                                                        <i class="fa-solid fa-eye"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <a class="btn btn-primary btn-sm" href="{{ path('app_sale_edit', {saleId: sale.id}) }}">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{{ path('app_sale_delete', {saleId: sale.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la vente" data-sweetAlert-text="Voulez-vous supprimer cet vente : {{ sale.name|lower }} ?">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="7"><b class="text-danger fs-1">AUCUNE VENTE DISPONNIBLE !</b></td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="navigation">
+                        {{ knp_pagination_render(sales) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "Modal/modal.html.twig" with {receivedOrRefund: true} %}
 {% endblock %}

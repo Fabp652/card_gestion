@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\ItemQuality;
 use App\Entity\ItemSale;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -20,22 +21,16 @@ class ItemSaleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $data = $options['data'];
+        $itemQualityId = $options['itemQualityId'];
+
         $builder
             ->add('price', NumberType::class, [
                 'label' => 'Prix',
                 'scale' => 2,
                 'label_attr' => ['class' => self::LABEL_CLASS],
                 'attr' => ['class' => self::ATTR_CLASS_CONTROL],
-                'required' => true
             ])
-            ->add('link', UrlType::class, [
-                'label' => 'Lien',
-                'label_attr' => ['class' => self::LABEL_CLASS],
-                'attr' => ['class' => self::ATTR_CLASS_CONTROL],
-                'required' => false
-            ])
-            ->add('itemQualities', EntityType::class, [
+            ->add('itemQuality', EntityType::class, [
                 'class' => ItemQuality::class,
                 'choice_value' => 'id',
                 'choice_label' => 'choiceLabel',
@@ -45,31 +40,29 @@ class ItemSaleType extends AbstractType
                     'data-width' => '100%'
                 ],
                 'label_attr' => ['class' => self::LABEL_CLASS],
-                'multiple' => true,
                 'required' => false,
-                'by_reference' => false
-            ])
-            ->add('name', TextType::class, [
-                'label' => 'Nom',
-                'label_attr' => ['class' => self::LABEL_CLASS],
-                'attr' => ['class' => self::ATTR_CLASS_CONTROL],
-                'required' => true
+                'query_builder' => function (EntityRepository $er) use ($itemQualityId) {
+                    $query = $er->createQueryBuilder('iq')
+                        ->leftJoin('iq.collection', 'c')
+                        ->orderBy('c.name')
+                        ->addOrderBy('iq.name')
+                        ->setMaxResults('30')
+                    ;
+                    if ($itemQualityId) {
+                        $query->where('iq.id = :id')
+                            ->setParameter('id', $itemQualityId)
+                        ;
+                    }
+                }
             ])
         ;
-
-        if ($data->getId()) {
-            $builder->add('sold', CheckboxType::class, [
-                'label' => 'Vendu',
-                'attr' => ['class' => 'form-check-input'],
-                'row_attr' => ['class' => 'form-check form-switch']
-            ]);
-        }
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => ItemSale::class
+            'data_class' => ItemSale::class,
+            'itemQualityId' => null
         ]);
     }
 }

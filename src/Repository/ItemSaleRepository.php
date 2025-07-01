@@ -17,44 +17,25 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ItemSaleRepository extends ServiceEntityRepository
 {
+    private const STATES = [
+        'En vente',
+        'Non envoyé',
+        'Demande de remboursement',
+        'Remboursé',
+        'Envoyé',
+        'Vendu'
+    ];
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ItemSale::class);
     }
 
     /**
-     * @param array $filters
-     * @return QueryBuilder
+     * @return array
      */
-    public function findByFilter(array $filters): QueryBuilder
+    public function getStates(): array
     {
-        $qb = $this->createQueryBuilder('isl');
-
-        foreach ($filters as $filterKey => $filterValue) {
-            if ($filterKey == 'name') {
-                $qb->andWhere('isl.' . $filterKey . ' LIKE :' . $filterKey)
-                    ->setParameter($filterKey, $filterValue . '%')
-                ;
-            } elseif (str_contains($filterKey, 'min')) {
-                $filterKeyExplode = explode('_', $filterKey);
-                $qb->andWhere('isl.' . $filterKeyExplode[1] . ' >= :min')
-                    ->setParameter('min', $filterValue)
-                ;
-            } elseif (str_contains($filterKey, 'max')) {
-                $filterKeyExplode = explode('_', $filterKey);
-                $qb->andWhere('isl.' . $filterKeyExplode[1] . ' <= :max')
-                    ->setParameter('max', $filterValue)
-                ;
-            } else {
-                if (is_numeric($filterValue)) {
-                    $filterValue = (int) $filterValue;
-                }
-                $qb->andWhere('isl.' . $filterKey . ' = ' . ':' . $filterKey)
-                    ->setParameter($filterKey, $filterValue)
-                ;
-            }
-        }
-
-        return $qb;
+        return self::STATES;
     }
 }

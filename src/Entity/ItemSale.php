@@ -29,7 +29,7 @@ class ItemSale
     private ?bool $refunded = null;
 
     #[ORM\Column]
-    private ?bool $refundRequest = null;
+    private ?bool $refundRequest = false;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $refundReason = null;
@@ -48,7 +48,7 @@ class ItemSale
     private ?Sale $sale = null;
 
     #[ORM\OneToOne(inversedBy: 'itemSale', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn]
     private ?ItemQuality $itemQuality = null;
 
     public function getId(): ?int
@@ -157,7 +157,7 @@ class ItemSale
         return $this->itemQuality;
     }
 
-    public function setItemQuality(ItemQuality $itemQuality): static
+    public function setItemQuality(?ItemQuality $itemQuality): static
     {
         $this->itemQuality = $itemQuality;
 

@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('table') }}
+        {{ encore_entry_link_tags('datepicker') }}
+    {% if not sale.isValid %}
+        {{ encore_entry_link_tags('select2') }}
+    {% endif %}
+{% endblock %}
+
+{% block title %}{{ sale.name }}{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <div class="container-fluid mt-container mx-4" {% if not sale.isValid %}data-controller="form select calculate-price datepicker"{% endif %}>
+        <div class="card h-100">
+            <div class="card-header border-2 bg-black bg-gradient px-0">
+                <h1 class="text-center fw-bold color-title">{{ sale.name|upper }}</h1>
+            </div>
+            <div class="card-body">
+                <div class="main-content">
+                    {% if not sale.isValid %}
+                        <div class="row border-bottom pb-3">
+                            {{ form_start(form, {method: 'POST', action: path('app_sale_edit', {saleId: sale.id}), attr: {class: 'd-flex justify-content-between', id: 'formUpdate'}}) }}
+                                <div class="col-5">
+                                    {{ form_row(form.name, {id: 'update_name'}) }}
+                                    {{ form_row(form.market, {id: 'update_market'}) }}
+                                    {{ form_row(form.link, {id: 'update_link'}) }}
+                                </div>
+                                <div class="col-5">
+                                    {% if not sale.isOrder %}
+                                        {{ form_row(form.soldAt, {id: 'update_soldAt'}) }}
+                                    {% endif %}
+                                    {{ form_row(form.isOrder, {id: 'update_isOrder'}) }}
+                                </div>
+                            {{ form_end(form) }}
+                        </div>
+                    {% else %}
+                        <div class="row border-bottom pb-3 justify-content-center">
+                            <div class="col-5">
+                                <dl class="row">
+                                    <dt class="col-6">Magasin</dt>
+                                    <dd class="col-6">
+                                        {% if sale.market %}
+                                            {% if sale.market.link %}
+                                                <a href="{{ purtchase.market.link }}">{{ sale.market.name }}</a>
+                                            {% else %}
+                                                {{ sale.market.name }}
+                                            {% endif %}
+                                        {% else %}
+                                            Non renseigné
+                                        {% endif %}
+                                    </dd>
+
+                                    {% if sale.isOrder %}
+                                        <dt class="col-6">Lien de la vente</dt>
+                                        <dd class="col-6">
+                                            {% if sale.link %}
+                                                <a href="{{ sale.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fa-solid fa-link"></i>
+                                                </a>
+                                            {% else %}
+                                                Pas de lien
+                                            {% endif %}
+                                        </dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                            <div class="col-5">
+                                <dl class="row">
+                                    <dt class="col-6">Date de vente</dt>
+                                    <dd class="col-6">{{ sale.soldAt|format_datetime('short', 'none', locale: 'fr') }}</dd>
+
+                                    <dt class="col-6">Commande</dt>
+                                    <dd class="col-6">
+                                        {% if sale.isOrder %}
+                                            <i class="fa-solid fa-square-check"></i>
+                                        {% else %}
+                                            <i class="fa-solid fa-square-xmark"></i>
+                                        {% endif %}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="row mt-4">
+                        <div class="col-12 mb-3 d-flex justify-content-end p-0">
+                            <div class="btn-group">
+                                {% if not sale.isValid %}
+                                    <a class="btn btn-success" href="{{ absolute_url(path('app_sale_validate', {saleId: sale.id})) }}">
+                                        Valider
+                                    </a>
+                                {% else %}
+                                    {% if sale.sold %}
+                                        {% if sale.isOrder and not sale.send and not sale.refundRequest %}
+                                            <button
+                                                class="btn btn-success showModal"
+                                                data-title="Toute la commande expédié"
+                                                data-class="send"
+                                                data-submit-url="{{ absolute_url(path('app_sale_state', {saleId: sale.id})) }}"
+                                                data-state="send"
+                                            >
+                                                Toute la commande expédié
+                                            </button>
+                                        {% endif %}
+                                        {% if not sale.refundRequest %}
+                                            <button
+                                                class="btn btn-outline-danger showModal"
+                                                data-title="Remboursement de toute la vente"
+                                                data-class="refundRequest"
+                                                data-submit-url="{{ absolute_url(path('app_sale_state', {saleId: sale.id})) }}"
+                                                data-state="refundRequest"
+                                            >
+                                                Remboursement de toute la vente
+                                            </button>
+                                        {% elseif not sale.refunded %}
+                                            <button
+                                                class="btn btn-success showModal"
+                                                data-title="Toute la vente remboursé"
+                                                data-class="refunded"
+                                                data-submit-url="{{ absolute_url(path('app_sale_state', {saleId: sale.id})) }}"
+                                                data-state="refunded"
+                                            >
+                                                Toute la vente remboursée
+                                            </button>
+                                        {% endif %}
+                                    {% else %}
+                                        <button
+                                            class="btn btn-success showModal"
+                                            data-title="Vendu"
+                                            data-class="sold"
+                                            data-submit-url="{{ absolute_url(path('app_sale_state', {saleId: sale.id})) }}"
+                                            data-state="sold"
+                                        >
+                                            Vendu
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                                <a class="btn btn-danger removeElement" href="{{ absolute_url(path('app_sale_delete', {saleId: sale.id})) }}" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ sale.name|lower }} ?">
+                                    Supprimer
+                                </a>
+                            </div>
+                        </div>
+                        <table class="col-12 table table-responsive text-center table-bordered border-black align-middle">
+                            <thead class="table-dark border-dark">
+                                <tr>
+                                    <th style="width:40%;">Nom</th>
+                                    <th>Prix</th>
+                                    {% if sale.isValid %}
+                                        <th>Etat</th>
+                                    {% endif %}
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider" {% if not sale.isValid %}data-url="{{ absolute_url(path('app_item_quality_search')) }}" id="selectParent"{% endif %}>
+                                {{ render(path('app_item_sale_list', {saleId: sale.id, form: not sale.isValid})) }}
+                                {% if not sale.isValid %}
+                                    <tr>
+                                        <td colspan="3">
+                                            <button class="btn btn-primary" id="newLine" data-url="{{ absolute_url(path('app_item_sale_add', {saleId: sale.id}))}}"><i class="fa-solid fa-plus"></i></button>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                                <tfoot>
+                                <tr class="fs-5">
+                                    <td colspan="{{ not sale.isValid ? 1 : 2 }}" class="text-end table-dark"><b>TOTAL</b></td>
+                                    <td colspan="2"><b class="text-success" id="totalPrice">{{ sale.price|format_currency('EUR', locale='fr') }}</b></td>
+                                </tr>
+                            </tfoot>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if sale.isValid %}
+        {% include "Modal/modal.html.twig" with {receivedOrRefund: true} %}
+    {% endif %}
+{% endblock %}
