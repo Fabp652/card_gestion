@@ -34,7 +34,8 @@ class CollectionsRepository extends ServiceEntityRepository
                     c.name AS collectionName,
                     c.id AS collectionId,
                     SUM(i.price * i.number) / SUM(i.number) AS average,
-                    cat.name As category
+                    cat.name As category,
+                    c.complete
                 '
             )
             ->leftJoin('c.items', 'i')

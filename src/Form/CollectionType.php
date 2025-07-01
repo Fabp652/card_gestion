@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\PreSubmitEvent;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -20,6 +21,9 @@ class CollectionType extends AbstractType
     private const LABEL_CLASS = 'form-label';
     private const ATTR_CLASS_CONTROL = 'form-control';
     private const ATTR_CLASS_SELECT = 'form-select select2';
+    private const ATTR_CLASS_CHECK = 'form-check-input';
+    private const ATTR_CLASS_CHECK_ROW = 'form-check form-switch';
+    private const ATTR_CLASS_CHECK_LABEL = 'form-check-label fw-medium';
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -74,6 +78,17 @@ class CollectionType extends AbstractType
                 ]
             )
         ;
+
+        $collection = $options['data'];
+        if ($collection->getId()) {
+            $builder->add('complete', CheckboxType::class, [
+                'label' => 'Collection complète',
+                'attr' => ['class' => self::ATTR_CLASS_CHECK],
+                'row_attr' => ['class' => self::ATTR_CLASS_CHECK_ROW],
+                'label_attr' => ['class' => self::ATTR_CLASS_CHECK_LABEL],
+                'required' => false
+            ]);
+        }
 
         $builder->get('category')
             ->addEventListener(FormEvents::PRE_SUBMIT, [$this, 'onPreSubmit'])
