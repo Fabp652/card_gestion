@@ -1,13 +1,11 @@
 {% if categoryId %}
-    {{ form_start(form, {method: 'POST', action: path('app_category_edit', {categoryId: categoryId}), attr: {'id': 'modalForm'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_category_edit', {categoryId: categoryId}), attr: {'id': 'modalForm', class: 'row'}}) }}
 {% elseif parentId %}
-    {{ form_start(form, {method: 'POST', action: path('app_category_add_child', {parentId: parentId}), attr: {'id': 'modalForm'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_category_add_child', {parentId: parentId}), attr: {'id': 'modalForm', class: 'row'}}) }}
 {% else %}
-    {{ form_start(form, {method: 'POST', action: path('app_category_add'), attr: {'id': 'modalForm'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_category_add'), attr: {'id': 'modalForm', class: 'row'}}) }}
 {% endif %}
-    <div class="row">
-        <div class="col-12 mb-3">
-            {{ form_row(form.name) }}
-        </div>
+    <div class="col-12 mb-3">
+        {{ form_row(form.name) }}
     </div>
 {{ form_end(form) }}

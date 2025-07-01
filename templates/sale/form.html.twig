@@ -1,13 +1,11 @@
-{{ form_start(form, {method: 'POST', action: path('app_sale_add'), attr: {'id': 'modalForm', 'data-controller': 'select'}}) }}
-    <div class="row">
-        <div class="col-12 mb-3">
-            {{ form_row(form.name) }}
-        </div>
-        <div class="col-6">
-            {{ form_row(form.market) }}
-        </div>
-        <div class="col-6">
-            {{ form_row(form.isOrder) }}
-        </div>
+{{ form_start(form, {method: 'POST', action: path('app_sale_add'), attr: {'id': 'modalForm', 'data-controller': 'select', class: 'row'}}) }}
+    <div class="col-12 mb-3">
+        {{ form_row(form.name) }}
+    </div>
+    <div class="col-6">
+        {{ form_row(form.market) }}
+    </div>
+    <div class="col-6">
+        {{ form_row(form.isOrder) }}
     </div>
 {{ form_end(form) }}
