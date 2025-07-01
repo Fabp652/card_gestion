@@ -153,7 +153,11 @@
                                                 {{ purchase.buyAt|format_datetime('short', 'none', locale: 'fr') }}
                                             {% endif %}
                                         </td>
-                                        <td>{{ purchase.link }}</td>
+                                        <td>
+                                            <a href="{{ purchase.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="fa-solid fa-link"></i>
+                                            </a>
+                                        </td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 {% if purchase.isValid %}

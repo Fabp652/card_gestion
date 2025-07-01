@@ -157,7 +157,11 @@
                                                 {{ sale.soldAt|format_datetime('short', 'none', locale: 'fr') }}
                                             {% endif %}
                                         </td>
-                                        <td>{{ sale.link }}</td>
+                                        <td>
+                                            <a href="{{ sale.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="fa-solid fa-link"></i>
+                                            </a>
+                                        </td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 {% if sale.isValid %}
