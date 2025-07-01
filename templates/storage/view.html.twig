@@ -41,7 +41,7 @@
                                     name="full"
                                     {% if storage.full %}checked{% endif %}
                                 >
-                                <label class="form-check-label ms-2 fw-medium" for="storageFull">Remplis</label>
+                                <label class="form-check-label ms-2 fw-medium" for="updateFull">Remplis</label>
                             </div>
                         {% endif %}
                     </form>
@@ -57,7 +57,7 @@
                                     <th>Action</th>
                                 </tr>
                                 <tr>
-                                    <form data-controller="item" id="formFilter" action="{{ absolute_url(path('app_storage_view', {storageId: storage.id})) }}" method="get">
+                                    <form data-controller="filter" id="formFilter" action="{{ absolute_url(path('app_storage_view', {storageId: storage.id})) }}" method="get">
                                         {% set filterQuery = request.query.all('filter') %}
                                         <th></th>
                                         <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
