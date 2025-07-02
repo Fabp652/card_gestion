@@ -122,22 +122,43 @@ export default class extends Controller {
                                 title: json.message
                             });
                         } else {
-                            let toast = Swal.mixin({
-                                toast: true,
-                                position: 'top-end',
-                                width: '400px',
-                                showConfirmButton: false,
-                                timer: 1500,
-                                timerProgressBar: true,
-                                customClass: {
-                                    popup: 'text-bg-danger rounded-0'
-                                },
-                                iconColor: '#fff'
-                            });
-                            toast.fire({
-                                icon: 'error',
-                                title: json.message
-                            });
+                            if (json.messages) {
+                                for (const [key, message] of Object.entries(json.messages)) {
+                                    let toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        width: '400px',
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        customClass: {
+                                            popup: 'text-bg-danger rounded-0'
+                                        },
+                                        iconColor: '#fff'
+                                    });
+                                    toast.fire({
+                                        icon: 'error',
+                                        title: message
+                                    });
+                                }
+                            } else {
+                                let toast = Swal.mixin({
+                                    toast: true,
+                                    position: 'top-end',
+                                    width: '400px',
+                                    showConfirmButton: false,
+                                    timer: 1500,
+                                    timerProgressBar: true,
+                                    customClass: {
+                                        popup: 'text-bg-danger rounded-0'
+                                    },
+                                    iconColor: '#fff'
+                                });
+                                toast.fire({
+                                    icon: 'error',
+                                    title: json.message
+                                });
+                            }
                         }
                     });
                 }

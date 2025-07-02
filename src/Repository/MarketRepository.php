@@ -26,7 +26,7 @@ class MarketRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('m');
 
         foreach ($filters as $filterKey => $filterValue) {
-            if ($filterKey == 'name') {
+            if ($filterKey == 'name' || $filterKey == 'search') {
                 $qb->andWhere('m.name LIKE :name')
                     ->setParameter('name', '%' . $filterValue . '%')
                 ;

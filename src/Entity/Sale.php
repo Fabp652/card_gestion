@@ -44,12 +44,15 @@ class Sale
     private ?string $refundReason = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être ultérieur à aujhourd\'hui')]
     private ?\DateTimeInterface $sendAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être ultérieur à aujhourd\'hui')]
     private ?\DateTimeInterface $refundAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être ultérieur à aujhourd\'hui')]
     private ?\DateTimeInterface $soldAt = null;
 
     #[ORM\Column]

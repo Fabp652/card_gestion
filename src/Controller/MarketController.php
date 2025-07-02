@@ -47,7 +47,7 @@ final class MarketController extends AbstractController
     {
         $search = $request->query->get('search', '');
         $markets = $this->marketRepo->findByFilter(['search' => $search])
-            ->select('m.id', 'm.name')
+            ->select('m.id', 'm.name AS text')
             ->orderBy('m.name')
             ->getQuery()
             ->getResult()
