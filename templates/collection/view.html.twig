@@ -5,7 +5,7 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="container-fluid mt-container mx-4">
+    <div class="container-fluid mt-container mx-4" data-controller="form">
         <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0 text-center" style="height:120px;">
                 {% if collection.file %}
@@ -19,7 +19,7 @@
             <div class="card-body">
                 <div class="main-content">
                     <div class="row mb-3">
-                        <div class="col-12 px-0">
+                        <div class="col ps-0">
                             <button
                                 type="button"
                                 class="btn btn-primary showModal"
@@ -29,6 +29,18 @@
                             >
                                 Nouvelle catégorie
                             </button>
+                        </div>
+                        <div class="form-check form-switch col d-flex justify-content-end align-self-center pe-0">
+                            <input
+                                class="form-check-input checkUpdate"
+                                name="complete"
+                                type="checkbox"
+                                role="switch"
+                                id="complete{{ '_' ~ collection.id }}"
+                                {% if collection.complete %}checked{% endif %}
+                                data-url="{{ absolute_url(path('app_collection_complete', {collectionId: collection.id})) }}"
+                            >
+                            <label class="form-check-label ms-2" for="complete{{ '_' ~ collection.id }}">Collection complète</label>
                         </div>
                     </div>
                     <div class="row mb-4">

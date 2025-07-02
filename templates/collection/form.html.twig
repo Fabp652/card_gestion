@@ -3,11 +3,6 @@
 {% else %}
     {{ form_start(form, {method: 'POST', action: path('app_collection_add'), attr: {'id': 'modalForm', 'class': 'row', 'data-controller': 'select'}}) }}
 {% endif %}
-    {% if collectionId %}
-        <div class="col-12 mb-3">
-            {{ form_row(form.complete) }}
-        </div>
-    {% endif %}
     <div class="col-6 mb-3">
         {{ form_row(form.name) }}
     </div>
@@ -25,4 +20,12 @@
             </div>
         {% endif %}            
     </div>
+    <div class="col-6 mb-3">
+        {{ form_row(form.hasRarities) }}
+    </div>
+    {% if collectionId %}
+        <div class="col-6 mb-3">
+            {{ form_row(form.complete) }}
+        </div>
+    {% endif %}
 {{ form_end(form) }}

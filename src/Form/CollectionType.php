@@ -77,6 +77,12 @@ class CollectionType extends AbstractType
                     'required' => false
                 ]
             )
+            ->add('hasRarities', CheckboxType::class, [
+                'label' => 'Utilise des raretés',
+                'attr' => ['class' => self::ATTR_CLASS_CHECK],
+                'row_attr' => ['class' => self::ATTR_CLASS_CHECK_ROW],
+                'label_attr' => ['class' => self::ATTR_CLASS_CHECK_LABEL],
+            ])
         ;
 
         $collection = $options['data'];

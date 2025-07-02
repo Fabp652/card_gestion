@@ -198,6 +198,35 @@ class CollectionController extends AbstractController
         }
     }
 
+    #[Route(
+        '/collection/{collectionId}/complete',
+        'app_collection_complete',
+        ['collectionId' => '\d+']
+    )]
+    public function complete(Request $request, int $collectionId): Response
+    {
+        /** @var Collections $collection */
+        $collection = $this->collectionRepo->find($collectionId);
+        if (!$collection) {
+            return $this->json(['result' => false, 'message' => 'Une erreur est survenue.']);
+        }
+
+        $flush = false;
+        $complete = $request->request->has('complete') ?
+            $request->request->get('complete') == 'true' : null
+        ;
+        if (is_bool($complete) && $complete != $collection->isComplete()) {
+            $collection->setComplete($complete);
+            $flush = true;
+        }
+
+        if ($flush) {
+            $this->em->flush();
+        }
+
+        return $this->json(['result' => true, 'message' => 'Mis à jour avec succès']);
+    }
+
     private function getViolationsMessage(ConstraintViolationListInterface $violations): array
     {
         $messages = [];
