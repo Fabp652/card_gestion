@@ -41,12 +41,19 @@ class ItemQuality
     #[ORM\Column]
     private ?int $sort = null;
 
-    #[ORM\OneToOne(mappedBy: 'itemQuality', cascade: ['persist', 'remove'])]
-    private ?ItemSale $itemSale = null;
+    /**
+     * @var Collection<int, ItemSale>
+     */
+    #[ORM\OneToMany(targetEntity: ItemSale::class, mappedBy: 'itemQuality')]
+    private ?Collection $itemSales = null;
+
+    #[ORM\Column(options:['default' => true])]
+    private ?bool $availableSale = true;
 
     public function __construct()
     {
         $this->criterias = new ArrayCollection();
+        $this->itemSales = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -149,20 +156,51 @@ class ItemQuality
         return $choiceLabel;
     }
 
-    public function getItemSale(): ?ItemSale
+    /**
+     * @return Collection<int, ItemSale>
+     */
+    public function getItemSales(): Collection
     {
-        return $this->itemSale;
+        return $this->itemSales;
     }
 
-    public function setItemSale(ItemSale $itemSale): static
+    public function addItemSale(ItemSale $itemSale): static
     {
-        if (!$itemSale && $this->itemSale) {
-            $this->itemSale->setItemQuality(null);
-        } elseif ($itemSale && $itemSale->getItemQuality() !== $this) {
+        if (!$this->itemSales->contains($itemSale)) {
+            $this->itemSales->add($itemSale);
             $itemSale->setItemQuality($this);
         }
 
-        $this->itemSale = $itemSale;
+        return $this;
+    }
+
+    public function removeItemSale(ItemSale $itemSale): static
+    {
+        if ($this->itemSales->removeElement($itemSale)) {
+            // set the owning side to null (unless already changed)
+            if ($itemSale->getSale() === $this) {
+                $itemSale->setSale(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getItemSale(): ?ItemSale
+    {
+        return $this->itemSales->filter(function ($itemSale) {
+            return !$itemSale->getDeletedAt();
+        })->first();
+    }
+
+    public function isAvailableSale(): ?bool
+    {
+        return $this->availableSale;
+    }
+
+    public function setAvailableSale(bool $availableSale): static
+    {
+        $this->availableSale = $availableSale;
 
         return $this;
     }

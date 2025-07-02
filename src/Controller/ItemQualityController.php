@@ -24,13 +24,17 @@ class ItemQualityController extends AbstractController
     #[Route('/item/quality/search', name: 'app_item_quality_search')]
     public function search(Request $request): Response
     {
-        $search = $request->query->get('search', '');
-        $storageId = (int) $request->query->get('storageId');
-        $notSale = $request->query->get('notSale') == 1;
+        $filters = $request->query->all() ;
 
-        $items = $this->itemQualityRepository->search($search, $storageId, $notSale);
+        $concat = "CASE WHEN i.reference IS NOT NULL THEN CONCAT('N°', iq.sort, ' ', i.reference, ' - ', i.name, ";
+        $concat .= "' (', c.name, ')') ELSE CONCAT('N°', iq.sort, ' ', i.name, ' (', c.name, ')') END AS text";
+        $items = $this->itemQualityRepository->findByFilter($filters);
+        $items->leftJoin('i.collection', 'c')
+            ->select('iq.id', $concat)
+            ->setMaxResults(30)
+        ;
 
-        return $this->json(['result' => true, 'searchResults' => $items]);
+        return $this->json(['result' => true, 'searchResults' => $items->getQuery()->getResult()]);
     }
 
     #[Route(
@@ -129,5 +133,34 @@ class ItemQualityController extends AbstractController
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);
+    }
+
+    #[Route(
+        '/item/quality/{itemQualityId}/available',
+        'app_item_quality_available',
+        ['itemQualityId' => '\d+']
+    )]
+    public function available(Request $request, int $itemQualityId): Response
+    {
+        /** @var ItemQuality $itemQuality */
+        $itemQuality = $this->itemQualityRepository->find($itemQualityId);
+        if (!$itemQuality) {
+            return $this->json(['result' => false, 'message' => 'Une erreur est survenue.']);
+        }
+
+        $flush = false;
+        $availableSale = $request->request->has('availableSale') ?
+            $request->request->get('availableSale') == 'true' : null
+        ;
+        if (is_bool($availableSale) && $availableSale != $itemQuality->isAvailableSale()) {
+            $itemQuality->setAvailableSale($availableSale);
+            $flush = true;
+        }
+
+        if ($flush) {
+            $this->em->flush();
+        }
+
+        return $this->json(['result' => true, 'message' => 'Mis à jour avec succès']);
     }
 }

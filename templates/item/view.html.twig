@@ -111,11 +111,12 @@
                                                         {{ itemQuality.storage.name }}
                                                     </a>
                                                 {% endif %}
-                                                {% if itemQuality.itemSale %}
-                                                    <a 
+                                                {% if not itemQuality.availableSale and itemQuality.itemSale %}
+                                                    {% set route = itemQuality.itemSale.sale.isValid ? 'app_sale_view' : 'app_sale_edit' %}
+                                                    <a
                                                         type="button"
                                                         class="btn btn-outline-success border-top-0"
-                                                        href="{{ path('app_item_sale_view', {itemSaleId: itemQuality.itemSale.id}) }}"
+                                                        href="{{ path(route, {saleId: itemQuality.itemSale.sale.id}) }}"
                                                     >
                                                         <i class="fa-solid fa-coins"></i>
                                                     </a>
@@ -146,6 +147,22 @@
                                             {% else %}
                                                 <h1 class="text-center position-absolute start-0 end-0 top-50 translate-middle-y mb-0 fw-bold">Pas encore évalué</h1>
                                             {% endif %}
+                                            <div class="form-check form-switch position-absolute bottom-0 end-0 p-1">
+                                                <input
+                                                    class="form-check-input {{ not itemQuality.itemSale ? 'checkUpdate' : '' }}"
+                                                    name="availableSale"
+                                                    type="checkbox"
+                                                    role="switch"
+                                                    id="availableSale{{ '_' ~ itemQuality.id }}"
+                                                    {% if itemQuality.availableSale %}checked{% endif %}
+                                                    {% if itemQuality.itemSale %}
+                                                        disabled
+                                                    {% else %}
+                                                        data-url="{{ absolute_url(path('app_item_quality_available', {itemQualityId: itemQuality.id})) }}"
+                                                    {% endif %}
+                                                >
+                                                <label class="form-check-label" for="availableSale{{ '_' ~ itemQuality.id }}">Valable pour la vente</label>
+                                            </div>
                                         </div>
                                     </div>
                                 {% else %}

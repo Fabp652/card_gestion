@@ -49,7 +49,7 @@ class ItemSale
     #[ORM\JoinColumn(nullable: false)]
     private ?Sale $sale = null;
 
-    #[ORM\OneToOne(inversedBy: 'itemSale', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'itemSale', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn]
     private ?ItemQuality $itemQuality = null;
 

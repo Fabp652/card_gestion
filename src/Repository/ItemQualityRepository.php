@@ -24,40 +24,6 @@ class ItemQualityRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string $search
-     * @param int $storageId
-     * @param bool $notSale
-     */
-    public function search(string $search, int $storageId, bool $notSale): array
-    {
-        $concat = "CASE WHEN i.reference IS NOT NULL THEN CONCAT('N°', iq.sort, ' ', i.reference, ' - ', i.name, ";
-        $concat .= "' (', c.name, ')') ELSE CONCAT('N°', iq.sort, ' ', i.name, ' (', c.name, ')') END AS text";
-
-        $qb = $this->createQueryBuilder('iq')
-            ->leftJoin('iq.item', 'i')
-            ->leftJoin('i.collection', 'c')
-            ->andWhere('i.name LIKE :search OR i.reference LIKE :search')
-            ->setParameter('search', '%' . $search . '%')
-            ->select('iq.id', $concat)
-            ->setMaxResults(30)
-        ;
-
-        if ($storageId) {
-            $qb->andWhere('iq.storage != :storage OR iq.storage IS NULL')
-                ->setParameter('storage', $storageId)
-            ;
-        }
-
-        if ($notSale) {
-            $qb->andWhere('iq.itemSale IS NULL');
-        }
-
-        return $qb->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
      * @param array $filters
      * @param int|null $storageId
      * @return QueryBuilder
@@ -80,7 +46,7 @@ class ItemQualityRepository extends ServiceEntityRepository
             }
             if ($filterKey == 'name' || $filterKey == 'reference') {
                 $qb->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
-                    ->setParameter($filterKey, $filterValue . '%')
+                    ->setParameter($filterKey, '%' . $filterValue . '%')
                 ;
             } elseif (str_contains($filterKey, 'min')) {
                 $filterKeyExplode = explode('_', $filterKey);
@@ -91,6 +57,14 @@ class ItemQualityRepository extends ServiceEntityRepository
                 $filterKeyExplode = explode('_', $filterKey);
                 $qb->andWhere('i.' . $filterKeyExplode[1] . ' <= :max')
                     ->setParameter('max', $filterValue)
+                ;
+            } elseif ($filterKey == 'storageId') {
+                $qb->andWhere('iq.storage != :storage OR iq.storage IS NULL')
+                    ->setParameter('storage', $storageId)
+                ;
+            } elseif ($filterKey == 'search') {
+                $qb->andWhere('i.name LIKE :search OR i.reference LIKE :search')
+                    ->setParameter('search', '%' . $filterValue . '%')
                 ;
             } else {
                 $qb->andWhere('iq.' . $filterKey . ' = ' . ':' . $filterKey)

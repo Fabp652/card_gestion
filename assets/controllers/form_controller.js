@@ -329,5 +329,58 @@ export default class extends Controller {
                 line.find('.price').trigger('change');
             }
         });
+
+        $('.checkUpdate').on('click', function (e) {
+            let checked = $(this).prop('checked');
+            let url = $(this).attr('data-url');
+            let formData = new FormData();
+            formData.set($(this).attr('name'), checked);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.status == 200) {
+                    response.json().then(json => {
+                        if (json.result === true) {
+                            let toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                width: '400px',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true,
+                                customClass: {
+                                    popup: 'text-bg-success rounded-0'
+                                },
+                                iconColor: '#fff'
+                            });
+                            toast.fire({
+                                icon: 'success',
+                                title: json.message
+                            });
+                        } else {
+                            let toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                width: '400px',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true,
+                                customClass: {
+                                    popup: 'text-bg-danger rounded-0'
+                                },
+                                iconColor: '#fff'
+                            });
+                            toast.fire({
+                                icon: 'error',
+                                title: json.message
+                            });
+                            $(this).prop('checked', !checked);
+                        }
+                    });
+                }
+            });
+        });
     }
 }
