@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Entity\Category;
 use App\Entity\Item;
 use App\Entity\Rarity;
-use App\Entity\Storage;
 use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
 use App\Repository\RarityRepository;

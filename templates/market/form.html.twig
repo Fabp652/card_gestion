@@ -1,0 +1,20 @@
+{% if marketId %}
+    {{ form_start(form, {method: 'POST', action: path('app_market_edit', {marketId: marketId}), attr: {id: 'modalForm', class: 'row'}}) }}
+{% else %}
+    {{ form_start(form, {method: 'POST', action: path('app_market_add'), attr: {id: 'modalForm', class: 'row'}}) }}
+{% endif %}
+    <div class="col-12 mb-3">
+        {{ form_row(form.name) }}
+    </div>
+    <div class="col-12 mb-3">
+        {{ form_row(form.link) }}
+    </div>
+    <div class="col-6 mb-3">
+        {{ form_row(form.forBuy) }}
+    </div><div class="col-6 mb-3">
+        {{ form_row(form.forSale) }}
+    </div>
+    <div class="col-6">
+        {{ form_row(form.isWebSite) }}
+    </div>
+{{ form_end(form) }}

@@ -86,6 +86,12 @@
                             </a>
                             <div class="{{ pathInfo == '/purchase' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ path('app_market_list') }}" class="nav-link{{ pathInfo == '/market' ? ' disabled navbar-active' : ' navbar-link' }}">
+                                Boutiques/Marchés
+                            </a>
+                            <div class="{{ pathInfo == '/market' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                        </li>
                     </ul>
                 </div>
             {% if collection is defined or category is defined or item is defined or storage is defined or sale is defined or purchase is defined %}

@@ -95,12 +95,17 @@ export default class extends Controller {
                                     )
                                 } else {
                                     for (const [key, value] of Object.entries(json.messages)) {
-                                        let msg = '<div class="msg invalid-feedback">' + value + '</div>';
                                         let input = $('input[id$="' + key + '"]');
                                         if (input.length == 0) {
                                             input = $('select[id$="' + key + '"]')
+                                            if (input.length == 0) {
+                                                $('#modalBody').prepend(
+                                                    '<b class="msg text-danger">' + value + '</b>'
+                                                )
+                                            }
                                         }
-
+                                        
+                                        let msg = '<div class="msg invalid-feedback">' + value + '</div>';
                                         input.parent().append(msg);
                                         input.addClass('is-invalid');
                                     }

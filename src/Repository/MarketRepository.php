@@ -24,6 +24,19 @@ class MarketRepository extends ServiceEntityRepository
     public function findByFilter(array $filters): QueryBuilder
     {
         $qb = $this->createQueryBuilder('m');
+
+        foreach ($filters as $filterKey => $filterValue) {
+            if ($filterKey == 'name') {
+                $qb->andWhere('m.name LIKE :name')
+                    ->setParameter('name', '%' . $filterValue . '%')
+                ;
+            } else {
+                $qb->andWhere('m.' . $filterKey . ' = :' . $filterKey)
+                    ->setParameter($filterKey, $filterValue)
+                ;
+            }
+        }
+
         return $qb;
     }
 }
