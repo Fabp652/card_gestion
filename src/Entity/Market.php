@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\MarketRepository;
+use App\Validator\OneOfForBuyOrForSale;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MarketRepository::class)]
+#[OneOfForBuyOrForSale]
 class Market
 {
     #[ORM\Id]
@@ -16,12 +19,15 @@ class Market
     private ?int $id = null;
 
     #[ORM\Column(length: 45)]
+    #[Assert\NotBlank(message: 'La boutique doit avoir un nom.')]
+    #[Assert\Length(max: 45, maxMessage: 'Le nom doit avoir au maximum 45 caractères.')]
     private ?string $name = null;
 
     #[ORM\Column]
     private ?bool $isWebSite = false;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'L\'URL du lien n\'est pas valide')]
     private ?string $link = null;
 
     /**
@@ -35,6 +41,12 @@ class Market
      */
     #[ORM\OneToMany(targetEntity: Sale::class, mappedBy: 'market')]
     private Collection $sales;
+
+    #[ORM\Column]
+    private ?bool $forSale = false;
+
+    #[ORM\Column]
+    private ?bool $forBuy = false;
 
     public function __construct()
     {
@@ -139,6 +151,30 @@ class Market
                 $sale->setMarket(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isForSale(): ?bool
+    {
+        return $this->forSale;
+    }
+
+    public function setForSale(bool $forSale): static
+    {
+        $this->forSale = $forSale;
+
+        return $this;
+    }
+
+    public function isForBuy(): ?bool
+    {
+        return $this->forBuy;
+    }
+
+    public function setForBuy(bool $forBuy): static
+    {
+        $this->forBuy = $forBuy;
 
         return $this;
     }
