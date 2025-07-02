@@ -6,9 +6,11 @@ export default class extends Controller {
         const modal = new Modal('#modal');
 
         $('.showModal').on('click', function (e) {
-            console.log(1);
             let url = $(this).data('url');
             let title = $(this).data('title');
+            $('.msg').remove();
+            $('input').removeClass('is-invalid');
+            $('select').removeClass('is-invalid');
 
             if (url) {
                 fetch(url, {

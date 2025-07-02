@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class ItemPurchaseController extends AbstractController
 {
@@ -207,8 +208,11 @@ final class ItemPurchaseController extends AbstractController
         'app_item_purchase_state',
         ['itemPurchaseId' => '\d+']
     )]
-    public function state(Request $request, int $itemPurchaseId): Response
-    {
+    public function state(
+        Request $request,
+        ValidatorInterface $validator,
+        int $itemPurchaseId
+    ): Response {
         /** @var ItemPurchase $itemPurchase */
         $itemPurchase = $this->iPRepo->find($itemPurchaseId);
         if (!$itemPurchase) {
@@ -228,6 +232,12 @@ final class ItemPurchaseController extends AbstractController
                     ->setReceivedAt(new DateTime(date('Y-m-d', $time)))
                 ;
 
+                $messages = $this->validate($itemPurchase, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
+
+
                 $purchase = $itemPurchase->getPurchase();
                 $iPReceivedOrRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
                     return $itemPurchase->isReceived() || $itemPurchase->isRefundRequest();
@@ -244,6 +254,12 @@ final class ItemPurchaseController extends AbstractController
                 }
 
                 $purchase = $itemPurchase->getPurchase();
+
+                $messages = $this->validate($itemPurchase, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
+
                 $iPRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
                     return $itemPurchase->isRefundRequest();
                 });
@@ -263,6 +279,11 @@ final class ItemPurchaseController extends AbstractController
                     ->setRefundAt(new DateTime(date('Y-m-d', $time)))
                 ;
 
+                $messages = $this->validate($itemPurchase, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
+
                 $purchase = $itemPurchase->getPurchase();
                 $iPRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
                     return $itemPurchase->isRefunded();
@@ -273,7 +294,7 @@ final class ItemPurchaseController extends AbstractController
                 break;
 
             default:
-                return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
+                return $this->json(['result' => false, 'message' => 'Une erreur est survenue.']);
                 break;
         }
         $this->em->flush();
@@ -292,5 +313,17 @@ final class ItemPurchaseController extends AbstractController
             $form->handleRequest($request);
         }
         return $form;
+    }
+
+    private function validate(ItemPurchase $itemPurchase, ValidatorInterface $validator): array
+    {
+        $violations = $validator->validate($itemPurchase);
+        $messages = [];
+        if ($violations->count() > 0) {
+            foreach ($violations as $violation) {
+                $messages[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+        }
+        return $messages;
     }
 }

@@ -38,9 +38,11 @@ class ItemSale
     private ?bool $send = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être ultérieur à aujourd\'hui')]
     private ?\DateTimeInterface $sendAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être ultérieur à aujourd\'hui')]
     private ?\DateTimeInterface $refundAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'itemSales')]

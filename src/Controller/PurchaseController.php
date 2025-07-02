@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class PurchaseController extends AbstractController
 {
@@ -161,7 +162,7 @@ final class PurchaseController extends AbstractController
         'app_purchase_validate',
         ['purchaseId' => '\d+']
     )]
-    public function validate(int $purchaseId): Response
+    public function validatePurchase(int $purchaseId): Response
     {
         /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
@@ -209,8 +210,11 @@ final class PurchaseController extends AbstractController
         'app_purchase_state',
         ['purchaseId' => '\d+']
     )]
-    public function state(Request $request, int $purchaseId): Response
-    {
+    public function state(
+        Request $request,
+        ValidatorInterface $validator,
+        int $purchaseId
+    ): Response {
         /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
         if (!$purchase) {
@@ -232,6 +236,11 @@ final class PurchaseController extends AbstractController
                     ->setReceivedAt(new DateTime(date('Y-m-d', $time)))
                 ;
 
+                $messages = $this->validate($purchase, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
+
                 foreach ($purchase->getItemsPurchase() as $itemPurchase) {
                     if ($itemPurchase->isReceived() || $itemPurchase->isRefundRequest()) {
                         continue;
@@ -244,6 +253,11 @@ final class PurchaseController extends AbstractController
                 $purchase->setRefundRequest(true);
                 if (!empty($data['reason'])) {
                     $purchase->setRefundedReason($data['reason']);
+                }
+
+                $messages = $this->validate($purchase, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
                 }
 
                 foreach ($purchase->getItemsPurchase() as $itemPurchase) {
@@ -265,6 +279,11 @@ final class PurchaseController extends AbstractController
                     ->setRefundedAt($dateTime)
                 ;
 
+                $messages = $this->validate($purchase, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
+
                 foreach ($purchase->getItemsPurchase() as $itemPurchase) {
                     if (!$itemPurchase->isRefunded()) {
                         $itemPurchase->setRefunded(true)
@@ -281,5 +300,17 @@ final class PurchaseController extends AbstractController
         $this->em->flush();
 
         return $this->json(['result' => true]);
+    }
+
+    private function validate(Purchase $purchase, ValidatorInterface $validator): array
+    {
+        $violations = $validator->validate($purchase);
+        $messages = [];
+        if ($violations->count() > 0) {
+            foreach ($violations as $violation) {
+                $messages[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+        }
+        return $messages;
     }
 }

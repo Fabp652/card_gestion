@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class SaleController extends AbstractController
 {
@@ -123,7 +124,7 @@ final class SaleController extends AbstractController
         'app_sale_validate',
         ['saleId' => '\d+']
     )]
-    public function validate(int $saleId): Response
+    public function validateSale(int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
@@ -171,8 +172,11 @@ final class SaleController extends AbstractController
         'app_sale_state',
         ['saleId' => '\d+']
     )]
-    public function state(Request $request, int $saleId): Response
-    {
+    public function state(
+        Request $request,
+        ValidatorInterface $validator,
+        int $saleId
+    ): Response {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
@@ -193,12 +197,22 @@ final class SaleController extends AbstractController
                 $sale->setSold(true)
                     ->setSoldAt(new DateTime(date('Y-m-d', $time)))
                 ;
+
+                $messages = $this->validate($sale, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
                 break;
 
             case 'refundRequest':
                 $sale->setRefundRequest(true);
                 if (!empty($data['reason'])) {
                     $sale->setRefundReason($data['reason']);
+                }
+
+                $messages = $this->validate($sale, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
                 }
 
                 foreach ($sale->getItemSales() as $itemSale) {
@@ -220,6 +234,11 @@ final class SaleController extends AbstractController
                     ->setRefundAt($dateTime)
                 ;
 
+                $messages = $this->validate($sale, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
+
                 foreach ($sale->getItemSales() as $itemSale) {
                     if (!$itemSale->isRefunded()) {
                         $itemSale->setRefunded(true)
@@ -240,6 +259,11 @@ final class SaleController extends AbstractController
                 $sale->setSend(true)
                     ->setSendAt($dateTime)
                 ;
+
+                $messages = $this->validate($sale, $validator);
+                if (!empty($messages)) {
+                    return $this->json(['result' => false, 'messages' => $messages]);
+                }
 
                 foreach ($sale->getItemSales() as $itemSale) {
                     if (!$itemSale->isSend()) {
@@ -288,5 +312,17 @@ final class SaleController extends AbstractController
         } else {
             return $this->json(['result' => false, 'message' => 'La vente est déjà supprimée']);
         }
+    }
+
+    private function validate(Sale $sale, ValidatorInterface $validator): array
+    {
+        $violations = $validator->validate($sale);
+        $messages = [];
+        if ($violations->count() > 0) {
+            foreach ($violations as $violation) {
+                $messages[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+        }
+        return $messages;
     }
 }
