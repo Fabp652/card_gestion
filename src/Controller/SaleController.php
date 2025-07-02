@@ -52,7 +52,11 @@ final class SaleController extends AbstractController
     {
         $sale = new Sale();
 
-        $marketUrl = $this->generateUrl('app_market_search', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $marketUrl = $this->generateUrl(
+            'app_market_search',
+            ['forSale' => 1],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
         $form = $this->createForm(SaleType::class, $sale, ['marketUrl' => $marketUrl])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($sale);
@@ -98,7 +102,11 @@ final class SaleController extends AbstractController
             }
         }
 
-        $marketUrl = $this->generateUrl('app_market_search', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $marketUrl = $this->generateUrl(
+            'app_market_search',
+            ['forSale' => 1],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
 
         $form = $this->createForm(SaleType::class, $sale, ['marketUrl' => $marketUrl])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

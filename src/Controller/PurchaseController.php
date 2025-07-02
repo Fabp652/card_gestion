@@ -51,7 +51,11 @@ final class PurchaseController extends AbstractController
     public function form(Request $request): Response
     {
         $purchase = new Purchase();
-        $marketUrl = $this->generateUrl('app_market_search', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $marketUrl = $this->generateUrl(
+            'app_market_search',
+            ['forBuy' => 1],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
         $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -129,7 +133,11 @@ final class PurchaseController extends AbstractController
             }
         }
 
-        $marketUrl = $this->generateUrl('app_market_search', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $marketUrl = $this->generateUrl(
+            'app_market_search',
+            ['forBuy' => 1],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
         $isOrder = $purchase->isOrder();
 
         $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);

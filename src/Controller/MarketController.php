@@ -45,8 +45,8 @@ final class MarketController extends AbstractController
     #[Route('/market/search', 'app_market_search')]
     public function search(Request $request): Response
     {
-        $search = $request->query->get('search', '');
-        $markets = $this->marketRepo->findByFilter(['search' => $search])
+        $filters = $request->query->all();
+        $markets = $this->marketRepo->findByFilter($filters)
             ->select('m.id', 'm.name AS text')
             ->orderBy('m.name')
             ->getQuery()
