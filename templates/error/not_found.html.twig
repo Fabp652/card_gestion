@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Erreur {% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <div class="mx-4 container-fluid mt-container">
+        <div class="row">
+            <h1>{{ message }}</h1>
+        </div>
+    </div>
+{% endblock %}
