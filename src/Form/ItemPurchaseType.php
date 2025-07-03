@@ -47,17 +47,10 @@ class ItemPurchaseType extends AbstractType
                     'data-width' => '100%'
                 ],
                 'query_builder' => function (EntityRepository $er) use ($itemId) {
-                    $query = $er->createQueryBuilder('i')
-                        ->leftJoin('i.collection', 'c')
-                        ->orderBy('c.name')
-                        ->addOrderBy('i.name')
-                        ->setMaxResults('30')
+                    return $er->createQueryBuilder('i')
+                        ->where('i.id = :id')
+                        ->setParameter('id', $itemId)
                     ;
-                    if ($itemId) {
-                        $query->where('i.id = :id')
-                            ->setParameter('id', $itemId)
-                        ;
-                    }
                 },
                 'required' => false
             ])
@@ -68,7 +61,8 @@ class ItemPurchaseType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => ItemPurchase::class,
-            'itemId' => null
+            'itemId' => null,
+            'post' => false
         ]);
     }
 }

@@ -107,7 +107,11 @@ class CollectionController extends AbstractController
             $collection = new Collections();
         }
 
-        $form = $this->createForm(CollectionType::class, $collection)->handleRequest($request);
+        $form = $this->createForm(
+            CollectionType::class,
+            $collection,
+            ['post' => $request->isMethod('POST')]
+        )->handleRequest($request);
 
         if ($form->isSubmitted()) {
             if (!$collection->getCategory() && $categoryData = $form->get('category')->getData()) {

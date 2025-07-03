@@ -56,7 +56,14 @@ final class PurchaseController extends AbstractController
             ['forBuy' => 1],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
-        $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);
+        $form = $this->createForm(
+            PurchaseType::class,
+            $purchase,
+            [
+                'marketUrl' => $marketUrl,
+                'post' => $request->isMethod('POST')
+            ]
+        )->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$purchase->isOrder()) {
@@ -140,7 +147,14 @@ final class PurchaseController extends AbstractController
         );
         $isOrder = $purchase->isOrder();
 
-        $form = $this->createForm(PurchaseType::class, $purchase, ['marketUrl' => $marketUrl])->handleRequest($request);
+        $form = $this->createForm(
+            PurchaseType::class,
+            $purchase,
+            [
+                'marketUrl' => $marketUrl,
+                'post' => $request->isMethod('POST')
+            ]
+        )->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if ($isOrder != $purchase->isOrder()) {
                 $purchase->setReceived(!$purchase->isOrder());

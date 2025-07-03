@@ -27,6 +27,24 @@ class CollectionType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $data = $options['data'];
+        $post = $options['post'];
+        $query = null;
+        if ($data->getCategory() && !$post) {
+            $query = function (EntityRepository $er) use ($data) {
+                return $er->createQueryBuilder('c')
+                    ->where('c.id = :id')
+                    ->setParameter('id', $data->getCategory()->getId())
+                ;
+            };
+        } elseif ($post) {
+            $query = function (EntityRepository $er) {
+                return $er->createQueryBuilder('c')
+                    ->where('c.parent IS NULL')
+                ;
+            };
+        }
+
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Nom',
@@ -38,11 +56,8 @@ class CollectionType extends AbstractType
                 EntityType::class,
                 [
                     'class' => Category::class,
-                    'query_builder' => function (EntityRepository $er) {
-                        return $er->createQueryBuilder('c')
-                            ->where('c.parent IS NULL')
-                        ;
-                    },
+                    'query_builder' => $query,
+                    'choices' => !$post && !$data->getCategory() ? [] : null,
                     'choice_label' => 'name',
                     'choice_value' => 'id',
                     'label' => 'Catégorie',
@@ -104,7 +119,8 @@ class CollectionType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Collections::class
+            'data_class' => Collections::class,
+            'post' => false
         ]);
     }
 

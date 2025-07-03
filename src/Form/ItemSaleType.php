@@ -42,17 +42,10 @@ class ItemSaleType extends AbstractType
                 'label_attr' => ['class' => self::LABEL_CLASS],
                 'required' => false,
                 'query_builder' => function (EntityRepository $er) use ($itemQualityId) {
-                    $query = $er->createQueryBuilder('iq')
-                        ->leftJoin('iq.collection', 'c')
-                        ->orderBy('c.name')
-                        ->addOrderBy('iq.name')
-                        ->setMaxResults('30')
+                    return $er->createQueryBuilder('iq')
+                        ->where('iq.id = :id')
+                        ->setParameter('id', $itemQualityId)
                     ;
-                    if ($itemQualityId) {
-                        $query->where('iq.id = :id')
-                            ->setParameter('id', $itemQualityId)
-                        ;
-                    }
                 }
             ])
         ;

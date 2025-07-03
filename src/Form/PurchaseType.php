@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Market;
 use App\Entity\Purchase;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\PreSubmitEvent;
@@ -27,6 +28,24 @@ class PurchaseType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $data = $options['data'];
+        $post = $options['post'];
+        $query = null;
+        if ($data->getMarket() && !$post) {
+            $query = function (EntityRepository $er) use ($data) {
+                return $er->createQueryBuilder('m')
+                    ->where('m.id = :id')
+                    ->setParameter('id', $data->getMarket()->getId())
+                ;
+            };
+        } elseif ($post) {
+            $query = function (EntityRepository $er) {
+                return $er->createQueryBuilder('m')
+                    ->where('m.forBuy = 1')
+                ;
+            };
+        }
+
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Nom',
@@ -57,6 +76,8 @@ class PurchaseType extends AbstractType
                 ],
                 'choice_label' => 'name',
                 'choice_value' => 'id',
+                'query_builder' => $query,
+                'choices' => !$post && !$data->getMarket() ? [] : null
             ])
         ;
 
@@ -80,7 +101,8 @@ class PurchaseType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Purchase::class,
-            'marketUrl' => null
+            'marketUrl' => null,
+            'post' => false
         ]);
     }
 }

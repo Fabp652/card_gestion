@@ -4,10 +4,10 @@ namespace App\Form;
 
 use App\Entity\Market;
 use App\Entity\Sale;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
@@ -25,6 +25,24 @@ class SaleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $data = $options['data'];
+        $post = $options['post'];
+        $query = null;
+        if ($data->getMarket() && !$post) {
+            $query = function (EntityRepository $er) use ($data) {
+                return $er->createQueryBuilder('m')
+                    ->where('m.id = :id')
+                    ->setParameter('id', $data->getMarket()->getId())
+                ;
+            };
+        } elseif ($post) {
+            $query = function (EntityRepository $er) {
+                return $er->createQueryBuilder('m')
+                    ->where('m.forBuy = 1')
+                ;
+            };
+        }
+
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Nom',
@@ -48,7 +66,9 @@ class SaleType extends AbstractType
                     'data-ajax--url' => $options['marketUrl']
                 ],
                 'choice_label' => 'name',
-                'choice_value' => 'id'
+                'choice_value' => 'id',
+                'query_builder' => $query,
+                'choices' => !$post && !$data->getMarket() ? [] : null
             ])
         ;
 
@@ -79,7 +99,8 @@ class SaleType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Sale::class,
-            'marketUrl' => null
+            'marketUrl' => null,
+            'post' => false
         ]);
     }
 }

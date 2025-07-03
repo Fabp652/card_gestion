@@ -57,7 +57,14 @@ final class SaleController extends AbstractController
             ['forSale' => 1],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
-        $form = $this->createForm(SaleType::class, $sale, ['marketUrl' => $marketUrl])->handleRequest($request);
+        $form = $this->createForm(
+            SaleType::class,
+            $sale,
+            [
+                'marketUrl' => $marketUrl,
+                'post' => $request->isMethod('POST')
+            ]
+        )->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($sale);
             $this->em->flush();
@@ -108,7 +115,14 @@ final class SaleController extends AbstractController
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $form = $this->createForm(SaleType::class, $sale, ['marketUrl' => $marketUrl])->handleRequest($request);
+        $form = $this->createForm(
+            SaleType::class,
+            $sale,
+            [
+                'marketUrl' => $marketUrl,
+                'post' => $request->isMethod('POST')
+            ]
+        )->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->flush();
             return $this->json(['result' => true, 'message' => 'Achat modifié avec succès']);
