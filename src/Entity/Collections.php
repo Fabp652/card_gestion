@@ -29,7 +29,7 @@ class Collections
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'collections')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn]
     #[Assert\NotBlank(message: 'La collection doit avoir une catégorie')]
     private ?Category $category = null;
 

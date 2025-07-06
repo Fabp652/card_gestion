@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250706091823 extends AbstractMigration
+final class Version20250706092327 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,7 @@ final class Version20250706091823 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE category ADD deleted_at DATETIME DEFAULT NULL');
-        $this->addSql('ALTER TABLE collections ADD deleted_at DATETIME DEFAULT NULL');
+        $this->addSql('ALTER TABLE collections ADD deleted_at DATETIME DEFAULT NULL, CHANGE category_id category_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE criteria ADD deleted_at DATETIME DEFAULT NULL');
         $this->addSql('ALTER TABLE file_manager ADD deleted_at DATETIME DEFAULT NULL');
         $this->addSql('ALTER TABLE item ADD deleted_at DATETIME DEFAULT NULL');
@@ -35,7 +35,7 @@ final class Version20250706091823 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE category DROP deleted_at');
-        $this->addSql('ALTER TABLE collections DROP deleted_at');
+        $this->addSql('ALTER TABLE collections DROP deleted_at, CHANGE category_id category_id INT NOT NULL');
         $this->addSql('ALTER TABLE criteria DROP deleted_at');
         $this->addSql('ALTER TABLE file_manager DROP deleted_at');
         $this->addSql('ALTER TABLE item DROP deleted_at');
