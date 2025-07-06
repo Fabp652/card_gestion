@@ -188,9 +188,7 @@ class ItemQuality
 
     public function getItemSale(): ?ItemSale
     {
-        return $this->itemSales->filter(function ($itemSale) {
-            return !$itemSale->getDeletedAt();
-        })->first();
+        return $this->itemSales->first();
     }
 
     public function isAvailableSale(): ?bool
