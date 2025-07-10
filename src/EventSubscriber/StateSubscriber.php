@@ -3,6 +3,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\ItemPurchase;
+use App\Entity\ItemQuality;
 use App\Entity\ItemSale;
 use App\Entity\Purchase;
 use App\Entity\Sale;
@@ -33,7 +34,7 @@ class StateSubscriber implements EventSubscriberInterface
                 foreach ($entitiesCollection as $ipOrIs) {
                     if ($state == 'validate') {
                         if ($ipOrIs instanceof ItemSale) {
-                            $ipOrIs->getItemQuality()->setAvailableSale(false);
+                            $this->availableSaleIQ($ipOrIs->getItemQuality(), false);
                         }
 
                         if (!$entity->isOrder()) {
@@ -57,27 +58,55 @@ class StateSubscriber implements EventSubscriberInterface
                         }
 
                         if ($state == 'send' || $state == 'received' || $state == 'refundRequest') {
-                            $add = $state == 'refundRequest' ? $entity instanceof Sale : $state == 'received';
+                            if ($state == 'refundRequest') {
+                                $add = $entity instanceof Sale;
+                                if ($add) {
+                                    $this->availableSaleIQ($ipOrIs->getItemQuality(), true);
+                                }
+                            } else {
+                                $add = $state == 'received';
+                            }
                             $this->updateItemsNumber($ipOrIs, $add);
                         }
                     }
                 }
             } elseif ($entity instanceof ItemPurchase || $entity instanceof ItemSale) {
-                $purchaseOrSale = $entity instanceof ItemPurchase ? $entity->getPurchase() : $entity->getSale();
-                $entityCollections = $this->getIPOrIS($purchaseOrSale);
-                $entitiesFiltered = $entityCollections->filter(function ($entityCollection) use ($state, $getMethod) {
-                    if ($state == 'received' || $state == 'send') {
-                        return $entityCollection->{$getMethod}() || $entityCollection->isRefundRequest();
-                    }
-                    return $entityCollection->{$getMethod}();
-                });
+                $changeState = true;
+                if (
+                    $entity instanceof ItemPurchase &&
+                    ($state == 'refunded' || $state == 'refundRequest') &&
+                    $entity->getQuantityToRefund() &&
+                    $entity->getQuantityToRefund() < $entity->getQuantity()
+                ) {
+                    $changeState = false;
+                }
 
-                if ($entitiesFiltered->count() == $entityCollections->count()) {
-                    $purchaseOrSale->{$setMethod}($value);
+                if ($changeState) {
+                    $purchaseOrSale = $entity instanceof ItemPurchase ? $entity->getPurchase() : $entity->getSale();
+                    $entityCollections = $this->getIPOrIS($purchaseOrSale);
+                    $entitiesFiltered = $entityCollections->filter(
+                        function ($entityCollection) use ($state, $getMethod) {
+                            if ($state == 'received' || $state == 'send') {
+                                return $entityCollection->{$getMethod}() || $entityCollection->isRefundRequest();
+                            }
+                            return $entityCollection->{$getMethod}();
+                        }
+                    );
+
+                    if ($entitiesFiltered->count() == $entityCollections->count()) {
+                        $purchaseOrSale->{$setMethod}($value);
+                    }
                 }
 
                 if ($state == 'send' || $state == 'received' || $state == 'refundRequest') {
-                    $add = $state == 'refundRequest' ? $entity instanceof ItemSale : $state == 'received';
+                    if ($state == 'refundRequest') {
+                        $add = $entity instanceof ItemSale;
+                        if ($add) {
+                            $this->availableSaleIQ($entity->getItemQuality(), true);
+                        }
+                    } else {
+                        $add = $state == 'received';
+                    }
                     $this->updateItemsNumber($entity, $state == 'received');
                 }
             }
@@ -102,7 +131,19 @@ class StateSubscriber implements EventSubscriberInterface
         $item = $entity instanceof ItemPurchase ?
             $entity->getItem() : $entity->getItemQuality()->getItem()
         ;
-        $itemQty = $add ? $item->getNumber() + $entity->getQuantity() : $item->getNumber() - 1;
+
+        if ($entity instanceof ItemSale) {
+            $qty = 1;
+        } else {
+            $qty = $entity->getQuantityToRefund() ?? $entity->getQuantity();
+        }
+
+        $itemQty = $add ? $item->getNumber() + $qty : $item->getNumber() - $qty;
         $item->setNumber($itemQty);
+    }
+
+    private function availableSaleIQ(ItemQuality $iq, bool $available): void
+    {
+        $iq->setAvailableSale($available);
     }
 }

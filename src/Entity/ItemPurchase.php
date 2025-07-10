@@ -62,6 +62,9 @@ class ItemPurchase
     #[ORM\JoinColumn(nullable: false)]
     private ?Purchase $purchase = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $quantityToRefund = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -195,6 +198,18 @@ class ItemPurchase
     public function setPurchase(?Purchase $purchase): static
     {
         $this->purchase = $purchase;
+
+        return $this;
+    }
+
+    public function getQuantityToRefund(): ?int
+    {
+        return $this->quantityToRefund;
+    }
+
+    public function setQuantityToRefund(int $quantityToRefund): static
+    {
+        $this->quantityToRefund = $quantityToRefund;
 
         return $this;
     }

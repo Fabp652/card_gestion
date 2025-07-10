@@ -239,10 +239,15 @@ final class ItemPurchaseController extends AbstractController
             $itemPurchase->{$method . 'At'}(new DateTime(date('Y-m-d', $time)));
         }
 
-        if ($state == 'refundRequest' && !empty($data['reason'])) {
-            $itemPurchase->setRefundReason($data['reason']);
-        }
+        if ($state == 'refundRequest') {
+            if (!empty($data['reason'])) {
+                $itemPurchase->setRefundReason($data['reason']);
+            }
 
+            if (!empty($data['quantity']) && $data['quantity'] < $itemPurchase->getQuantity()) {
+                $itemPurchase->setQuantityToRefund($data['quantity']);
+            }
+        }
         $itemPurchase->{$method}(true);
 
         $violations = $validator->validate($itemPurchase);
