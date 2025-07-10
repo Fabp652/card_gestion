@@ -25,3 +25,6 @@ services:
     App\Service\FileManager:
         arguments:
             $projectDirectory: "%kernel.project_dir%"
+
+    App\EventSubscriber:
+        tags: [state]

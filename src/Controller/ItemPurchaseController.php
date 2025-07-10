@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\ItemPurchase;
 use App\Entity\Purchase;
+use App\Event\StateEvent;
 use App\Form\FormHiddenType;
 use App\Form\ItemPurchaseType;
 use App\Repository\ItemPurchaseRepository;
@@ -12,6 +13,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -211,6 +213,7 @@ final class ItemPurchaseController extends AbstractController
     public function state(
         Request $request,
         ValidatorInterface $validator,
+        EventDispatcherInterface $dispatcher,
         int $itemPurchaseId
     ): Response {
         /** @var ItemPurchase $itemPurchase */
@@ -220,83 +223,45 @@ final class ItemPurchaseController extends AbstractController
         }
 
         $data = $request->request->all();
-        switch ($data['state']) {
-            case 'received':
-                if (empty($data['date'])) {
-                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
-                }
-
-                $dateString = str_replace('/', '-', $data['date']);
-                $time = strtotime($dateString);
-                $itemPurchase->setReceived(true)
-                    ->setReceivedAt(new DateTime(date('Y-m-d', $time)))
-                ;
-
-                $messages = $this->validate($itemPurchase, $validator);
-                if (!empty($messages)) {
-                    return $this->json(['result' => false, 'messages' => $messages]);
-                }
-
-
-                $purchase = $itemPurchase->getPurchase();
-                $iPReceivedOrRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
-                    return $itemPurchase->isReceived() || $itemPurchase->isRefundRequest();
-                });
-                if ($iPReceivedOrRefundRequest->count() == $purchase->getItemsPurchase()->count()) {
-                    $purchase->setReceived(true);
-                }
-                break;
-
-            case 'refundRequest':
-                $itemPurchase->setRefundRequest(true);
-                if (!empty($data['reason'])) {
-                    $itemPurchase->setRefundReason($data['reason']);
-                }
-
-                $purchase = $itemPurchase->getPurchase();
-
-                $messages = $this->validate($itemPurchase, $validator);
-                if (!empty($messages)) {
-                    return $this->json(['result' => false, 'messages' => $messages]);
-                }
-
-                $iPRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
-                    return $itemPurchase->isRefundRequest();
-                });
-                if ($iPRefundRequest->count() == $purchase->getItemsPurchase()->count()) {
-                    $purchase->setRefundRequest(true);
-                }
-                break;
-
-            case 'refunded':
-                if (empty($data['date'])) {
-                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
-                }
-
-                $dateString = str_replace('/', '-', $data['date']);
-                $time = strtotime($dateString);
-                $itemPurchase->setRefunded(true)
-                    ->setRefundAt(new DateTime(date('Y-m-d', $time)))
-                ;
-
-                $messages = $this->validate($itemPurchase, $validator);
-                if (!empty($messages)) {
-                    return $this->json(['result' => false, 'messages' => $messages]);
-                }
-
-                $purchase = $itemPurchase->getPurchase();
-                $iPRefundRequest = $purchase->getItemsPurchase()->filter(function ($itemPurchase) {
-                    return $itemPurchase->isRefunded();
-                });
-                if ($iPRefundRequest->count() == $purchase->getItemsPurchase()->count()) {
-                    $purchase->setRefunded(true);
-                }
-                break;
-
-            default:
-                return $this->json(['result' => false, 'message' => 'Une erreur est survenue.']);
-                break;
+        $state = $data['state'];
+        if (!in_array($state, ['received', 'refunded', 'refundRequest'])) {
+            return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
         }
+
+        $method = 'set' . ucfirst($state);
+        if (in_array($state, ['received', 'refunded'])) {
+            if (empty($data['date'])) {
+                return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
+            }
+
+            $dateString = str_replace('/', '-', $data['date']);
+            $time = strtotime($dateString);
+            $itemPurchase->{$method . 'At'}(new DateTime(date('Y-m-d', $time)));
+        }
+
+        if ($state == 'refundRequest' && !empty($data['reason'])) {
+            $itemPurchase->setRefundReason($data['reason']);
+        }
+
+        $itemPurchase->{$method}(true);
+
+        $violations = $validator->validate($itemPurchase);
+        if ($violations->count() > 0) {
+            $messages = [];
+            foreach ($violations as $violation) {
+                $messages[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+            return $this->json(['result' => false, 'messages' => $messages]);
+        }
+
+        $event = new StateEvent(
+            $itemPurchase->getId(),
+            ItemPurchase::class,
+            $state,
+            true
+        );
+
+        $dispatcher->dispatch($event, 'state');
         $this->em->flush();
 
         return $this->json(['result' => true]);
@@ -313,17 +278,5 @@ final class ItemPurchaseController extends AbstractController
             $form->handleRequest($request);
         }
         return $form;
-    }
-
-    private function validate(ItemPurchase $itemPurchase, ValidatorInterface $validator): array
-    {
-        $violations = $validator->validate($itemPurchase);
-        $messages = [];
-        if ($violations->count() > 0) {
-            foreach ($violations as $violation) {
-                $messages[$violation->getPropertyPath()] = $violation->getMessage();
-            }
-        }
-        return $messages;
     }
 }

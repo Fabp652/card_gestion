@@ -186,7 +186,7 @@ class ItemQuality
         return $this;
     }
 
-    public function getItemSale(): ?ItemSale
+    public function getItemSale(): ItemSale|false
     {
         return $this->itemSales->first();
     }

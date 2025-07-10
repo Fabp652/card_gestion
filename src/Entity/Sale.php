@@ -174,12 +174,12 @@ class Sale
         return $this;
     }
 
-    public function getRefundAt(): ?\DateTimeInterface
+    public function getRefundedAt(): ?\DateTimeInterface
     {
         return $this->refundAt;
     }
 
-    public function setRefundAt(?\DateTimeInterface $refundAt): static
+    public function setRefundedAt(?\DateTimeInterface $refundAt): static
     {
         $this->refundAt = $refundAt;
 

@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Sale;
+use App\Event\StateEvent;
 use App\Form\SaleType;
 use App\Repository\SaleRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -146,7 +148,7 @@ final class SaleController extends AbstractController
         'app_sale_validate',
         ['saleId' => '\d+']
     )]
-    public function validateSale(int $saleId): Response
+    public function validateSale(EventDispatcherInterface $dispatcher, int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
@@ -163,6 +165,15 @@ final class SaleController extends AbstractController
         $dateTime = new DateTime();
         $sale->setIsValid(true);
         $sale->setValidatedAt($dateTime);
+
+        $event = new StateEvent(
+            $sale->getId(),
+            Sale::class,
+            'validate',
+            true
+        );
+
+        $dispatcher->dispatch($event, 'state');
 
         $this->em->flush();
 
@@ -197,6 +208,7 @@ final class SaleController extends AbstractController
     public function state(
         Request $request,
         ValidatorInterface $validator,
+        EventDispatcherInterface $dispatcher,
         int $saleId
     ): Response {
         /** @var Sale $sale */
@@ -208,97 +220,45 @@ final class SaleController extends AbstractController
         }
 
         $data = $request->request->all();
-        switch ($data['state']) {
-            case 'sold':
-                if (empty($data['date'])) {
-                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
-                }
-
-                $dateString = str_replace('/', '-', $data['date']);
-                $time = strtotime($dateString);
-                $sale->setSold(true)
-                    ->setSoldAt(new DateTime(date('Y-m-d', $time)))
-                ;
-
-                $messages = $this->validate($sale, $validator);
-                if (!empty($messages)) {
-                    return $this->json(['result' => false, 'messages' => $messages]);
-                }
-                break;
-
-            case 'refundRequest':
-                $sale->setRefundRequest(true);
-                if (!empty($data['reason'])) {
-                    $sale->setRefundReason($data['reason']);
-                }
-
-                $messages = $this->validate($sale, $validator);
-                if (!empty($messages)) {
-                    return $this->json(['result' => false, 'messages' => $messages]);
-                }
-
-                foreach ($sale->getItemSales() as $itemSale) {
-                    if (!$itemSale->isRefundRequest()) {
-                        $itemSale->setRefundRequest(true);
-                    }
-                }
-                break;
-
-            case 'refunded':
-                if (empty($data['date'])) {
-                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
-                }
-
-                $dateString = str_replace('/', '-', $data['date']);
-                $time = strtotime($dateString);
-                $dateTime = new DateTime(date('Y-m-d', $time));
-                $sale->setRefunded(true)
-                    ->setRefundAt($dateTime)
-                ;
-
-                $messages = $this->validate($sale, $validator);
-                if (!empty($messages)) {
-                    return $this->json(['result' => false, 'messages' => $messages]);
-                }
-
-                foreach ($sale->getItemSales() as $itemSale) {
-                    if (!$itemSale->isRefunded()) {
-                        $itemSale->setRefunded(true)
-                            ->setRefundAt($dateTime);
-                        ;
-                    }
-                }
-                break;
-
-            case 'send':
-                if (empty($data['date'])) {
-                    return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
-                }
-
-                $dateString = str_replace('/', '-', $data['date']);
-                $time = strtotime($dateString);
-                $dateTime = new DateTime(date('Y-m-d', $time));
-                $sale->setSend(true)
-                    ->setSendAt($dateTime)
-                ;
-
-                $messages = $this->validate($sale, $validator);
-                if (!empty($messages)) {
-                    return $this->json(['result' => false, 'messages' => $messages]);
-                }
-
-                foreach ($sale->getItemSales() as $itemSale) {
-                    if (!$itemSale->isSend()) {
-                        $itemSale->setSend(true)
-                            ->setSendAt($dateTime);
-                        ;
-                    }
-                }
-                break;
-            default:
-                return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
-                break;
+        $state = $data['state'];
+        if (!in_array($state, ['send', 'refunded', 'refundRequest', 'sold'])) {
+            return $this->json(['result' => false, 'message' => 'Une erreur est survenue']);
         }
+
+        $method = 'set' . ucfirst($state);
+        if (in_array($state, ['send', 'refunded'])) {
+            if (empty($data['date'])) {
+                return $this->json(['result' => false, 'messages' => ['date' => 'Veuillez choisir une date']]);
+            }
+
+            $dateString = str_replace('/', '-', $data['date']);
+            $time = strtotime($dateString);
+            $sale->{$method . 'At'}(new DateTime(date('Y-m-d', $time)));
+        }
+
+        if ($state == 'refundRequest' && !empty($data['reason'])) {
+            $sale->setRefundReason($data['reason']);
+        }
+
+        $sale->{$method}(true);
+
+        $violations = $validator->validate($sale);
+        if ($violations->count() > 0) {
+            $messages = [];
+            foreach ($violations as $violation) {
+                $messages[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+            return $this->json(['result' => false, 'messages' => $messages]);
+        }
+
+        $event = new StateEvent(
+            $sale->getId(),
+            Sale::class,
+            $state,
+            true
+        );
+
+        $dispatcher->dispatch($event, 'state');
         $this->em->flush();
 
         return $this->json(['result' => true]);
@@ -334,17 +294,5 @@ final class SaleController extends AbstractController
         } else {
             return $this->json(['result' => false, 'message' => 'La vente est déjà supprimée']);
         }
-    }
-
-    private function validate(Sale $sale, ValidatorInterface $validator): array
-    {
-        $violations = $validator->validate($sale);
-        $messages = [];
-        if ($violations->count() > 0) {
-            foreach ($violations as $violation) {
-                $messages[$violation->getPropertyPath()] = $violation->getMessage();
-            }
-        }
-        return $messages;
     }
 }
