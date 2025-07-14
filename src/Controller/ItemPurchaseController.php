@@ -244,7 +244,13 @@ final class ItemPurchaseController extends AbstractController
                 $itemPurchase->setRefundReason($data['reason']);
             }
 
-            if (!empty($data['quantity']) && $data['quantity'] < $itemPurchase->getQuantity()) {
+            if (is_numeric($data['quantity']) && $data['quantity'] <= $itemPurchase->getQuantity()) {
+                if ($itemPurchase->getQuantityToRefund() && $itemPurchase->getQuantityToRefund() > $data['quantity']) {
+                    return $this->json([
+                        'result' => false,
+                        'messages' => ['quantity' => 'Doit être supérieur à la quantité actuelle']
+                    ]);
+                }
                 $itemPurchase->setQuantityToRefund($data['quantity']);
             }
         }

@@ -36,6 +36,7 @@ export default class extends Controller {
                 let submitUrl = $(this).data('submit-url');
                 let className = '.' + $(this).data('class');
                 let state = $(this).data('state');
+                let quantity = $(this).attr('data-quantity');
                 $('#modalForm').children().addClass('d-none');
                 $('.modalInput').val('');
 
@@ -45,6 +46,10 @@ export default class extends Controller {
                     $('#state').val(state);
                 }
                 $(className).removeClass('d-none');
+
+                if (quantity) {
+                    $('#quantity').val(quantity);
+                }
 
                 modal.show();
             }

@@ -45,13 +45,16 @@
                         <i class="fa-solid fa-check"></i>
                     </button>
                 {% endif %}
-                {% if not itemPurchase.refundRequest %}
+                {% if not itemPurchase.refundRequest or itemPurchase.quantityToRefund < itemPurchase.quantity %}
                     <button
                         class="btn btn-sm btn-danger showModal"
                         data-title='Remboursement de "{{ item.choiceLabel }}"'
                         data-class="refundRequestIP"
                         data-submit-url="{{ absolute_url(path('app_item_purchase_state', {itemPurchaseId: itemPurchase.id})) }}"
                         data-state="refundRequest"
+                        {% if itemPurchase.quantityToRefund and itemPurchase.quantityToRefund < itemPurchase.quantity %}
+                            data-quantity="{{ itemPurchase.quantityToRefund }}"
+                        {% endif %}
                     >
                         <i class="fa-solid fa-reply"></i>
                     </button>
