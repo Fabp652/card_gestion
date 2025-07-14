@@ -3,7 +3,8 @@
 namespace App\Service;
 
 use App\Entity\FileManager as EntityFileManager;
-use Psr\Container\ContainerInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -14,11 +15,14 @@ class FileManager
 
     private string $folderPath;
 
-    public function __construct(private SluggerInterface $slugger, string $projectDirectory)
-    {
+    public function __construct(
+        private SluggerInterface $slugger,
+        private Filesystem $filesystem,
+        private string $projectDirectory
+    ) {
         $this->folderPath = $projectDirectory . self::FOLDER_DATA;
-        if (!file_exists($this->folderPath)) {
-            mkdir($this->folderPath);
+        if (!$this->filesystem->exists($this->folderPath)) {
+            $this->filesystem->mkdir($this->folderPath, 0700);
         }
     }
 
@@ -29,8 +33,8 @@ class FileManager
     public function getDirectory(string $folderName): string
     {
         $directory = $this->folderPath . '/' . $folderName;
-        if (!file_exists($directory)) {
-            mkdir($directory);
+        if (!$this->filesystem->exists($directory)) {
+            $this->filesystem->mkdir($directory);
         }
         return $directory;
     }
@@ -91,7 +95,11 @@ class FileManager
     {
         $directory = $this->getDirectory($folder);
         $filePath = $directory . '/' . $filename;
+        if (!$this->filesystem->exists($filePath)) {
+            return false;
+        }
 
-        return unlink($filePath);
+        $this->filesystem->remove($filePath);
+        return true;
     }
 }
