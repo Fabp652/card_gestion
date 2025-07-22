@@ -20,7 +20,7 @@ class FileExtension extends AbstractExtension
     {
         return [
             new TwigFunction('file_encoded', [$this, 'getFileEncoded']),
-            new TwigFunction('file_encoded_id', [$this, 'getFileEncodedId'])
+            new TwigFunction('file_encoded_id', [$this, 'getFileEncodedById'])
         ];
     }
 

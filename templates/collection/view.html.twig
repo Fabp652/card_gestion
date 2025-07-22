@@ -99,7 +99,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {% if statRarities %}
+                    {% if statRarities is not null %}
                         <div class="row mb-4">
                                 <div class="col-12 px-0">
                                     <div class="card border-black border-end-0 border-top-0">
@@ -131,7 +131,7 @@
                                                     {% for rarity in statRarities %}
                                                         <tr>
                                                             <td>{{ rarity.rarityName|capitalize }}</td>
-                                                            <td>{% if rarity.fileId %}<img src="{{ file_encoded(rarity.fileId) }}">{% endif %}</td>
+                                                            <td>{% if rarity.fileId %}<img src="{{ file_encoded_id(rarity.fileId) }}">{% endif %}</td>
                                                             <td>{{ rarity.grade }}</td>
                                                             <td>{{ rarity.totalItem ?? 0 }}</td>
                                                             <td><b class="text-success">{{ rarity.totalAmount|format_currency('EUR', locale = 'fr') }}</b></td>

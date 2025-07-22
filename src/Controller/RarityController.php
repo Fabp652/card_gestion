@@ -64,6 +64,8 @@ final class RarityController extends AbstractController
                             'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
                         ]);
                     }
+
+                    $this->em->remove($rarity->getFile());
                 }
 
                 $fileManagerEntity = $fileManager->upload(self::FOLDER, $rarity->getName(), $file);
