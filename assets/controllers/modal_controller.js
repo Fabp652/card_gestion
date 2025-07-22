@@ -8,6 +8,13 @@ export default class extends Controller {
         $('.showModal').on('click', function (e) {
             let url = $(this).data('url');
             let title = $(this).data('title');
+            let modalXl = $(this).attr('data-modal-xl');
+
+            if (modalXl && modalXl == 1) {
+                $('#modal, .modal-dialog').addClass('modal-xl');
+            } else {
+                $('#modal, .modal-dialog').removeClass('modal-xl');
+            }
             $('.msg').remove();
             $('input').removeClass('is-invalid');
             $('select').removeClass('is-invalid');

@@ -82,10 +82,17 @@ class Item
     #[ORM\OneToMany(targetEntity: ItemPurchase::class, mappedBy: 'item')]
     private Collection $itemPurchases;
 
+    /**
+     * @var Collection<int, FileManager>
+     */
+    #[ORM\ManyToMany(targetEntity: FileManager::class)]
+    private Collection $files;
+
     public function __construct()
     {
         $this->itemQualities = new ArrayCollection();
         $this->itemPurchases = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -347,5 +354,29 @@ class Item
         $choiceLabel .= $this->name . ' (' . $this->collection->getName() . ')';
 
         return $choiceLabel;
+    }
+
+    /**
+     * @return Collection<int, FileManager>
+     */
+    public function getFiles(): Collection
+    {
+        return $this->files;
+    }
+
+    public function addFile(FileManager $file): static
+    {
+        if (!$this->files->contains($file)) {
+            $this->files->add($file);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(FileManager $file): static
+    {
+        $this->files->removeElement($file);
+
+        return $this;
     }
 }

@@ -83,22 +83,24 @@ class ItemQualityController extends AbstractController
                 $itemQuality->setItem($item);
             }
 
-            if ($form->has('file')) {
-                $file = $form->get('file')->getData();
-                if ($file) {
-                    if ($itemQuality->getFile()) {
-                        $result = $fileManager->removeFile(
-                            $itemQuality->getFile()->getName(),
-                            $itemQuality->getFile()->getFolder()
-                        );
-                        if (!$result) {
-                            return $this->json([
-                                'result' => false,
-                                'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
-                            ]);
-                        }
+            if ($request->request->has('removeFiles')) {
+                $removeFiles = explode(',', $request->request->get('removeFiles'));
+                foreach ($removeFiles as $removeFile) {
+                    $file = $fileManager->removeFileById((int) $removeFile);
+                    if (!$file) {
+                        return $this->json([
+                            'result' => false,
+                            'message' => 'Une erreur est survenue lors de la suppression du fichier.'
+                        ]);
                     }
-                    $fileManagerEntity = $fileManager->upload('item', $item->getName(), $file);
+
+                    $this->em->remove($file);
+                }
+            }
+
+            if ($form->has('files')) {
+                foreach ($form->get('files')->getData() as $file) {
+                    $fileManagerEntity = $fileManager->upload('itemQuality', $item->getName(), $file);
 
                     if (!$fileManagerEntity) {
                         return $this->json([
@@ -107,7 +109,7 @@ class ItemQualityController extends AbstractController
                         ]);
                     }
                     $this->em->persist($fileManagerEntity);
-                    $itemQuality->setFile($fileManagerEntity);
+                    $itemQuality->addFile($fileManagerEntity);
                 }
             }
 
@@ -129,7 +131,8 @@ class ItemQualityController extends AbstractController
         $render = $this->render('item/quality/form.html.twig', [
             'form' => $form->createView(),
             'itemId' => $itemId,
-            'itemQualityId' => $itemQualityId
+            'itemQualityId' => $itemQualityId,
+            'itemQuality' => $itemQualityId ? $itemQuality : null
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);

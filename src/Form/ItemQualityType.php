@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\File;
 
 class ItemQualityType extends AbstractType
@@ -73,25 +74,28 @@ class ItemQualityType extends AbstractType
                 ]
             )
             ->add(
-                'file',
+                'files',
                 FileType::class,
                 [
                     'label' => 'Photo',
                     'label_attr' => ['class' => self::LABEL_CLASS],
                     'attr' => [
-                        'class' => self::ATTR_CLASS_CONTROL
+                        'class' => self::ATTR_CLASS_CONTROL . ' fileInput'
                     ],
                     'mapped' => false,
                     'constraints' => [
-                        new File([
-                            'mimeTypes' => [
-                                'image/jpeg',
-                                'image/png'
-                            ],
-                            'mimeTypesMessage' => 'Seuls les image au formats jpeg ou png sont acceptés'
+                        new All([
+                            'constraints' => new File([
+                                'mimeTypes' => [
+                                    'image/jpeg',
+                                    'image/png'
+                                ],
+                                'mimeTypesMessage' => 'Seuls les image au formats jpeg ou png sont acceptés'
+                            ])
                         ])
                     ],
-                    'required' => false
+                    'required' => false,
+                    'multiple' => true
                 ]
             )
             ->add('storage', EntityType::class, [

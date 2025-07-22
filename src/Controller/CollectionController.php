@@ -148,6 +148,8 @@ class CollectionController extends AbstractController
                             'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
                         ]);
                     }
+
+                    $this->em->remove($collection->getFile());
                 }
 
                 $fileManagerEntity = $fileManager->upload(self::FOLDER, $collection->getName(), $file);

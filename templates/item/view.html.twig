@@ -93,12 +93,28 @@
                                 {% endif %}
                                 {% for itemQuality in item.itemQualities %}
                                     <div class="row mt-5 mb-3 border border-black" style="height:400px;">
-                                        <div class="col-5 position-relative py-3 text-center border-end border-black mh-100{{ not itemQuality.file ? ' no-image' : ''}}">
-                                            <div class="sort-item position-absolute top-0 start-0 border-bottom border-end border-black bg-light">
+                                        <div class="col-5 position-relative p-0 text-center border-end border-black h-100{{ itemQuality.files.empty ? ' no-image' : ''}}">
+                                            <div class="sort-item position-absolute top-0 start-0 border-bottom border-end border-black bg-light z-3">
                                                 <h1 class="fw-bold">{{ itemQuality.sort }}</h1>
                                             </div>
-                                            {% if itemQuality.file %}
-                                                <img class="mh-100" src="{{ file_encoded(itemQuality.file) }}">
+                                            {% if not itemQuality.files.empty %}
+                                                <div id="carouselImages" class="carousel slide h-100">
+                                                    <div class="carousel-inner h-100">
+                                                        {% for file in itemQuality.files %}
+                                                            <div class="carousel-item h-100{{ itemQuality.files|first == file ? ' active' : '' }}">
+                                                                <img src="{{ file_encoded(file) }}" class="h-100">
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <button class="carousel-control-prev bg-black" type="button" data-bs-target="#carouselImages" data-bs-slide="prev">
+                                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                        <span class="visually-hidden">Précédent</span>
+                                                    </button>
+                                                    <button class="carousel-control-next bg-black" type="button" data-bs-target="#carouselImages" data-bs-slide="next">
+                                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                        <span class="visually-hidden">Suivant</span>
+                                                    </button>
+                                                </div>
                                             {% endif %}
                                         </div>
                                         <div class="col py-3 position-relative text-bg-dark overflow-auto mh-100">
@@ -125,7 +141,8 @@
                                                     type="button"
                                                     class="btn btn-primary showModal"
                                                     data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
-                                                    data-title="Évaluer l'objet"
+                                                    data-title='Modifier "{{ itemQuality.choiceLabel }}"'
+                                                    data-modal-xl="1"
                                                 >
                                                     <i class="fa-solid fa-gear"></i>
                                                 </button>

@@ -76,6 +76,9 @@ class Purchase
     #[ORM\ManyToOne(inversedBy: 'purchases')]
     private ?Market $market = null;
 
+    #[ORM\ManyToOne]
+    private ?FileManager $file = null;
+
     public function __construct()
     {
         $this->itemsPurchase = new ArrayCollection();
@@ -291,6 +294,18 @@ class Purchase
     public function setMarket(?Market $market): static
     {
         $this->market = $market;
+
+        return $this;
+    }
+
+    public function getFile(): ?FileManager
+    {
+        return $this->file;
+    }
+
+    public function setFile(?FileManager $file): static
+    {
+        $this->file = $file;
 
         return $this;
     }

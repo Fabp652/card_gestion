@@ -32,9 +32,6 @@ class ItemQuality
     #[ORM\ManyToMany(targetEntity: Criteria::class, inversedBy: 'itemQualities')]
     private Collection $criterias;
 
-    #[ORM\ManyToOne]
-    private ?FileManager $file = null;
-
     #[ORM\ManyToOne(inversedBy: 'itemQualities')]
     private ?Storage $storage = null;
 
@@ -50,10 +47,17 @@ class ItemQuality
     #[ORM\Column(options:['default' => true])]
     private ?bool $availableSale = true;
 
+    /**
+     * @var Collection<int, FileManager>
+     */
+    #[ORM\ManyToMany(targetEntity: FileManager::class, inversedBy: 'itemQualities')]
+    private Collection $files;
+
     public function __construct()
     {
         $this->criterias = new ArrayCollection();
         $this->itemSales = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -105,18 +109,6 @@ class ItemQuality
     public function removeCriteria(Criteria $criteria): static
     {
         $this->criterias->removeElement($criteria);
-
-        return $this;
-    }
-
-    public function getFile(): ?FileManager
-    {
-        return $this->file;
-    }
-
-    public function setFile(?FileManager $file): static
-    {
-        $this->file = $file;
 
         return $this;
     }
@@ -199,6 +191,30 @@ class ItemQuality
     public function setAvailableSale(bool $availableSale): static
     {
         $this->availableSale = $availableSale;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FileManager>
+     */
+    public function getFiles(): Collection
+    {
+        return $this->files;
+    }
+
+    public function addFile(FileManager $file): static
+    {
+        if (!$this->files->contains($file)) {
+            $this->files->add($file);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(FileManager $file): static
+    {
+        $this->files->removeElement($file);
 
         return $this;
     }

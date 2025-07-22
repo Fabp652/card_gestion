@@ -382,5 +382,52 @@ export default class extends Controller {
                 }
             });
         });
+
+        $(document).on('click', '.removeFileBtn', function (e) {
+            let fileId =  $(this).attr('data-file-id');
+            let key = $(this).attr('data-key')
+            if (fileId) {
+                let value = $('#removeFiles').val();
+                value = value.length > 0 ? value + ',' + fileId : value + fileId;
+                $('#removeFiles').val(value);
+            } else if (key) {
+                let fileInput = $(this).closest('.file').find('.fileInput');
+                let files = fileInput.prop('files');
+                const dt = new DataTransfer();
+                for (let i = 0; i < files.length; i++) {
+                    if (i != key) {
+                        const file = files.item(i);
+                        dt.items.add(file);
+                    }
+                }
+                fileInput.prop('files', dt.files);
+            }
+
+            $(this).parent().remove();
+        });
+
+        $(document).on('change', '.fileInput', function (e) {
+            let files = e.target.files;
+
+            $('.newImage').remove();
+            for(const [key, file] of Object.entries(files)) {
+                let reader = new FileReader();
+                reader.addEventListener(
+                    'load',
+                    () => {
+                        let html = '';
+
+                        html = '<div class="col-2 position-relative p-0 me-3 newImage">';
+                        html += '<button class="btn btn-danger btn-sm position-absolute top-0 end-0 removeFileBtn" type="button" data-key="' + key + '">';
+                        html += '<i class="fa-solid fa-xmark"></i></button>';
+                        html += '<img class="w-100" src="' + reader.result + '"></div>';
+
+                        $('#filePreview').append(html);
+                    }
+                );
+
+                reader.readAsDataURL(file);
+            }
+        });
     }
 }

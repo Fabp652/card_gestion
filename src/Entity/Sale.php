@@ -80,6 +80,9 @@ class Sale
     #[ORM\OneToMany(targetEntity: ItemSale::class, mappedBy: 'sale')]
     private Collection $itemSales;
 
+    #[ORM\ManyToOne]
+    private ?FileManager $file = null;
+
     public function __construct()
     {
         $this->itemSales = new ArrayCollection();
@@ -307,6 +310,18 @@ class Sale
             $price += $itemSale->getPrice();
         }
         $this->price = $price;
+
+        return $this;
+    }
+
+    public function getFile(): ?FileManager
+    {
+        return $this->file;
+    }
+
+    public function setFile(?FileManager $file): static
+    {
+        $this->file = $file;
 
         return $this;
     }

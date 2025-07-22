@@ -3,8 +3,8 @@
 namespace App\Service;
 
 use App\Entity\FileManager as EntityFileManager;
+use App\Repository\FileManagerRepository;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Filesystem\Path;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -18,6 +18,7 @@ class FileManager
     public function __construct(
         private SluggerInterface $slugger,
         private Filesystem $filesystem,
+        private FileManagerRepository $fmrepo,
         private string $projectDirectory
     ) {
         $this->folderPath = $projectDirectory . self::FOLDER_DATA;
@@ -101,5 +102,17 @@ class FileManager
 
         $this->filesystem->remove($filePath);
         return true;
+    }
+
+    /**
+     * @param int $id
+     * @return EntityFileManager|null
+     */
+    public function removeFileById(int $id): EntityFileManager|null
+    {
+        $fileManager = $this->fmrepo->find($id);
+        $result = $this->removeFile($fileManager->getName(), $fileManager->getFolder());
+
+        return $result ? $fileManager : null;
     }
 }

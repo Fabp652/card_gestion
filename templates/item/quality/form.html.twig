@@ -1,38 +1,72 @@
 {% if itemQualityId %}
-    {{ form_start(form, {method: 'POST', action: path('app_item_quality_edit', {itemQualityId: itemQualityId}), attr: {'id': 'modalForm'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_item_quality_edit', {itemQualityId: itemQualityId}), attr: {'id': 'modalForm', 'data-controller': 'quality'}}) }}
 {% else %}
-    {{ form_start(form, {method: 'POST', action: path('app_item_quality_add', {itemId: itemId}), attr: {'id': 'modalForm'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_item_quality_add', {itemId: itemId}), attr: {'id': 'modalForm', 'data-controller': 'quality'}}) }}
 {% endif %}
-    <div class="row" data-controller="quality">
-        <div class="col-12 mb-3">
-            {{ form_row(form.file) }}
-        </div>
-        <div class="col-6 mb-3">
-             {{ form_row(form.storage) }}
-        </div>
-        <div class="col-6 mb-3">
-            {{ form_row(form.quality) }}
-        </div>
-        <div class="col-12">
-            {{ form_label(form.criterias) }}
-            <div class="mt-2 d-flex flex-wrap">
-                <div class="form-check pe-0 col-6">
-                    <input
-                        id="item_quality_criterias_0"
-                        class="form-check-input criteriaQuality"
-                        type="checkbox"
-                        name="perfect"
-                        value="1"
-                        {% if form.vars.value.quality == 10 and form.vars.value.criterias|length == 0 %}checked{% endif %}
-                    >
-                    <label class="form-check-label" for="item_quality_criterias_0" >Aucun défaut</label>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="fileTab" data-bs-toggle="tab" data-bs-target="#fileTabPane" type="button" role="tab" aria-controls="fileTabPane" aria-selected="true">Images</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="criteriaTab" data-bs-toggle="tab" data-bs-target="#criteriaTabPane" type="button" role="tab" aria-controls="criteriaTabPane" aria-selected="false">Critères</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="fileTabPane" role="tabpanel" aria-labelledby="fileTab" tabindex="0">
+            <div class="row mt-3 file">
+                <div class="col-12 mb-3">
+                    {{ form_row(form.files) }}
                 </div>
-                {% for childForm in form.criterias.children %}
-                    <div class="form-check pe-0 col-6">
-                        {{ form_widget(childForm, {'attr': {'class': 'form-check-input criteriaQuality'}}) }}   
-                        <label class="form-check-label" for="{{ childForm.vars.id }}" >{{ childForm.vars.label }}</label>
+                <div class="col-12 mt-2">
+                    <h6>Photos ajoutées</h6>
+                    {% if itemQuality and not itemQuality.files.empty %}
+                        <input type="hidden" id="removeFiles" name="removeFiles">
+                    {% endif %}
+                    <div class="mx-auto border border-black bg-light p-2 row" id="filePreview">
+                        {% if itemQuality and not itemQuality.files.empty %}
+                            {% for file in itemQuality.files %}
+                                <div class="col-2 position-relative p-0 me-3">
+                                    <button class="btn btn-danger btn-sm position-absolute top-0 end-0 removeFileBtn" data-file-id="{{ file.id }}" type="button">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <img class="w-100" src="{{ file_encoded(file) }}">
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="criteriaTabPane" role="tabpanel" aria-labelledby="criteriaTab" tabindex="0">
+            <div class="row mt-3">
+                <div class="col-6 mb-3">
+                    {{ form_row(form.storage) }}
+                </div>
+                <div class="col-6 mb-3">
+                    {{ form_row(form.quality) }}
+                </div>
+                <div class="col-12">
+                    {{ form_label(form.criterias) }}
+                    <div class="mt-2 d-flex flex-wrap">
+                        <div class="form-check pe-0 col-6">
+                            <input
+                                id="item_quality_criterias_0"
+                                class="form-check-input criteriaQuality"
+                                type="checkbox"
+                                name="perfect"
+                                value="1"
+                                {% if form.vars.value.quality == 10 and form.vars.value.criterias|length == 0 %}checked{% endif %}
+                            >
+                            <label class="form-check-label" for="item_quality_criterias_0" >Aucun défaut</label>
+                        </div>
+                        {% for childForm in form.criterias.children %}
+                            <div class="form-check pe-0 col-6">
+                                {{ form_widget(childForm, {'attr': {'class': 'form-check-input criteriaQuality'}}) }}   
+                                <label class="form-check-label" for="{{ childForm.vars.id }}" >{{ childForm.vars.label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
