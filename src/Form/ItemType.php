@@ -12,12 +12,15 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\All;
+use Symfony\Component\Validator\Constraints\File;
 
 class ItemType extends AbstractType
 {
@@ -105,6 +108,31 @@ class ItemType extends AbstractType
                             ->setParameter('parent', $collection->getCategory())
                         ;
                     }
+                ]
+            )
+            ->add(
+                'files',
+                FileType::class,
+                [
+                    'label' => 'Image',
+                    'label_attr' => ['class' => self::LABEL_CLASS],
+                    'attr' => [
+                        'class' => self::ATTR_CLASS_CONTROL . ' fileInput'
+                    ],
+                    'mapped' => false,
+                    'constraints' => [
+                        new All([
+                            'constraints' => new File([
+                                'mimeTypes' => [
+                                    'image/jpeg',
+                                    'image/png'
+                                ],
+                                'mimeTypesMessage' => 'Seuls les image au formats jpeg ou png sont acceptés'
+                            ])
+                        ])
+                    ],
+                    'required' => false,
+                    'multiple' => true
                 ]
             )
         ;

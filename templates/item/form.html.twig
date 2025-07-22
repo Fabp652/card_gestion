@@ -1,7 +1,7 @@
 {% if itemId %}
-    {{ form_start(form, {method: 'POST', action: path('app_item_edit', {collectionId: collectionId, itemId: itemId}), attr: {'id': 'modalForm', class: 'row'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_item_edit', {collectionId: collectionId, itemId: itemId}), attr: {'id': 'modalForm', class: 'row', 'data-controller': 'form'}}) }}
 {% else %}
-    {{ form_start(form, {method: 'POST', action: path('app_item_add', {collectionId: collectionId}), attr: {'id': 'modalForm', class: 'row'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_item_add', {collectionId: collectionId}), attr: {'id': 'modalForm', class: 'row', 'data-controller': 'form'}}) }}
 {% endif %}
     <div class="col-12 mb-3">
         {{ form_row(form.name) }}
@@ -25,5 +25,28 @@
     </div>
     <div class="col-12">
         {{ form_row(form.link) }}
+    </div>
+    <div class="row mt-3 file">
+        <div class="col-12 mb-3">
+            {{ form_row(form.files) }}
+        </div>
+        <div class="col-12 mt-2">
+            <h6>Photos ajoutées</h6>
+            {% if files and not files.empty %}
+                <input type="hidden" id="removeFiles" name="removeFiles">
+            {% endif %}
+            <div class="mx-auto border border-black bg-light p-2 row" id="filePreview">
+                {% if files and not files.empty %}
+                    {% for file in files %}
+                        <div class="col-2 position-relative p-0 me-3">
+                            <button class="btn btn-danger btn-sm position-absolute top-0 end-0 removeFileBtn" data-file-id="{{ file.id }}" type="button">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                            <img class="w-100" src="{{ file_encoded(file) }}">
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
     </div>
 {{ form_end(form) }}

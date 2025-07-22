@@ -173,6 +173,14 @@
                                                         <i class="fa-solid fa-pen"></i>
                                                     </a>
                                                 {% endif %}
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-primary showModal"
+                                                    data-url="{{ absolute_url(path('app_file_upload', {entityName: 'sale', entityId: sale.id})) }}"
+                                                    data-title="Ticket/Facture"
+                                                >
+                                                    <i class="fa-solid fa-file"></i>
+                                                </button>
                                                 <a href="{{ path('app_sale_delete', {saleId: sale.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la vente" data-sweetAlert-text="Voulez-vous supprimer cet vente : {{ sale.name|lower }} ?">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>

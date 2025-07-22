@@ -8,6 +8,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
 use App\Repository\RarityRepository;
+use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -76,6 +77,7 @@ class ItemController extends AbstractController
     public function form(
         Request $request,
         CategoryRepository $categoryRepo,
+        FileManager $fileManager,
         int $collectionId,
         ?int $itemId
     ): Response {
@@ -99,8 +101,40 @@ class ItemController extends AbstractController
 
         $form = $this->createForm(ItemType::class, $item, ['collection' => $collection])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $item->setCollection($collection);
-            $this->em->persist($item);
+            if ($request->request->has('removeFiles')) {
+                $removeFiles = explode(',', $request->request->get('removeFiles'));
+                foreach ($removeFiles as $removeFile) {
+                    $file = $fileManager->removeFileById((int) $removeFile);
+                    if (!$file) {
+                        return $this->json([
+                            'result' => false,
+                            'message' => 'Une erreur est survenue lors de la suppression du fichier.'
+                        ]);
+                    }
+
+                    $this->em->remove($file);
+                }
+            }
+
+            if ($form->has('files')) {
+                foreach ($form->get('files')->getData() as $file) {
+                    $fileManagerEntity = $fileManager->upload('item', $item->getName(), $file);
+
+                    if (!$fileManagerEntity) {
+                        return $this->json([
+                            'result' => false,
+                            'message' => 'Une erreur est survenue pendant le téléchargement du fichier.'
+                        ]);
+                    }
+                    $this->em->persist($fileManagerEntity);
+                    $item->addFile($fileManagerEntity);
+                }
+            }
+
+            if (!$item->getId()) {
+                $item->setCollection($collection);
+                $this->em->persist($item);
+            }
             $this->em->flush();
 
             return $this->json(['result' => true]);
@@ -116,7 +150,8 @@ class ItemController extends AbstractController
         $render = $this->render('item/form.html.twig', [
             'form' => $form->createView(),
             'itemId' => $itemId,
-            'collectionId' => $collectionId
+            'collectionId' => $collectionId,
+            'files' => $itemId ? $item->getFiles() : null
         ]);
 
         return $this->json(['result' => true, 'content' => $render->getContent()]);
