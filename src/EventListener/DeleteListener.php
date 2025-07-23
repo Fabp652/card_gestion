@@ -7,6 +7,7 @@ use App\Entity\Item;
 use App\Entity\Purchase;
 use App\Entity\Rarity;
 use App\Entity\Sale;
+use App\Entity\Storage;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
@@ -45,6 +46,10 @@ final class DeleteListener
         } elseif ($entity instanceof Rarity) {
             foreach ($entity->getItems() as $item) {
                 $item->setRarity(null);
+            }
+        } elseif ($entity instanceof Storage) {
+            foreach ($entity->getItemQualities() as $iq) {
+                $iq->setStorage(null);
             }
         }
     }
