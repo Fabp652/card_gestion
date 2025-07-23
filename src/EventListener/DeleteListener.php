@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Entity\Category;
 use App\Entity\Item;
 use App\Entity\Purchase;
+use App\Entity\Rarity;
 use App\Entity\Sale;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
@@ -40,6 +41,10 @@ final class DeleteListener
         } elseif ($entity instanceof Sale) {
             foreach ($entity->getItemSales() as $is) {
                 $om->remove($is);
+            }
+        } elseif ($entity instanceof Rarity) {
+            foreach ($entity->getItems() as $item) {
+                $item->setRarity(null);
             }
         }
     }

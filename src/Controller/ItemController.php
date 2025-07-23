@@ -103,7 +103,8 @@ class ItemController extends AbstractController
         $form = $this->createForm(ItemType::class, $item, ['collection' => $collection])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if ($request->request->has('removeFiles')) {
-                $removeFiles = explode(',', $request->request->get('removeFiles'));
+                $removeFilesStr = $request->request->get('removeFiles');
+                $removeFiles = strlen($removeFilesStr) > 0 ? explode(',', $request->request->get('removeFiles')) : [];
                 foreach ($removeFiles as $removeFile) {
                     $file = $fileManager->removeFileById((int) $removeFile);
                     if (!$file) {
