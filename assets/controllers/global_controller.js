@@ -75,10 +75,10 @@ export default class extends Controller {
                                 } else {
                                     let toast = Swal.mixin({
                                         toast: true,
-                                        position: 'top',
+                                        position: 'top-end',
                                         width: '400px',
                                         showConfirmButton: false,
-                                        timer: 1500,
+                                        timer: 2000,
                                         timerProgressBar: true,
                                         customClass: {
                                             popup: 'text-bg-danger rounded-0'

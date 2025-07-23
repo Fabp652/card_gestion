@@ -195,10 +195,16 @@ class CollectionController extends AbstractController
     {
         $collection = $this->collectionRepo->find($collectionId);
         if ($collection) {
-            $this->em->remove($collection);
-            $this->em->flush();
+            if ($collection->getItems()->isEmpty()) {
+                $this->em->remove($collection);
+                $this->em->flush();
 
-            return $this->json(['result' => true]);
+                return $this->json(['result' => true]);
+            }
+            return $this->json([
+                'result' => false,
+                'message' => 'La collection ne peut pas être supprimé si elle contient des objets.'
+            ]);
         } else {
             return $this->json(['result' => false, 'message' => 'La collection est déjà supprimée']);
         }
