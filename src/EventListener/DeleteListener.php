@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Entity\Category;
 use App\Entity\Item;
 use App\Entity\Purchase;
+use App\Entity\Sale;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
@@ -35,6 +36,10 @@ final class DeleteListener
         } elseif ($entity instanceof Purchase) {
             foreach ($entity->getItemsPurchase() as $ip) {
                 $om->remove($ip);
+            }
+        } elseif ($entity instanceof Sale) {
+            foreach ($entity->getItemSales() as $is) {
+                $om->remove($is);
             }
         }
     }
