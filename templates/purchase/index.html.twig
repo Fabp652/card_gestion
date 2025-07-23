@@ -178,9 +178,11 @@
                                                 >
                                                     <i class="fa-solid fa-file"></i>
                                                 </button>
-                                                <a href="{{ path('app_purchase_delete', {purchaseId: purchase.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </a>
+                                                {% if not purchase.isValid %}
+                                                    <a href="{{ path('app_purchase_delete', {purchaseId: purchase.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>
+                                                {% endif %}
                                             </div>
                                         </td>
                                     </tr>

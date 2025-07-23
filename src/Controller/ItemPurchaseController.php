@@ -172,13 +172,20 @@ final class ItemPurchaseController extends AbstractController
         }
 
         $purchase = $itemPurchase->getPurchase();
-        $purchase->removeItemsPurchase($itemPurchase);
-        $purchase->caclPrice();
+        if (!$purchase->isValid()) {
+            $purchase->removeItemsPurchase($itemPurchase);
+            $purchase->caclPrice();
 
-        $this->em->remove($itemPurchase);
-        $this->em->flush();
+            $this->em->remove($itemPurchase);
+            $this->em->flush();
 
-        return $this->json(['result' => true, 'message' => 'L\'objet a été retiré avec succès.']);
+            return $this->json(['result' => true, 'message' => 'L\'objet a été retiré avec succès.']);
+        }
+
+        return $this->json([
+            'result' => false,
+            'message' => 'L\'objet ne peut pas être retiré si l\'achat est validé.'
+        ]);
     }
 
     #[Route(

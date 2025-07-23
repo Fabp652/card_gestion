@@ -87,6 +87,9 @@
                                     <a class="btn btn-success" href="{{ absolute_url(path('app_purchase_validate', {purchaseId: purchase.id})) }}">
                                         Valider
                                     </a>
+                                    <a class="btn btn-danger removeElement" href="{{ absolute_url(path('app_purchase_delete', {purchaseId: purchase.id})) }}" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?">
+                                        Supprimer
+                                    </a>
                                 {% else %}
                                     {% if not purchase.received and not purchase.refundRequest %}
                                         <button
@@ -121,9 +124,6 @@
                                         </button>
                                     {% endif %}
                                 {% endif %}
-                                <a class="btn btn-danger removeElement" href="{{ absolute_url(path('app_purchase_delete', {purchaseId: purchase.id})) }}" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?">
-                                    Supprimer
-                                </a>
                             </div>
                         </div>
                         <table class="col-12 table table-responsive text-center table-bordered border-black align-middle">

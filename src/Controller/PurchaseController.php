@@ -104,19 +104,24 @@ final class PurchaseController extends AbstractController
     {
         $purchase = $this->purchaseRepo->find($purchaseId);
         if ($purchase) {
-            $this->em->remove($purchase);
-            $this->em->flush();
+            if (!$purchase->isValid()) {
+                $this->em->remove($purchase);
+                $this->em->flush();
 
-            $response = ['result' => true];
-            if (str_ends_with($request->headers->get('referer'), 'edit')) {
-                $response['redirect'] = $this->generateUrl(
-                    'app_purchase_list',
-                    [],
-                    UrlGeneratorInterface::ABSOLUTE_URL
-                );
+                $response = ['result' => true];
+                if (str_ends_with($request->headers->get('referer'), 'edit')) {
+                    $response['redirect'] = $this->generateUrl(
+                        'app_purchase_list',
+                        [],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    );
+                }
+                return $this->json($response);
             }
-
-            return $this->json($response);
+            return $this->json([
+                'result' => false,
+                'message' => 'Un achat validé ne peut pas être supprimé.'
+            ]);
         } else {
             return $this->json(['result' => false, 'message' => 'L\'achat est déjà supprimée']);
         }
