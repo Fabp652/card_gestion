@@ -165,9 +165,11 @@
                                                 >
                                                     <i class="fa-solid fa-pen"></i>
                                                 </button>
-                                                <a href="{{ path('app_item_delete', {id: item.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet" data-sweetAlert-text="Voulez-vous supprimer cet objet : {{ item.name|lower }} ?">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </a>
+                                                {% if item.itemQualities.isEmpty %}
+                                                    <a href="{{ path('app_item_delete', {id: item.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet" data-sweetAlert-text="Voulez-vous supprimer cet objet : {{ item.name|lower }} ?">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>
+                                                {% endif %}
                                             </div>
                                         </td>
                                     </tr>

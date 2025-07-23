@@ -203,7 +203,7 @@ class CollectionController extends AbstractController
             }
             return $this->json([
                 'result' => false,
-                'message' => 'La collection ne peut pas être supprimé si elle contient des objets.'
+                'message' => 'La collection ne peut pas être supprimée si elle contient des objets.'
             ]);
         } else {
             return $this->json(['result' => false, 'message' => 'La collection est déjà supprimée']);

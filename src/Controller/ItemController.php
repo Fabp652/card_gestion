@@ -93,6 +93,7 @@ class ItemController extends AbstractController
             }
         } else {
             $item = new Item();
+            $item->setCollection($collection);
             if ($categoryId = $request->query->get('categoryId')) {
                 $category = $categoryRepo->find($categoryId);
                 $item->setCategory($category);
@@ -132,7 +133,6 @@ class ItemController extends AbstractController
             }
 
             if (!$item->getId()) {
-                $item->setCollection($collection);
                 $this->em->persist($item);
             }
             $this->em->flush();
@@ -162,10 +162,16 @@ class ItemController extends AbstractController
     {
         $item = $this->itemRepo->find($id);
         if ($item) {
-            $this->em->remove($item);
-            $this->em->flush();
+            if ($item->getItemQualities()->isEmpty()) {
+                $this->em->remove($item);
+                $this->em->flush();
 
-            return $this->json(['result' => true]);
+                return $this->json(['result' => true]);
+            }
+            return $this->json([
+                'result' => false,
+                'message' => 'L\'objet ne peut pas être supprimé si des objets sont possédés.'
+            ]);
         } else {
             return $this->json(['result' => false, 'message' => 'L\'objet est déjà supprimé']);
         }
