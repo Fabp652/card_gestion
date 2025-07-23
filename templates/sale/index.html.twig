@@ -182,9 +182,11 @@
                                                 >
                                                     <i class="fa-solid fa-file"></i>
                                                 </button>
-                                                <a href="{{ path('app_sale_delete', {saleId: sale.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la vente" data-sweetAlert-text="Voulez-vous supprimer cet vente : {{ sale.name|lower }} ?">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </a>
+                                                {% if not sale.isValid %}
+                                                    <a href="{{ path('app_sale_delete', {saleId: sale.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la vente" data-sweetAlert-text="Voulez-vous supprimer cet vente : {{ sale.name|lower }} ?">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>
+                                                {% endif %}
                                             </div>
                                         </td>
                                     </tr>

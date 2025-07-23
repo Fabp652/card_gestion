@@ -161,14 +161,19 @@ class ItemSaleController extends AbstractController
         $itemSale = $this->itemSaleRepository->find($itemSaleId);
         if ($itemSale) {
             $sale = $itemSale->getSale();
-            $sale->caclPrice();
+            if (!$sale->isValid()) {
+                $sale->removeItemSale($itemSale);
+                $sale->caclPrice();
+                $this->em->remove($itemSale);
+                $this->em->flush();
 
-            $itemSale->setItemQuality(null);
-            $this->em->flush();
-            $this->em->remove($itemSale);
-            $this->em->flush();
+                return $this->json(['result' => true, 'message' => 'L\'objet a été retiré avec succès.']);
+            }
 
-            return $this->json(['result' => true]);
+            return $this->json([
+                'result' => false,
+                'message' => 'L\'objet ne peut pas être retiré si la vente est validé.'
+            ]);
         } else {
             return $this->json(['result' => false, 'message' => 'L\'objet a déjà été retiré.']);
         }

@@ -274,23 +274,25 @@ final class SaleController extends AbstractController
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if ($sale) {
-            foreach ($sale->getItemSales() as $itemSale) {
-                $itemSale->setItemQuality(null);
-                $this->em->remove($itemSale);
-            }
-            $this->em->remove($sale);
-            $this->em->flush();
+            if (!$sale->isValid()) {
+                $this->em->remove($sale);
+                $this->em->flush();
 
-            $response = ['result' => true];
-            if (str_ends_with($request->headers->get('referer'), 'edit')) {
-                $response['redirect'] = $this->generateUrl(
-                    'app_sale_list',
-                    [],
-                    UrlGeneratorInterface::ABSOLUTE_URL
-                );
-            }
+                $response = ['result' => true];
+                if (str_ends_with($request->headers->get('referer'), 'edit')) {
+                    $response['redirect'] = $this->generateUrl(
+                        'app_sale_list',
+                        [],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    );
+                }
 
-            return $this->json($response);
+                return $this->json($response);
+            }
+            return $this->json([
+                'result' => false,
+                'message' => 'Une vente validé ne peut pas être supprimée.'
+            ]);
         } else {
             return $this->json(['result' => false, 'message' => 'La vente est déjà supprimée']);
         }
