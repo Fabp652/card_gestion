@@ -1,5 +1,5 @@
 {% if itemId %}
-    {{ form_start(form, {method: 'POST', action: path('app_item_edit', {collectionId: collectionId, itemId: itemId}), attr: {'id': 'modalForm', class: 'row', 'data-controller': 'form'}}) }}
+    {{ form_start(form, {method: 'POST', action: path('app_item_edit', {itemId: itemId}), attr: {'id': 'modalForm', class: 'row', 'data-controller': 'form'}}) }}
 {% else %}
     {{ form_start(form, {method: 'POST', action: path('app_item_add', {collectionId: collectionId}), attr: {'id': 'modalForm', class: 'row', 'data-controller': 'form'}}) }}
 {% endif %}

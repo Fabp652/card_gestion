@@ -81,22 +81,24 @@ class ItemController extends AbstractController
     }
 
 
-    #[Route('/collection/{collectionId}/item/add', name: 'app_item_add', requirements: ['collectionId' => '\d+'])]
+    #[Route('/collection/{collectionId}/item/add', 'app_item_add', ['collectionId' => '\d+'])]
     #[Route(
-        '/collection/{collectionId}/item/{itemId}/edit',
-        name: 'app_item_edit',
-        requirements: ['collectionId' => '\d+', 'itemId' => '\d+']
+        '/item/{itemId}/edit',
+        'app_item_edit',
+        ['itemId' => '\d+']
     )]
     public function form(
         Request $request,
         CategoryRepository $categoryRepo,
         FileManager $fileManager,
-        int $collectionId,
+        ?int $collectionId,
         ?int $itemId
     ): Response {
-        $collection = $this->collectionRepo->find($collectionId);
-        if (!$collection) {
-            return $this->json(['result' => false, 'message' => 'Collection introuvable']);
+        if ($collectionId) {
+            $collection = $this->collectionRepo->find($collectionId);
+            if (!$collection) {
+                return $this->json(['result' => false, 'message' => 'Collection introuvable']);
+            }
         }
 
         if ($itemId) {
@@ -104,6 +106,7 @@ class ItemController extends AbstractController
             if (!$item) {
                 return $this->json(['result' => false, 'message' => 'Objet introuvable']);
             }
+            $collection = $item->getCollection();
         } else {
             $item = new Item();
             $item->setCollection($collection);
