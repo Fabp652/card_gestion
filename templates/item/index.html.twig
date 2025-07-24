@@ -8,7 +8,7 @@
     {{ encore_entry_link_tags('table') }}
 {% endblock %}
 
-{% block title %}{{ collection.name }} ({{ category.name }}){% endblock %}
+{% block title %}{{ collection.name }} ({{ category ? category.name|capitalize : 'Divers' }}){% endblock %}
 
 {% block body %}
 {{ parent() }}
@@ -29,22 +29,24 @@
                     <div class="row mb-4">
                         <div class="col-12 d-flex px-0">
                             <div class="dropdown me-3">
-                                <button class="btn btn-outline-primary dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:160px;">
-                                    {{ category.name }}
-                                </button>
-                                <ul class="dropdown-menu w-100 p-0">
-                                    {% for otherCategory in categories %}
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: otherCategory.id}) }}">{{ otherCategory.name }}</a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                                {% if categories %}
+                                    <button class="btn btn-outline-primary dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:160px;">
+                                        {{ category ? category.name|capitalize : 'Divers' }}
+                                    </button>
+                                    <ul class="dropdown-menu w-100 p-0">
+                                        {% for otherCategory in categories %}
+                                            <li>
+                                                <a class="dropdown-item" href="{{ path('app_item_list', {collectionId: collection.id, categoryId: otherCategory.id ?? 0}) }}">{{ otherCategory.name ?? otherCategory }}</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
                             </div>
                             <button 
                                 type="button"
                                 class="btn btn-primary showModal"
                                 id="showModal"
-                                data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id, categoryId: category.id})) }}"
+                                data-url="{{ absolute_url(path('app_item_add', {collectionId: collection.id, categoryId: category.id ?? 0})) }}"
                                 data-title="Ajouter un objet"
                             >
                                 Ajouter
@@ -69,7 +71,7 @@
                                     <th>Action</th>
                                 </tr>
                                 <tr>
-                                    <form data-controller="filter" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: category.id})) }}" method="get">
+                                    <form data-controller="filter" id="formFilter" action="{{ absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: category.id ?? 0})) }}" method="get">
                                         {% set filterQuery = request.query.all('filter') %}
                                         <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
                                         <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>
@@ -109,7 +111,7 @@
                                         </th>
                                         <th></th>
                                         <th>
-                                            <a href="{{ path('app_item_list', {collectionId: collection.id, categoryId: category.id}) }}" class="btn btn-secondary btn-sm">
+                                            <a href="{{ path('app_item_list', {collectionId: collection.id, categoryId: category.id ?? 0}) }}" class="btn btn-secondary btn-sm">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                                                     <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
                                                 </svg>

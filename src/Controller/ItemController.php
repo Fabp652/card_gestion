@@ -39,8 +39,21 @@ class ItemController extends AbstractController
         int $categoryId
     ): Response {
         $collection = $this->collectionRepo->find($collectionId);
-        $category = $categoryRepo->find($categoryId);
-        $categories = $categoryRepo->findWithoutActualCategory($category);
+        if (!$collection) {
+            return $this->render('error/not_found.html.twig', [
+                'message' => 'La collection est introuvable.'
+            ]);
+        }
+
+        if ($categoryId) {
+            $category = $categoryRepo->find($categoryId);
+            $categories = $categoryRepo->findWithoutActualCategory($category);
+            if ($this->itemRepo->hasItemWithoutCategory($collectionId)) {
+                $categories[] = 'Divers';
+            }
+        } elseif ($collectionCategory = $collection->getCategory()) {
+            $categories = $categoryRepo->findBy(['parent' => $collectionCategory]);
+        }
 
         $filters = $request->query->all('filter');
         $filters = array_filter(
@@ -62,8 +75,8 @@ class ItemController extends AbstractController
             'items' => $items,
             'collection' => $collection,
             'request' => $request,
-            'category' => $category,
-            'categories' => $categories
+            'category' => $category ?? null,
+            'categories' => $categories ?? null
         ]);
     }
 

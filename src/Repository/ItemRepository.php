@@ -162,4 +162,22 @@ class ItemRepository extends ServiceEntityRepository
         }
         return $qb;
     }
+
+    /**
+     * @param int $collectionId
+     * @return bool
+     */
+    public function hasItemWithoutCategory(int $collectionId): bool
+    {
+        $result = $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->where('i.collection = :collection')
+            ->setParameter('collection', $collectionId)
+            ->andWhere('i.category IS NULL')
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+
+        return $result > 0;
+    }
 }

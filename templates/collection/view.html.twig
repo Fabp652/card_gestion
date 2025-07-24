@@ -20,15 +20,17 @@
                 <div class="main-content">
                     <div class="row mb-3">
                         <div class="col ps-0">
-                            <button
-                                type="button"
-                                class="btn btn-primary showModal"
-                                id="showModal"
-                                data-url="{{ absolute_url(path('app_category_add_child', {parentId: collection.category.id})) }}"
-                                data-title="Créer une nouvelle catégorie"
-                            >
-                                Nouvelle catégorie
-                            </button>
+                            {% if collection.category %}
+                                <button
+                                    type="button"
+                                    class="btn btn-primary showModal"
+                                    id="showModal"
+                                    data-url="{{ absolute_url(path('app_category_add_child', {parentId: collection.category.id})) }}"
+                                    data-title="Créer une nouvelle catégorie"
+                                >
+                                    Nouvelle catégorie
+                                </button>
+                            {% endif %}
                         </div>
                         <div class="form-check form-switch col d-flex justify-content-end align-self-center pe-0">
                             <input
@@ -44,12 +46,12 @@
                         </div>
                     </div>
                     <div class="row mb-4">
-                        <div class="col-12 px-0" data-masonry='{"percentPosition": true, "itemSelector": ".grid-item", "gutter": ".gutter-size"}'>
+                        <div class="col-12 px-0" {% if mostExpensives|length > 1 %}data-masonry='{"percentPosition": true, "itemSelector": ".grid-item", "gutter": ".gutter-size"}'{% endif %}>
                             <div class="gutter-size" style="width: 4%">
                             </div>
                             {% set hasRarities = collection.hasRarities %}
                             {% for category, mostExpensive in mostExpensives %}
-                                <div class="grid-item py-2" style="width:48%;">
+                                <div class="grid-item py-2" {% if mostExpensives|length > 1 %}style="width:48%;"{% endif %}>
                                     <div class="card border-black border-end-0 border-top-0">
                                         {% set categorySplitted = category|split('_') %}
                                         <div class="card-header bg-black bg-gradient d-flex justify-content-between">

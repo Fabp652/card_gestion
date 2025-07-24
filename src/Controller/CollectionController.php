@@ -53,7 +53,7 @@ class CollectionController extends AbstractController
         int $collectionId
     ): Response {
         $collection = $this->collectionRepo->find($collectionId);
-        $categories = $collection->getCategory()->getChilds();
+        $categories = $collection->getCategory() ? $collection->getCategory()->getChilds() : [];
 
         if ($collection->hasRarities()) {
             $statRarities = $rarityRepository->stats($collectionId);
@@ -63,6 +63,11 @@ class CollectionController extends AbstractController
         foreach ($categories as $category) {
             $index = $category->getName() . '_' . $category->getId();
             $mostExpensives[$index] = $itemRepo->findMostExpensives($collectionId, $category->getId());
+        }
+
+        $noCategory = $itemRepo->findMostExpensives($collectionId, null);
+        if (!empty($noCategory)) {
+            $mostExpensives['divers_0'] = $noCategory;
         }
 
         return $this->render('collection/view.html.twig', [

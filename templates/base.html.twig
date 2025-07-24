@@ -30,9 +30,9 @@
                                 <h5 class="offcanvas-title fw-bold color-title" id="offcanvasNavbarLabel">CATÉGORIES</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                             </div>
-                            <div class="offcanvas-body px-0">
+                            {# <div class="offcanvas-body px-0">
                                 {{ render(path('app_category_nav', {collectionId: collection.id, categoryId: collection.category.id})) }}
-                            </div>
+                            </div> #}
                         </div>
                         {{ render(path('app_collection_dropdown', {collectionId: collection.id})) }}
                     {% endif %}
@@ -178,7 +178,7 @@
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">{{ item.name }}</li>
                             {% else %}
-                                <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+                                <li class="breadcrumb-item active" aria-current="page">{{ category ? category.name : 'Divers' }}</li>
                             {% endif %}
                         {% elseif category is defined %}
                             <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>

@@ -71,7 +71,7 @@
                                         </ul>
                                     </div>
                                     <div class="card-footer text-start d-flex justify-content-between border-black border-end">
-                                        <i class="align-content-center text-lowercase fw-semibold">{{ stat.category }}</i>
+                                        <i class="align-content-center text-lowercase fw-semibold">{{ stat.category ?? 'divers' }}</i>
                                         <b class="text-capitalize">
                                             {% if stat.complete %}
                                                 Complète
