@@ -90,10 +90,22 @@
                                         <td>{{ itemQuality.quality }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
+                                                <a
+                                                    class="btn btn-outline-primary btn-sm"
+                                                    href="{{ path('app_item_view', {id: item.id}) }}"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Voir"
+                                                >
                                                     <i class="fa-solid fa-eye"></i>
                                                 </a>
-                                                <a href="{{ path('app_storage_remove', {storageId: storage.id, itemQualityId: itemQuality.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet de ce rangement" data-sweetAlert-text="Voulez-vous retirer cet objet : {{ item.name|lower }} ?">
+                                                <a
+                                                    href="{{ path('app_storage_remove', {storageId: storage.id, itemQualityId: itemQuality.id}) }}"
+                                                    class="btn btn-danger btn-sm removeElement"
+                                                    data-sweetAlert-title="Suppression de l'objet de ce rangement"
+                                                    data-sweetAlert-text="Voulez-vous retirer cet objet : {{ item.name|lower }} ?"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Retirer du rangement"
+                                                >
                                                     <i class="fa-solid fa-xmark"></i>
                                                 </a>
                                             </div>

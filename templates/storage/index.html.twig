@@ -41,17 +41,31 @@
                                     <div class="card-header bg-black bg-gradient d-flex justify-content-between">
                                         <h5 class="card-title mb-0 color-title py-1">{{ stat.storageName }}</h5>
                                         <div class="btn-group position-absolute top-0 end-0" role="group">
-                                            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_storage_view', {storageId: stat.storageId}) }}">
+                                            <a
+                                                class="btn btn-outline-primary btn-sm"
+                                                href="{{ path('app_storage_view', {storageId: stat.storageId}) }}"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Voir"
+                                            >
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
                                             <button
                                                 data-url="{{ absolute_url(path('app_storage_edit', {storageId: stat.storageId})) }}"
                                                 data-title="{{ 'Modifier "' ~ stat.storageName ~ '"' }}"
                                                 class="btn btn-primary btn-sm showModal"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Modifier"
                                             >
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
-                                            <a href="{{ path('app_storage_delete', {storageId: stat.storageId}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de le rangement" data-sweetAlert-text="Voulez-vous supprimer ce rangement : {{ stat.storageName|lower }} ?">
+                                            <a
+                                                href="{{ path('app_storage_delete', {storageId: stat.storageId}) }}"
+                                                class="btn btn-danger btn-sm removeElement"
+                                                data-sweetAlert-title="Suppression de le rangement"
+                                                data-sweetAlert-text="Voulez-vous supprimer ce rangement : {{ stat.storageName|lower }} ?"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Supprimer"
+                                            >
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </a>
                                         </div>

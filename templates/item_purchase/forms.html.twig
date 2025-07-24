@@ -17,10 +17,20 @@
         </td>
         <td>
             <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-primary lineSubmit" data-url="{{ absolute_url(path('app_item_purchase_edit', {itemPurchaseId: itemPurchase.id})) }}">
+                <button
+                    class="btn btn-sm btn-primary lineSubmit"
+                    data-url="{{ absolute_url(path('app_item_purchase_edit', {itemPurchaseId: itemPurchase.id})) }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Enregistrer"
+                >
                     <i class="fa-solid fa-check"></i>
                 </button>
-                <button class="btn btn-sm btn-secondary lineRefresh" data-url="{{ absolute_url(path('app_item_purchase_data', {itemPurchaseId: itemPurchase.id})) }}">
+                <button
+                    class="btn btn-sm btn-secondary lineRefresh"
+                    data-url="{{ absolute_url(path('app_item_purchase_data', {itemPurchaseId: itemPurchase.id})) }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Réinitialiser"
+                >
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
                 <button
@@ -28,6 +38,8 @@
                     data-sweetAlert-title="Supprimer la ligne"
                     data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
                     data-url="{{ absolute_url(path('app_item_purchase_delete', {itemPurchaseId: itemPurchase.id})) }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Supprimer"
                 >
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -51,14 +63,27 @@
         </td>
         <td>
             <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-primary lineSubmit"  data-url="{{ absolute_url(path('app_item_purchase_add', {purchaseId: purchaseId}))}}"><i class="fa-solid fa-check"></i></button>
-                <button class="btn btn-sm btn-secondary lineRefresh">
+                <button
+                    class="btn btn-sm btn-primary lineSubmit"
+                    data-url="{{ absolute_url(path('app_item_purchase_add', {purchaseId: purchaseId}))}}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Enregistrer"
+                >
+                    <i class="fa-solid fa-check"></i>
+                </button>
+                <button
+                    class="btn btn-sm btn-secondary lineRefresh"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Réinitialiser"
+                >
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
                 <button
                     class="btn btn-sm btn-danger lineCancel"
                     data-sweetAlert-title="Supprimer la ligne"
                     data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Supprimer"
                 >
                     <i class="fa-solid fa-xmark"></i>
                 </button>

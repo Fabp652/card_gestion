@@ -156,7 +156,12 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_item_view', {id: item.id}) }}">
+                                                <a
+                                                    class="btn btn-outline-primary btn-sm"
+                                                    href="{{ path('app_item_view', {id: item.id}) }}"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Voir"
+                                                >
                                                     <i class="fa-solid fa-eye"></i>
                                                 </a>
                                                 <button
@@ -164,11 +169,20 @@
                                                     data-title="{{ 'Modifier "' ~ item.name ~ '"' }}"
                                                     class="btn btn-primary btn-sm showModal"
                                                     data-modal-xl="1"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Modifier"
                                                 >
                                                     <i class="fa-solid fa-pen"></i>
                                                 </button>
                                                 {% if item.itemQualities.isEmpty %}
-                                                    <a href="{{ path('app_item_delete', {id: item.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'objet" data-sweetAlert-text="Voulez-vous supprimer cet objet : {{ item.name|lower }} ?">
+                                                    <a
+                                                        href="{{ path('app_item_delete', {id: item.id}) }}"
+                                                        class="btn btn-danger btn-sm removeElement"
+                                                        data-sweetAlert-title="Suppression de l'objet"
+                                                        data-sweetAlert-text="Voulez-vous supprimer cet objet : {{ item.name|lower }} ?"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-title="Supprimer"
+                                                    >
                                                         <i class="fa-solid fa-trash-can"></i>
                                                     </a>
                                                 {% endif %}

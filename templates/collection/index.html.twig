@@ -37,18 +37,32 @@
                                     <div class="card-header bg-black bg-gradient d-flex justify-content-between">
                                         <h5 class="card-title mb-0 color-title py-1">{{ stat.collectionName }}</h5>
                                         <div class="btn-group position-absolute top-0 end-0" role="group">
-                                            <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}">
+                                            <a
+                                                class="btn btn-outline-primary btn-sm"
+                                                href="{{absolute_url(path('app_collection_view', {collectionId: stat.collectionId}))}}"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Voir"
+                                            >
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
                                             <button
                                                 data-url="{{ absolute_url(path('app_collection_edit', {collectionId: stat.collectionId})) }}"
                                                 data-title="{{ 'Modifier "' ~ stat.collectionName ~ '"' }}"
                                                 class="btn btn-primary btn-sm showModal"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Modifier"
                                             >
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
                                             {% if stat.totalItem == 0 %}
-                                                <a href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la collection" data-sweetAlert-text="Voulez-vous supprimer cette collection : {{ stat.collectionName|lower }} ?">
+                                                <a
+                                                    href="{{ path('app_collection_delete', {collectionId: stat.collectionId}) }}"
+                                                    class="btn btn-danger btn-sm removeElement"
+                                                    data-sweetAlert-title="Suppression de la collection"
+                                                    data-sweetAlert-text="Voulez-vous supprimer cette collection : {{ stat.collectionName|lower }} ?"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Supprimer"
+                                                >
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             {% endif %}

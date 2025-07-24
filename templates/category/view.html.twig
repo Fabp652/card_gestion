@@ -40,10 +40,19 @@
                                                     data-url="{{ absolute_url(path('app_category_edit', {categoryId: childSplitted|last})) }}"
                                                     data-title="{{ 'Modifier "' ~ childSplitted|first ~ '"' }}"
                                                     class="btn btn-primary btn-sm showModal"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Modifier"
                                                 >
                                                     <i class="fa-solid fa-pen"></i>
                                                 </button>
-                                                <a href="{{ path('app_category_delete', {categoryId: childSplitted|last}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la catégorie" data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ childSplitted|first|lower }} ?">
+                                                <a
+                                                    href="{{ path('app_category_delete', {categoryId: childSplitted|last}) }}"
+                                                    class="btn btn-danger btn-sm removeElement"
+                                                    data-sweetAlert-title="Suppression de la catégorie"
+                                                    data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ childSplitted|first|lower }} ?"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Supprimer"
+                                                >
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </div>

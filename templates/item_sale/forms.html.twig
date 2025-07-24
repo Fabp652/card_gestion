@@ -11,10 +11,20 @@
         </td>
         <td>
             <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-primary lineSubmit" data-url="{{ absolute_url(path('app_item_sale_edit', {itemSaleId: itemSale.id})) }}">
+                <button
+                    class="btn btn-sm btn-primary lineSubmit"
+                    data-url="{{ absolute_url(path('app_item_sale_edit', {itemSaleId: itemSale.id})) }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Enregistrer"
+                >
                     <i class="fa-solid fa-check"></i>
                 </button>
-                <button class="btn btn-sm btn-secondary lineRefresh" data-url="{{ absolute_url(path('app_item_sale_data', {itemSaleId: itemSale.id})) }}">
+                <button
+                    class="btn btn-sm btn-secondary lineRefresh"
+                    data-url="{{ absolute_url(path('app_item_sale_data', {itemSaleId: itemSale.id})) }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Réinitialiser"
+                >
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
                 <button
@@ -22,6 +32,8 @@
                     data-sweetAlert-title="Supprimer la ligne"
                     data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
                     data-url="{{ absolute_url(path('app_item_sale_delete', {itemSaleId: itemSale.id})) }}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Supprimer"
                 >
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -39,14 +51,27 @@
         </td>
         <td>
             <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-primary lineSubmit" data-url="{{ absolute_url(path('app_item_sale_add', {saleId: saleId}))}}"><i class="fa-solid fa-check"></i></button>
-                <button class="btn btn-sm btn-secondary lineRefresh">
+                <button
+                    class="btn btn-sm btn-primary lineSubmit"
+                    data-url="{{ absolute_url(path('app_item_sale_add', {saleId: saleId}))}}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Enregistrer"
+                >
+                    <i class="fa-solid fa-check"></i>
+                </button>
+                <button
+                    class="btn btn-sm btn-secondary lineRefresh"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Réinitialiser"
+                >
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
                 <button
                     class="btn btn-sm btn-danger lineCancel"
                     data-sweetAlert-title="Supprimer la ligne"
                     data-sweetAlert-text="Voulez-vous supprimer la ligne ?"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Supprimer"
                 >
                     <i class="fa-solid fa-xmark"></i>
                 </button>

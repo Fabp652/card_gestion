@@ -142,6 +142,8 @@
                                                         type="button"
                                                         class="btn btn-outline-success border-top-0"
                                                         href="{{ path(route, {saleId: itemQuality.itemSale.sale.id}) }}"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-title="Voir la vente"
                                                     >
                                                         <i class="fa-solid fa-coins"></i>
                                                     </a>
@@ -152,8 +154,10 @@
                                                     data-url="{{ absolute_url(path('app_item_quality_edit', {itemQualityId: itemQuality.id})) }}"
                                                     data-title='Modifier "{{ itemQuality.choiceLabel }}"'
                                                     data-modal-xl="1"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Modifier"
                                                 >
-                                                    <i class="fa-solid fa-gear"></i>
+                                                    <i class="fa-solid fa-pen"></i>
                                                 </button>
                                             </div>
                                             {% if itemQuality.quality is not null %}

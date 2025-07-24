@@ -47,6 +47,8 @@
                         data-class="received"
                         data-submit-url="{{ absolute_url(path('app_item_purchase_state', {itemPurchaseId: itemPurchase.id})) }}"
                         data-state="received"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Reçu"
                     >
                         <i class="fa-solid fa-check"></i>
                     </button>
@@ -61,6 +63,8 @@
                         {% if itemPurchase.quantityToRefund and itemPurchase.quantityToRefund < itemPurchase.quantity %}
                             data-quantity="{{ itemPurchase.quantityToRefund }}"
                         {% endif %}
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Demande de remboursement"
                     >
                         <i class="fa-solid fa-reply"></i>
                     </button>
@@ -71,6 +75,8 @@
                         data-class="refunded"
                         data-submit-url="{{ absolute_url(path('app_item_purchase_state', {itemPurchaseId: itemPurchase.id})) }}"
                         data-state="refunded"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Remboursé"
                     >
                         <i class="fa-solid fa-check"></i>
                     </button>

@@ -159,10 +159,19 @@
                                                     class="btn btn-primary btn-sm showModal"
                                                     data-url="{{ path('app_market_edit', {marketId: market.id}) }}"
                                                     data-title='Modifier "{{ market.name }}"'
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Modifier"
                                                 >
                                                     <i class="fa-solid fa-pen"></i>
                                                 </button>
-                                                <a href="{{ path('app_market_delete', {marketId: market.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la boutique" data-sweetAlert-text="Voulez-vous supprimer cet boutique : {{ market.name|lower }} ?">
+                                                <a
+                                                    href="{{ path('app_market_delete', {marketId: market.id}) }}"
+                                                    class="btn btn-danger btn-sm removeElement"
+                                                    data-sweetAlert-title="Suppression de la boutique"
+                                                    data-sweetAlert-text="Voulez-vous supprimer cet boutique : {{ market.name|lower }} ?"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Supprimer"
+                                                >
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </div>

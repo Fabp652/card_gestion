@@ -57,17 +57,31 @@
                                         <div class="card-header bg-black bg-gradient d-flex justify-content-between">
                                             <h5 class="card-title color-title text-uppercase align-middle my-auto py-1">LES 10 {{ categorySplitted|first }} LES PLUS CHERS</h5>
                                             <div class="btn-group position-absolute top-0 end-0" role="group">
-                                                <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: categorySplitted|last}))}}">
+                                                <a
+                                                    class="btn btn-outline-primary btn-sm"
+                                                    href="{{absolute_url(path('app_item_list', {collectionId: collection.id, categoryId: categorySplitted|last}))}}"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Voir"
+                                                >
                                                     <i class="fa-solid fa-eye"></i>
                                                 </a>
                                                 <button
                                                     data-url="{{ absolute_url(path('app_category_edit', {categoryId: categorySplitted|last})) }}"
                                                     data-title="{{ 'Modifier "' ~ categorySplitted|first ~ '"' }}"
                                                     class="btn btn-primary btn-sm showModal"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Modifier"
                                                 >
                                                     <i class="fa-solid fa-pen"></i>
                                                 </button>
-                                                <a href="{{ path('app_category_delete', {categoryId: categorySplitted|last}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la catégorie" data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ categorySplitted|first|lower }} ?">
+                                                <a
+                                                    href="{{ path('app_category_delete', {categoryId: categorySplitted|last}) }}"
+                                                    class="btn btn-danger btn-sm removeElement"
+                                                    data-sweetAlert-title="Suppression de la catégorie"
+                                                    data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ categorySplitted|first|lower }} ?"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Supprimer"
+                                                >
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </div>
@@ -112,6 +126,8 @@
                                                     data-url="{{ absolute_url(path('app_rarity_add', {collectionId: collection.id})) }}"
                                                     data-title="{{ 'Ajouter une rareté' }}"
                                                     class="btn btn-primary btn-sm showModal"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Ajouter une rareté"
                                                 >
                                                     <i class="fa-solid fa-plus"></i>
                                                 </button>
@@ -143,10 +159,19 @@
                                                                         data-url="{{ absolute_url(path('app_rarity_edit', {rarityId: rarity.id})) }}"
                                                                         data-title="{{ 'Modifier "' ~ rarity.rarityName ~ '"' }}"
                                                                         class="btn btn-primary btn-sm showModal"
+                                                                        data-bs-toggle="tooltip"
+                                                                        data-bs-title="Modifier"
                                                                     >
                                                                         <i class="fa-solid fa-pen"></i>
                                                                     </button>
-                                                                    <a href="{{ path('app_rarity_delete', {rarityId: rarity.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la rareté" data-sweetAlert-text="Voulez-vous supprimer cette rareté : {{ rarity.rarityName|lower }} ?">
+                                                                    <a
+                                                                        href="{{ path('app_rarity_delete', {rarityId: rarity.id}) }}"
+                                                                        class="btn btn-danger btn-sm removeElement"
+                                                                        data-sweetAlert-title="Suppression de la rareté"
+                                                                        data-sweetAlert-text="Voulez-vous supprimer cette rareté : {{ rarity.rarityName|lower }} ?"
+                                                                        data-bs-toggle="tooltip"
+                                                                        data-bs-title="Supprimer"
+                                                                    >
                                                                         <i class="fa-solid fa-trash-can"></i>
                                                                     </a>
                                                                 </div>

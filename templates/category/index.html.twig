@@ -32,17 +32,31 @@
                                     <div class="card-header bg-black bg-gradient d-flex justify-content-between">
                                         <h5 class="color-title card-title mb-0 py-1">{{ stat.categoryName }}</h5>
                                         <div class="btn-group position-absolute top-0 end-0" role="group">
-                                            <a class="btn btn-outline-primary btn-sm" href="{{absolute_url(path('app_category_view', {categoryId: stat.categoryId}))}}">
+                                            <a
+                                                class="btn btn-outline-primary btn-sm"
+                                                href="{{absolute_url(path('app_category_view', {categoryId: stat.categoryId}))}}"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Voir"
+                                            >
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
                                             <button
                                                 data-url="{{ absolute_url(path('app_category_edit', {categoryId: stat.categoryId})) }}"
                                                 data-title="{{ 'Modifier "' ~ stat.categoryName ~ '"' }}"
                                                 class="btn btn-primary btn-sm showModal"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Modifier"
                                             >
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
-                                            <a href="{{ path('app_category_delete', {categoryId: stat.categoryId}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de la catégorie" data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ stat.categoryName|lower }} ?">
+                                            <a
+                                                href="{{ path('app_category_delete', {categoryId: stat.categoryId}) }}"
+                                                class="btn btn-danger btn-sm removeElement"
+                                                data-sweetAlert-title="Suppression de la catégorie"
+                                                data-sweetAlert-text="Voulez-vous supprimer cette catégorie : {{ stat.categoryName|lower }} ?"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Supprimer"
+                                            >
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </a>
                                         </div>

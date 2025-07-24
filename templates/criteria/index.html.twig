@@ -94,10 +94,19 @@
                                                     data-url="{{ absolute_url(path('app_criteria_edit', {criteriaId: criteria.id})) }}"
                                                     data-title="{{ 'Modifier "' ~ criteria.name ~ '"' }}"
                                                     class="btn btn-primary btn-sm showModal"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Modifier"
                                                 >
                                                     <i class="fa-solid fa-pen"></i>
                                                 </button>
-                                                <a href="{{ path('app_criteria_delete', {criteriaId: criteria.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de le critère" data-sweetAlert-text="Voulez-vous supprimer ce critère : {{ criteria.name|lower }} ?">
+                                                <a
+                                                    href="{{ path('app_criteria_delete', {criteriaId: criteria.id}) }}"
+                                                    class="btn btn-danger btn-sm removeElement"
+                                                    data-sweetAlert-title="Suppression de le critère"
+                                                    data-sweetAlert-text="Voulez-vous supprimer ce critère : {{ criteria.name|lower }} ?"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Supprimer"
+                                                >
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </div>

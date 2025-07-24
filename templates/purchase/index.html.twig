@@ -161,11 +161,21 @@
                                         <td>
                                             <div class="btn-group" role="group">
                                                 {% if purchase.isValid %}
-                                                    <a class="btn btn-outline-primary btn-sm" href="{{ path('app_purchase_view', {purchaseId: purchase.id}) }}">
+                                                    <a
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        href="{{ path('app_purchase_view', {purchaseId: purchase.id}) }}"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-title="Voir"
+                                                    >
                                                         <i class="fa-solid fa-eye"></i>
                                                     </a>
                                                 {% else %}
-                                                    <a class="btn btn-primary btn-sm" href="{{ path('app_purchase_edit', {purchaseId: purchase.id}) }}">
+                                                    <a
+                                                        class="btn btn-primary btn-sm"
+                                                        href="{{ path('app_purchase_edit', {purchaseId: purchase.id}) }}"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-title="Modifier"
+                                                    >
                                                         <i class="fa-solid fa-pen"></i>
                                                     </a>
                                                 {% endif %}
@@ -175,11 +185,20 @@
                                                     data-url="{{ absolute_url(path('app_file_upload', {entityName: 'purchase', entityId: purchase.id})) }}"
                                                     data-title="Ticket/Facture"
                                                     data-modal-xl="1"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="{{ purchase.file ? 'Changer le fichier' : 'Ajouter un fichier' }}"
                                                 >
                                                     <i class="fa-solid fa-file"></i>
                                                 </button>
                                                 {% if not purchase.isValid %}
-                                                    <a href="{{ path('app_purchase_delete', {purchaseId: purchase.id}) }}" class="btn btn-danger btn-sm removeElement" data-sweetAlert-title="Suppression de l'achat" data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?">
+                                                    <a
+                                                        href="{{ path('app_purchase_delete', {purchaseId: purchase.id}) }}"
+                                                        class="btn btn-danger btn-sm removeElement"
+                                                        data-sweetAlert-title="Suppression de l'achat"
+                                                        data-sweetAlert-text="Voulez-vous supprimer cet achat : {{ purchase.name|lower }} ?"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-title="Supprimer"
+                                                    >
                                                         <i class="fa-solid fa-trash-can"></i>
                                                     </a>
                                                 {% endif %}
