@@ -218,4 +218,11 @@ class ItemQuality
 
         return $this;
     }
+
+    public function getInSale(): bool
+    {
+        return $this->itemSales->filter(function ($itemSale) {
+            return $itemSale->getSale()->isValid();
+        })->count() > 0;
+    }
 }

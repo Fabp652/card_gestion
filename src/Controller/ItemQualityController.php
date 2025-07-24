@@ -117,6 +117,8 @@ class ItemQualityController extends AbstractController
                 $itemQuality->setSort($item->getItemQualities()->count() + 1);
             }
 
+            $item->setNumber($item->getNumber() + 1);
+
             $this->em->persist($itemQuality);
             $this->em->flush();
         } elseif ($form->isSubmitted() && !$form->isValid()) {

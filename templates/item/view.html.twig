@@ -10,7 +10,7 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="container-fluid mt-container mx-4" data-controller="form">
+    <div class="container-fluid mt-container mx-4" data-controller="form show-hide">
         <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0">
                 {% if item.link %}
@@ -77,23 +77,31 @@
                     <div class="row">
                         <div class="col-12 card px-3">
                             <div class="card-body">
-                                {% if item.itemQualities|length < item.number %}
-                                    <div class="row">
-                                        <div class="col-12 ps-0">
-                                            <button
-                                                type="button"
-                                                class="btn btn-primary showModal"
-                                                id="showModal"
-                                                data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
-                                                data-title="Évaluer un exemplaire"
-                                            >
-                                                Évaluer un exemplaire
-                                            </button>
-                                        </div>
+                                <div class="row">
+                                    <div class="col-6 ps-0">
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary showModal"
+                                            id="showModal"
+                                            data-url="{{ absolute_url(path('app_item_quality_add', {itemId: item.id})) }}"
+                                            data-title="Nouvel exemplaire"
+                                        >
+                                            Nouvel exemplaire
+                                        </button>
                                     </div>
-                                {% endif %}
-                                {% for itemQuality in item.itemQualities %}
-                                    <div class="row mt-5 mb-3 border border-black" style="height:400px;">
+                                    <div class="form-check form-switch col-6 d-flex justify-content-end align-self-center pe-0">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            role="switch"
+                                            id="showHide"
+                                            name="showHide"
+                                        >
+                                        <label class="form-check-label ms-2 fw-medium" for="showHide">Afficher les exemplaires en vente ou vendus</label>
+                                    </div>
+                                </div>
+                                {% for itemQuality in item.itemQualities|sort((a, b) => a.inSale <=> b.inSale) %}
+                                    <div class="row mt-5 mb-3 border border-black{{ itemQuality.inSale ? ' showHide' : '' }}" style="height:400px;{{ itemQuality.inSale ? ' display:none;' }}">
                                         <div class="col-5 position-relative p-0 text-center border-end border-black h-100{{ itemQuality.files.empty ? ' no-image' : ''}}">
                                             <div class="sort-item position-absolute top-0 start-0 border-bottom border-end border-black bg-light z-3">
                                                 <h1 class="fw-bold">{{ itemQuality.sort }}</h1>
