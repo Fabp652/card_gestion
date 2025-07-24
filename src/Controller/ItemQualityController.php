@@ -81,6 +81,11 @@ class ItemQualityController extends AbstractController
 
             if (!$itemQuality->getId()) {
                 $itemQuality->setItem($item);
+                $item->addItemQuality($itemQuality);
+
+                if ($item->getItemQualities()->count() > $item->getNumber()) {
+                    $item->setNumber($item->getNumber() + 1);
+                }
             }
 
             if ($request->request->has('removeFiles')) {
@@ -116,8 +121,6 @@ class ItemQualityController extends AbstractController
             if (!$itemQuality->getSort()) {
                 $itemQuality->setSort($item->getItemQualities()->count() + 1);
             }
-
-            $item->setNumber($item->getNumber() + 1);
 
             $this->em->persist($itemQuality);
             $this->em->flush();
