@@ -12,10 +12,16 @@
             {% else %}
                 {% if itemPurchase.refundRequest and not itemPurchase.refunded %}
                     {% set state = states|find((v, k) => k == 1) %}
+                    {% if itemPurchase.quantityToRefund and itemPurchase.quantityToRefund < itemPurchase.quantity %}
+                        {% set state = state ~ ' (' ~ itemPurchase.quantityToRefund ~ ')' %}
+                    {% endif %}
                     {% set bg = 'text-bg-danger' %}
                 {% else %}
                     {% if itemPurchase.refunded %}
                         {% set state = states|find((v, k) => k == 2) %}
+                        {% if itemPurchase.quantityToRefund and itemPurchase.quantityToRefund < itemPurchase.quantity %}
+                            {% set state = state ~ ' (' ~ itemPurchase.quantityToRefund ~ ')' %}
+                        {% endif %}
                     {% else %}
                         {% set state = states|find((v, k) => k == 3) %}
                     {% endif %}
