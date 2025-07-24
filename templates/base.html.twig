@@ -52,43 +52,43 @@
                     <ul class="navbar-nav text-uppercase fw-semibold flex-column">
                         <li class="nav-item">
                             <a class="nav-link{{ pathInfo == '/' ? ' disabled navbar-active' : ' navbar-link' }}" href="{{ path('app_collection') }}">
-                                Collections
+                                <i class="fa-solid fa-gem"></i> Collections
                             </a>
                             <div class="{{ pathInfo == '/' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link{{ pathInfo == '/storage' ? ' disabled navbar-active' : ' navbar-link' }}" href="{{ path('app_storage_list') }}">
-                                Rangements
+                                <i class="fa-solid fa-boxes-stacked"></i> Rangements
                             </a>
                             <div class="{{ pathInfo == '/storage' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
                         <li class="nav-item">
                             <a href="{{ path('app_category_list') }}" class="nav-link{{ pathInfo == '/category' ? ' disabled navbar-active' : ' navbar-link' }}">
-                                Catégories
+                                <i class="fa-solid fa-tags"></i> Catégories
                             </a>
                             <div class="{{ pathInfo == '/category' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
                         <li class="nav-item">
                             <a href="{{ path('app_criteria_list') }}" class="nav-link{{ pathInfo == '/criteria' ? ' disabled navbar-active' : ' navbar-link' }}">
-                                Critères
+                                <i class="fa-solid fa-list-check"></i> Critères
                             </a>
                             <div class="{{ pathInfo == '/criteria' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
                         <li class="nav-item">
                             <a href="{{ path('app_sale_list') }}" class="nav-link{{ pathInfo == '/item/sale' ? ' disabled navbar-active' : ' navbar-link' }}">
-                                Ventes
+                                <i class="fa-solid fa-coins"></i> Ventes
                             </a>
                             <div class="{{ pathInfo == '/item/sale' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
                         <li class="nav-item">
                             <a href="{{ path('app_purchase_list') }}" class="nav-link{{ pathInfo == '/purchase' ? ' disabled navbar-active' : ' navbar-link' }}">
-                                Achats
+                                <i class="fa-solid fa-cart-shopping"></i> Achats
                             </a>
                             <div class="{{ pathInfo == '/purchase' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
                         <li class="nav-item">
                             <a href="{{ path('app_market_list') }}" class="nav-link{{ pathInfo == '/market' ? ' disabled navbar-active' : ' navbar-link' }}">
-                                Boutiques/Marchés
+                                <i class="fa-solid fa-shop"></i> Boutiques/Marchés
                             </a>
                             <div class="{{ pathInfo == '/market' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
                         </li>
