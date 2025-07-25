@@ -1,5 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
-import { Modal, Tooltip } from 'bootstrap';
+import { Modal } from 'bootstrap';
 
 export default class extends Controller {
     connect() {
@@ -31,10 +31,7 @@ export default class extends Controller {
 
                                 modal.show();
 
-                                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                                if (tooltipTriggerList.length > 0) {
-                                    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
-                                }
+                                $('.modalTooltip').tooltip();
                             }
                         });
                     }

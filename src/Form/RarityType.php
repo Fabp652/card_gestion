@@ -21,7 +21,7 @@ class RarityType extends AbstractType
         $gradeHelp .= ', donc plus le niveau est grand plus la rareté est rare';
 
         $gradeLabel = 'Niveau de rareté <span data-bs-toggle="tooltip" data-bs-placement="top" ';
-        $gradeLabel .= ' data-bs-title="' . $gradeHelp . '"><i class="fa-solid fa-circle-question fa-sm"></i></span>';
+        $gradeLabel .= ' data-bs-title="' . $gradeHelp . '" class="modalTooltip"><i class="fa-solid fa-circle-question fa-sm"></i></span>';
 
         $builder
             ->add('name', TextType::class, [
