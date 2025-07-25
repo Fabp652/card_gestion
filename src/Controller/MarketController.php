@@ -5,7 +5,8 @@ namespace App\Controller;
 use App\Entity\Market;
 use App\Form\MarketType;
 use App\Repository\MarketRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\EntityManager;
+use App\Service\Validate;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,11 +15,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class MarketController extends AbstractController
 {
-    public function __construct(private MarketRepository $marketRepo, private EntityManagerInterface $em)
+    public function __construct(private MarketRepository $marketRepo)
     {
     }
 
-    #[Route('/market', name: 'app_market_list')]
+    #[Route('/market', 'app_market_list')]
     public function list(Request $request, PaginatorInterface $paginator): Response
     {
         $filters = $request->query->all('filter');
@@ -57,12 +58,8 @@ final class MarketController extends AbstractController
     }
 
     #[Route('/market/add', 'app_market_add')]
-    #[Route(
-        '/market/{marketId}/edit',
-        'app_market_edit',
-        ['marketId' => '\d+']
-    )]
-    public function form(Request $request, ?int $marketId): Response
+    #[Route('/market/{marketId}/edit', 'app_market_edit', ['marketId' => '\d+'])]
+    public function form(Request $request, EntityManager $em, Validate $validate, ?int $marketId): Response
     {
         $market = new Market();
         if ($marketId) {
@@ -76,18 +73,13 @@ final class MarketController extends AbstractController
         $form = $this->createForm(MarketType::class, $market)->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$market->getId()) {
-                $this->em->persist($market);
+                $result = $em->persist($market);
+            } else {
+                $result = $em->flush();
             }
-            $this->em->flush();
-
-            return $this->json(['result' => true]);
+            return $this->json($result);
         } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         $render = $this->render('market/form.html.twig', [
@@ -98,21 +90,13 @@ final class MarketController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route(
-        '/market/{marketId}/delete',
-        'app_market_delete',
-        ['marketId' => '\d+']
-    )]
-    public function delete(int $marketId): Response
+    #[Route('/market/{marketId}/delete', 'app_market_delete', ['marketId' => '\d+'])]
+    public function delete(EntityManager $em, int $marketId): Response
     {
         $market = $this->marketRepo->find($marketId);
         if (!$market) {
             return $this->json(['result' => false, 'message' => 'La boutique est déjà supprimé.']);
         }
-
-        $this->em->remove($market);
-        $this->em->flush();
-
-        return $this->json(['result' => true, 'message' => 'Supprimé avec succès.']);
+        return $this->json($em->remove($market));
     }
 }

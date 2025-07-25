@@ -6,8 +6,9 @@ use App\Entity\Sale;
 use App\Event\StateEvent;
 use App\Form\SaleType;
 use App\Repository\SaleRepository;
+use App\Service\EntityManager;
+use App\Service\Validate;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -15,11 +16,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class SaleController extends AbstractController
 {
-    public function __construct(private SaleRepository $saleRepo, private EntityManagerInterface $em)
+    public function __construct(private SaleRepository $saleRepo)
     {
     }
 
@@ -27,20 +27,12 @@ final class SaleController extends AbstractController
     public function index(Request $request, PaginatorInterface $paginator): Response
     {
         $filters = $request->query->all('filter');
-        $filters = array_filter(
-            $filters,
-            function ($filter) {
-                return !empty($filter) || $filter == 0;
-            }
-        );
+        $filters = array_filter($filters, function ($filter) {
+            return !empty($filter) || $filter == 0;
+        });
 
         $sales = $this->saleRepo->findByFilter($filters);
-
-        $sales = $paginator->paginate(
-            $sales,
-            $request->query->get('page', 1),
-            $request->query->get('limit', 10)
-        );
+        $sales = $paginator->paginate($sales, $request->query->get('page', 1), $request->query->get('limit', 10));
 
         return $this->render('sale/index.html.twig', [
             'request' => $request,
@@ -50,38 +42,28 @@ final class SaleController extends AbstractController
     }
 
     #[Route('/sale/add', 'app_sale_add')]
-    public function add(Request $request): Response
+    public function add(Request $request, EntityManager $em, Validate $validate): Response
     {
         $sale = new Sale();
+        $marketUrl = $this->generateUrl('app_market_search', ['forSale' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $marketUrl = $this->generateUrl(
-            'app_market_search',
-            ['forSale' => 1],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
-        $form = $this->createForm(
-            SaleType::class,
-            $sale,
-            [
-                'marketUrl' => $marketUrl,
-                'post' => $request->isMethod('POST')
-            ]
-        )->handleRequest($request);
+        $form = $this->createForm(SaleType::class, $sale, [
+            'marketUrl' => $marketUrl,
+            'post' => $request->isMethod('POST')
+        ])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($sale);
-            $this->em->flush();
-
-            return $this->json([
-                'result' => true,
-                'redirect' => $this->generateUrl('app_sale_edit', ['saleId' => $sale->getId()])
-            ]);
-        } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
+            if (!$sale->getId()) {
+                $result = $em->persist($sale, true);
+            } else {
+                $result = $em->flush();
             }
-            return $this->json(['result' => false, 'messages' => $messages]);
+
+            if ($result['result']) {
+                $result['redirect'] = $this->generateUrl('app_sale_edit', ['saleId' => $sale->getId()]);
+            }
+            return $this->json($result);
+        } elseif ($form->isSubmitted()) {
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         $render = $this->render('sale/form.html.twig', [
@@ -91,12 +73,8 @@ final class SaleController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route(
-        '/sale/{saleId}/edit',
-        'app_sale_edit',
-        ['saleId' => '\d+']
-    )]
-    public function edit(Request $request, int $saleId): Response
+    #[Route('/sale/{saleId}/edit', 'app_sale_edit', ['saleId' => '\d+'])]
+    public function edit(Request $request, EntityManager $em, Validate $validate, int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
@@ -111,30 +89,18 @@ final class SaleController extends AbstractController
             }
         }
 
-        $marketUrl = $this->generateUrl(
-            'app_market_search',
-            ['forSale' => 1],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
+        $marketUrl = $this->generateUrl('app_market_search', ['forSale' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $form = $this->createForm(
-            SaleType::class,
-            $sale,
-            [
-                'marketUrl' => $marketUrl,
-                'post' => $request->isMethod('POST')
-            ]
-        )->handleRequest($request);
+        $form = $this->createForm(SaleType::class, $sale, [
+            'marketUrl' => $marketUrl,
+            'post' => $request->isMethod('POST')
+        ])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->flush();
-            return $this->json(['result' => true, 'message' => 'Achat modifié avec succès']);
+            $result = $em->flush();
+            $result['message'] = 'Achat modifié avec succès';
+            return $this->json($result);
         } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         return $this->render('sale/edit_or_view.html.twig', [
@@ -143,23 +109,18 @@ final class SaleController extends AbstractController
         ]);
     }
 
-    #[Route(
-        '/sale/{saleId}/validate',
-        'app_sale_validate',
-        ['saleId' => '\d+']
-    )]
-    public function validateSale(EventDispatcherInterface $dispatcher, int $saleId): Response
+    #[Route('/sale/{saleId}/validate', 'app_sale_validate', ['saleId' => '\d+'])]
+    public function validateSale(EventDispatcherInterface $dispatcher, EntityManager $em, int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'La vente est introuvable.'
-            ]);
+            return $this->render('error/not_found.html.twig', ['message' => 'La vente est introuvable.']);
         }
 
         if ($sale->getItemSales()->isEmpty()) {
-            return $this->json(['result' => false, 'message' => 'La vente doit avoir au moins un objet.']);
+            $this->addFlash('danger', 'La vente doit avoir au moins un objet.');
+            return $this->redirectToRoute('app_sale_edit', ['saleId' => $saleId]);
         }
 
         $dateTime = new DateTime();
@@ -175,16 +136,15 @@ final class SaleController extends AbstractController
 
         $dispatcher->dispatch($event, 'state');
 
-        $this->em->flush();
+        $result = $em->flush();
+        if (!$result['result']) {
+            return $this->redirectToRoute('app_sale_edit', ['saleId' => $saleId]);
+        }
 
         return $this->redirectToRoute('app_sale_view', ['saleId' => $saleId]);
     }
 
-    #[Route(
-        '/sale/{saleId}/view',
-        'app_sale_view',
-        ['saleId' => '\d+']
-    )]
+    #[Route('/sale/{saleId}/view', 'app_sale_view', ['saleId' => '\d+'])]
     public function view(int $saleId): Response
     {
         /** @var Sale $sale */
@@ -200,23 +160,18 @@ final class SaleController extends AbstractController
         ]);
     }
 
-    #[Route(
-        '/sale/{saleId}/state',
-        'app_sale_state',
-        ['saleId' => '\d+']
-    )]
+    #[Route('/sale/{saleId}/state', 'app_sale_state', ['saleId' => '\d+'])]
     public function state(
         Request $request,
-        ValidatorInterface $validator,
+        Validate $validate,
         EventDispatcherInterface $dispatcher,
+        EntityManager $em,
         int $saleId
     ): Response {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
         }
 
         $data = $request->request->all();
@@ -242,57 +197,35 @@ final class SaleController extends AbstractController
 
         $sale->{$method}(true);
 
-        $violations = $validator->validate($sale);
-        if ($violations->count() > 0) {
-            $messages = [];
-            foreach ($violations as $violation) {
-                $messages[$violation->getPropertyPath()] = $violation->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+        $violations = $validate->validate($sale);
+        if (!empty($violations)) {
+            return $this->json(['result' => false, 'messages' => $violations]);
         }
 
-        $event = new StateEvent(
-            $sale->getId(),
-            Sale::class,
-            $state,
-            true
-        );
-
+        $event = new StateEvent($sale->getId(), Sale::class, $state, true);
         $dispatcher->dispatch($event, 'state');
-        $this->em->flush();
 
-        return $this->json(['result' => true]);
+        return $this->json($em->flush());
     }
 
-    #[Route(
-        '/sale/{saleId}/delete',
-        'app_sale_delete',
-        ['saleId' => '\d+']
-    )]
-    public function delete(Request $request, int $saleId): Response
+    #[Route('/sale/{saleId}/delete', 'app_sale_delete', ['saleId' => '\d+'])]
+    public function delete(Request $request, EntityManager $em, int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if ($sale) {
             if (!$sale->isValid()) {
-                $this->em->remove($sale);
-                $this->em->flush();
-
-                $response = ['result' => true];
-                if (str_ends_with($request->headers->get('referer'), 'edit')) {
+                $result = $em->remove($sale, true);
+                if ($result['result'] && str_ends_with($request->headers->get('referer'), 'edit')) {
                     $response['redirect'] = $this->generateUrl(
                         'app_sale_list',
                         [],
                         UrlGeneratorInterface::ABSOLUTE_URL
                     );
                 }
-
                 return $this->json($response);
             }
-            return $this->json([
-                'result' => false,
-                'message' => 'Une vente validé ne peut pas être supprimée.'
-            ]);
+            return $this->json(['result' => false, 'message' => 'Une vente validé ne peut pas être supprimée.']);
         } else {
             return $this->json(['result' => false, 'message' => 'La vente est déjà supprimée']);
         }

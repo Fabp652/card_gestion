@@ -6,8 +6,9 @@ use App\Entity\ItemQuality;
 use App\Form\ItemQualityType;
 use App\Repository\ItemQualityRepository;
 use App\Repository\ItemRepository;
+use App\Service\EntityManager;
 use App\Service\FileManager;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\Validate;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,13 +16,13 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ItemQualityController extends AbstractController
 {
-    public function __construct(
-        private ItemQualityRepository $itemQualityRepository,
-        private EntityManagerInterface $em
-    ) {
+    private const FOLDER = 'itemQuality';
+
+    public function __construct(private ItemQualityRepository $itemQualityRepository)
+    {
     }
 
-    #[Route('/item/quality/search', name: 'app_item_quality_search')]
+    #[Route('/item/quality/search', 'app_item_quality_search')]
     public function search(Request $request): Response
     {
         $filters = $request->query->all() ;
@@ -37,20 +38,14 @@ class ItemQualityController extends AbstractController
         return $this->json(['result' => true, 'searchResults' => $items->getQuery()->getResult()]);
     }
 
-    #[Route(
-        '/item/{itemId}/quality/add',
-        name: 'app_item_quality_add',
-        requirements: ['itemId' => '\d+']
-    )]
-    #[Route(
-        '/item/quality/{itemQualityId}/update',
-        name: 'app_item_quality_edit',
-        requirements: ['itemQualityId' => '\d+']
-    )]
+    #[Route('/item/{itemId}/quality/add', 'app_item_quality_add', ['itemId' => '\d+'])]
+    #[Route('/item/quality/{itemQualityId}/update', 'app_item_quality_edit', ['itemQualityId' => '\d+'])]
     public function form(
         Request $request,
         FileManager $fileManager,
         ItemRepository $itemRepo,
+        EntityManager $em,
+        Validate $validate,
         ?int $itemId,
         ?int $itemQualityId
     ): Response {
@@ -99,22 +94,24 @@ class ItemQualityController extends AbstractController
                         ]);
                     }
 
-                    $this->em->remove($file);
+                    $result = $em->remove($file);
+                    if (!$result['result']) {
+                        return $this->json($result);
+                    }
                 }
             }
 
             if ($form->has('files')) {
                 foreach ($form->get('files')->getData() as $file) {
-                    $fileManagerEntity = $fileManager->upload('itemQuality', $item->getName(), $file);
+                    $result = $fileManager->addOrReplace($file, self::FOLDER, $item->getName());
 
-                    if (!$fileManagerEntity) {
-                        return $this->json([
-                            'result' => false,
-                            'message' => 'Une erreur est survenue pendant le téléchargement du fichier.'
-                        ]);
+                    if (!$result['result']) {
+                        return $this->json($result);
                     }
-                    $this->em->persist($fileManagerEntity);
-                    $itemQuality->addFile($fileManagerEntity);
+
+                    $fileManagerEntity = $result['newEntityFile'];
+                    $item->addFile($fileManagerEntity);
+                    $em->persist($fileManagerEntity);
                 }
             }
 
@@ -122,15 +119,9 @@ class ItemQualityController extends AbstractController
                 $itemQuality->setSort($item->getItemQualities()->count() + 1);
             }
 
-            $this->em->persist($itemQuality);
-            $this->em->flush();
+            return $this->json($em->persist($itemQuality, true));
         } elseif ($form->isSubmitted() && !$form->isValid()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         $render = $this->render('item/quality/form.html.twig', [
@@ -143,12 +134,8 @@ class ItemQualityController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route(
-        '/item/quality/{itemQualityId}/available',
-        'app_item_quality_available',
-        ['itemQualityId' => '\d+']
-    )]
-    public function available(Request $request, int $itemQualityId): Response
+    #[Route('/item/quality/{itemQualityId}/available', 'app_item_quality_available', ['itemQualityId' => '\d+'])]
+    public function available(Request $request, EntityManager $em, int $itemQualityId): Response
     {
         /** @var ItemQuality $itemQuality */
         $itemQuality = $this->itemQualityRepository->find($itemQualityId);
@@ -166,9 +153,11 @@ class ItemQualityController extends AbstractController
         }
 
         if ($flush) {
-            $this->em->flush();
+            $result = $em->flush();
+            if (!$result['result']) {
+                return $this->json($result);
+            }
         }
-
         return $this->json(['result' => true, 'message' => 'Mis à jour avec succès']);
     }
 }

@@ -5,7 +5,8 @@ namespace App\Controller;
 use App\Entity\StorageType;
 use App\Form\StorageTypeType;
 use App\Repository\StorageTypeRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\EntityManager;
+use App\Service\Validate;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,30 +18,19 @@ class StorageTypeController extends AbstractController
     {
     }
 
-    #[Route('/storage/type', name: 'app_storage_type_add')]
-    public function form(Request $request, EntityManagerInterface $em): Response
+    #[Route('/storage/type', 'app_storage_type_add')]
+    public function form(Request $request, EntityManager $em, Validate $validate): Response
     {
         $storageType = new StorageType();
-
         $form = $this->createForm(StorageTypeType::class, $storageType)->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($storageType);
-            $em->flush();
-
-            return $this->json(['result' => true]);
+            $result = $em->persist($storageType, true);
+            return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
-        $render = $this->render('storage_type/form.html.twig', [
-            'form' => $form
-        ]);
-
+        $render = $this->render('storage_type/form.html.twig', ['form' => $form]);
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 }

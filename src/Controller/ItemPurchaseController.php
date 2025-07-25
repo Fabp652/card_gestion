@@ -9,31 +9,24 @@ use App\Form\FormHiddenType;
 use App\Form\ItemPurchaseType;
 use App\Repository\ItemPurchaseRepository;
 use App\Repository\PurchaseRepository;
+use App\Service\EntityManager;
+use App\Service\Validate;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class ItemPurchaseController extends AbstractController
 {
-    public function __construct(private ItemPurchaseRepository $iPRepo, private EntityManagerInterface $em)
+    public function __construct(private ItemPurchaseRepository $iPRepo)
     {
     }
 
-    #[Route(
-        '/purchase/{purchaseId}/item',
-        name: 'app_item_purchase_list',
-        requirements: ['purchaseId' => '\d+']
-    )]
+    #[Route('/purchase/{purchaseId}/item', 'app_item_purchase_list', ['purchaseId' => '\d+'])]
     public function list(
         Request $request,
         PurchaseRepository $purchaseRepo,
@@ -74,19 +67,13 @@ final class ItemPurchaseController extends AbstractController
         }
     }
 
-    #[Route(
-        '/purchase/{purchaseId}/item/add',
-        name: 'app_item_purchase_add',
-        requirements: ['purchaseId' => '\d+']
-    )]
-    #[Route(
-        '/purchase/item/{itemPurchaseId}/edit',
-        name: 'app_item_purchase_edit',
-        requirements: ['itemPurchaseId' => '\d+']
-    )]
+    #[Route('/purchase/{purchaseId}/item/add', 'app_item_purchase_add', ['purchaseId' => '\d+'])]
+    #[Route('/purchase/item/{itemPurchaseId}/edit', 'app_item_purchase_edit', ['itemPurchaseId' => '\d+'])]
     public function addOrEdit(
         Request $request,
         PurchaseRepository $purchaseRepo,
+        EntityManager $em,
+        Validate $validate,
         ?int $purchaseId,
         ?int $itemPurchaseId
     ): Response {
@@ -111,19 +98,27 @@ final class ItemPurchaseController extends AbstractController
         )->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $result = ['result' => true];
             $new = false;
             if (!$itemPurchase->getId()) {
                 if ($itemPurchase->getPurchase()->isReceived()) {
                     $itemPurchase->setReceived(true);
                 }
-                $this->em->persist($itemPurchase);
+                $result = $em->persist($itemPurchase);
+                if (!$result['result']) {
+                    return $this->json($result);
+                }
                 $new = true;
             }
-            $this->em->flush();
+            $result = $em->flush();
+            if (!$result['result']) {
+                return $this->json($result);
+            }
 
             $purchase->caclPrice();
-            $this->em->flush();
+            $result = $em->flush();
+            if (!$result['result']) {
+                return $this->json($result);
+            }
 
             if ($new) {
                 $result['message'] = 'Objet ajouté avec succès.';
@@ -147,23 +142,14 @@ final class ItemPurchaseController extends AbstractController
             }
             return $this->json($result);
         } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         } else {
             return $this->json(['result' => false]);
         }
     }
 
-    #[Route(
-        '/purchase/item/{itemPurchaseId}/delete',
-        'app_item_purchase_delete',
-        ['itemPurchaseId' => '\d+']
-    )]
-    public function delete(int $itemPurchaseId): Response
+    #[Route('/purchase/item/{itemPurchaseId}/delete', 'app_item_purchase_delete', ['itemPurchaseId' => '\d+'])]
+    public function delete(EntityManager $em, int $itemPurchaseId): Response
     {
         /** @var ItemPurchase $itemPurchase */
         $itemPurchase = $this->iPRepo->find($itemPurchaseId);
@@ -175,11 +161,7 @@ final class ItemPurchaseController extends AbstractController
         if (!$purchase->isValid()) {
             $purchase->removeItemsPurchase($itemPurchase);
             $purchase->caclPrice();
-
-            $this->em->remove($itemPurchase);
-            $this->em->flush();
-
-            return $this->json(['result' => true, 'message' => 'L\'objet a été retiré avec succès.']);
+            return $this->json($em->remove($itemPurchase, true));
         }
 
         return $this->json([
@@ -188,11 +170,7 @@ final class ItemPurchaseController extends AbstractController
         ]);
     }
 
-    #[Route(
-        '/purchase/item/{itemPurchaseId}/data',
-        'app_item_purchase_data',
-        ['itemPurchaseId' => '\d+']
-    )]
+    #[Route('/purchase/item/{itemPurchaseId}/data', 'app_item_purchase_data', ['itemPurchaseId' => '\d+'])]
     public function data(int $itemPurchaseId): Response
     {
         /** @var ItemPurchase $itemPurchase */
@@ -201,26 +179,20 @@ final class ItemPurchaseController extends AbstractController
             return $this->json(['result' => false, 'message' => 'L\'objet est introuvable.']);
         }
 
-        return $this->json([
-            'result' => true,
-            'data' => [
-                'item' => $itemPurchase->getItem()->getId(),
-                'price' => $itemPurchase->getPrice(),
-                'quantity' => $itemPurchase->getQuantity(),
-                'link' => $itemPurchase->getLink()
-            ]
-        ]);
+        return $this->json(['result' => true, 'data' => [
+            'item' => $itemPurchase->getItem()->getId(),
+            'price' => $itemPurchase->getPrice(),
+            'quantity' => $itemPurchase->getQuantity(),
+            'link' => $itemPurchase->getLink()
+        ]]);
     }
 
-    #[Route(
-        '/purchase/item/{itemPurchaseId}/state',
-        'app_item_purchase_state',
-        ['itemPurchaseId' => '\d+']
-    )]
+    #[Route('/purchase/item/{itemPurchaseId}/state', 'app_item_purchase_state', ['itemPurchaseId' => '\d+'])]
     public function state(
         Request $request,
-        ValidatorInterface $validator,
+        Validate $validate,
         EventDispatcherInterface $dispatcher,
+        EntityManager $em,
         int $itemPurchaseId
     ): Response {
         /** @var ItemPurchase $itemPurchase */
@@ -263,38 +235,14 @@ final class ItemPurchaseController extends AbstractController
         }
         $itemPurchase->{$method}(true);
 
-        $violations = $validator->validate($itemPurchase);
-        if ($violations->count() > 0) {
-            $messages = [];
-            foreach ($violations as $violation) {
-                $messages[$violation->getPropertyPath()] = $violation->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+        $violations = $validate->validate($itemPurchase);
+        if (!empty($violations)) {
+            return $this->json(['result' => true, 'messages' => $violations]);
         }
 
-        $event = new StateEvent(
-            $itemPurchase->getId(),
-            ItemPurchase::class,
-            $state,
-            true
-        );
-
+        $event = new StateEvent($itemPurchase->getId(), ItemPurchase::class, $state, true);
         $dispatcher->dispatch($event, 'state');
-        $this->em->flush();
 
-        return $this->json(['result' => true]);
-    }
-
-    private function newForm(
-        string $type,
-        ?ItemPurchase $itemPurchase = null,
-        array $options = [],
-        ?Request $request = null
-    ): Form {
-        $form = $this->createForm($type, $itemPurchase, $options);
-        if ($request) {
-            $form->handleRequest($request);
-        }
-        return $form;
+        return $this->json($em->flush());
     }
 }

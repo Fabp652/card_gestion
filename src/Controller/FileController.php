@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Purchase;
 use App\Entity\Sale;
 use App\Service\FileManager;
+use App\Service\Validate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -26,6 +27,7 @@ final class FileController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         FileManager $fm,
+        Validate $validate,
         string $entityName,
         int $entityId
     ): Response {
@@ -51,44 +53,24 @@ final class FileController extends AbstractController
         $entity = $em->getRepository(self::ENTITY_NAMESPACE . ucfirst($entityName))->find($entityId);
         $file = $entity->getFile();
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($file) {
-                $result = $fm->removeFile($file->getName(), $file->getFolder());
-                if (!$result) {
-                    return $this->json([
-                        'result' => false,
-                        'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
-                    ]);
-                }
-
-                $em->remove($file);
-            }
-
-            $fileManagerEntity = $fm->upload(
+            $result = $fm->addOrReplace(
+                $form->get('file')->getData(),
                 strtolower($entityName),
                 $entity->getName(),
-                $form->get('file')->getData()
+                $entity->getFile()
             );
 
-            if (!$fileManagerEntity) {
-                return $this->json([
-                    'result' => false,
-                    'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
-                ]);
+            if (!$result['false']) {
+                return $this->json($result);
             }
 
-            $em->persist($fileManagerEntity);
+            $fileManagerEntity = $result['newEntityFile'];
             $entity->setFile($fileManagerEntity);
+            $result = $em->persist($fileManagerEntity, true);
 
-            $em->flush();
-
-            return $this->json(['result' => true]);
+            return $this->json($result);
         } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         $render = $this->render('file/upload.html.twig', [

@@ -6,7 +6,8 @@ use App\Entity\Storage;
 use App\Form\StorageType;
 use App\Repository\ItemQualityRepository;
 use App\Repository\StorageRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\EntityManager;
+use App\Service\Validate;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,32 +16,24 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class StorageController extends AbstractController
 {
-    public function __construct(private StorageRepository $storageRepository, private EntityManagerInterface $em)
+    public function __construct(private StorageRepository $storageRepository)
     {
     }
 
-    #[Route('/storage', name: 'app_storage_list')]
+    #[Route('/storage', 'app_storage_list')]
     public function list(): Response
     {
         $stats = $this->storageRepository->stats();
-
-        return $this->render('storage/index.html.twig', [
-            'stats' => $stats,
-        ]);
+        return $this->render('storage/index.html.twig', ['stats' => $stats]);
     }
 
-    #[Route('/storage/add', name: 'app_storage_add')]
-    #[Route(
-        '/storage/{storageId}/edit',
-        name: 'app_storage_edit',
-        requirements: ['storageId' => '\d+']
-    )]
-    public function form(Request $request, ?int $storageId): Response
+    #[Route('/storage/add', 'app_storage_add')]
+    #[Route('/storage/{storageId}/edit', 'app_storage_edit', ['storageId' => '\d+'])]
+    public function form(Request $request, EntityManager $em, Validate $validate, ?int $storageId): Response
     {
+        $storage = new Storage();
         if ($storageId) {
             $storage = $this->storageRepository->find($storageId);
-        } else {
-            $storage = new Storage();
         }
 
         $form = $this->createForm(StorageType::class, $storage)->handleRequest($request);
@@ -48,48 +41,38 @@ class StorageController extends AbstractController
             if ($storage->getCapacity() == 0) {
                 $storage->setCapacity(null);
             }
-            $this->em->persist($storage);
-            $this->em->flush();
 
-            return $this->json(['result' => true]);
-        } elseif ($form->isSubmitted() && !$form->isValid()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
+            if (!$storage->getId()) {
+                $result = $em->persist($storage);
+            } else {
+                $result = $em->flush();
             }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json($result);
+        } elseif ($form->isSubmitted()) {
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
-        $render = $this->render('storage/form.html.twig', [
-            'form' => $form->createView(),
-            'storageId' => $storageId
-        ]);
-
+        $render = $this->render('storage/form.html.twig', ['form' => $form->createView(), 'storageId' => $storageId]);
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/storage/{storageId}/delete', name: 'app_storage_delete', requirements: ['storageId' => '\d+'])]
-    public function delete(int $storageId): Response
+    #[Route('/storage/{storageId}/delete', 'app_storage_delete', ['storageId' => '\d+'])]
+    public function delete(EntityManager $em, int $storageId): Response
     {
         $storage = $this->storageRepository->find($storageId);
         if ($storage) {
-            $this->em->remove($storage);
-            $this->em->flush();
-
-            return $this->json(['result' => true]);
+            return $this->json($em->remove($storage));
         } else {
             return $this->json(['result' => false, 'message' => 'Le rangement est déjà supprimé']);
         }
     }
 
-    #[Route(
-        '/storage/{storageId}/item/{itemQualityId}/remove',
-        name: 'app_storage_remove',
-        requirements: ['storageId' => '\d+', 'itemQualityId' => '\d+']
-    )]
+    #[Route('/storage/{storageId}/item/{itemQualityId}/remove', 'app_storage_remove', [
+        'storageId' => '\d+', 'itemQualityId' => '\d+'
+    ])]
     public function removeItem(
         ItemQualityRepository $itemQualityRepository,
+        EntityManager $em,
         int $storageId,
         int $itemQualityId
     ): Response {
@@ -105,9 +88,7 @@ class StorageController extends AbstractController
                 ) {
                     $storage->setFull(false);
                 }
-                $this->em->flush();
-
-                return $this->json(['result' => true]);
+                return $this->json($em->flush());
             } else {
                 return $this->json(['result' => false, 'message' => 'L\'objet est introuvable']);
             }
@@ -116,11 +97,7 @@ class StorageController extends AbstractController
         }
     }
 
-    #[Route(
-        '/storage/{storageId}',
-        name: 'app_storage_view',
-        requirements: ['storageId' => '\d+']
-    )]
+    #[Route('/storage/{storageId}', 'app_storage_view', ['storageId' => '\d+'])]
     public function view(
         Request $request,
         PaginatorInterface $paginator,
@@ -128,8 +105,9 @@ class StorageController extends AbstractController
         int $storageId
     ): Response {
         $storage = $this->storageRepository->find($storageId);
+        $query = $request->query;
 
-        $filters = $request->query->all('filter');
+        $filters = $query->all('filter');
         $filters = array_filter(
             $filters,
             function ($filter) {
@@ -138,12 +116,7 @@ class StorageController extends AbstractController
         );
 
         $itemQualities = $itemQualityRepository->findByFilter($filters, $storageId);
-
-        $itemQualities = $paginator->paginate(
-            $itemQualities,
-            $request->query->get('page', 1),
-            $request->query->get('limit', 10)
-        );
+        $itemQualities = $paginator->paginate($itemQualities, $query->get('page', 1), $query->get('limit', 10));
 
         return $this->render('storage/view.html.twig', [
             'itemQualities' => $itemQualities,
@@ -152,12 +125,8 @@ class StorageController extends AbstractController
         ]);
     }
 
-    #[Route(
-        '/storage/{storageId}/update',
-        name: 'app_storage_update',
-        requirements: ['storageId' => '\d+']
-    )]
-    public function update(Request $request, ItemQualityRepository $itemQualityRepository, int $storageId): Response
+    #[Route('/storage/{storageId}/update', 'app_storage_update', ['storageId' => '\d+'])]
+    public function update(Request $request, ItemQualityRepository $iqRepo, EntityManager $em, int $storageId): Response
     {
         $flush = false;
         $storage = $this->storageRepository->find($storageId);
@@ -165,7 +134,7 @@ class StorageController extends AbstractController
         $datas = $request->request->all();
         foreach ($datas as $dataKey => $dataValue) {
             if ($dataKey === 'itemQuality' && $dataValue) {
-                $itemQuality = $itemQualityRepository->find($dataValue);
+                $itemQuality = $iqRepo->find($dataValue);
                 if (!$storage->getItemQualities()->contains($itemQuality)) {
                     $storage->addItemQuality($itemQuality);
                     $flush = true;
@@ -190,9 +159,12 @@ class StorageController extends AbstractController
                     $storage->setFull(false);
                 }
             }
-            $this->em->flush();
-        }
 
+            $result = $em->flush();
+            if (!$result['result']) {
+                return $this->json($result);
+            }
+        }
         return $this->json(['result' => true]);
     }
 }

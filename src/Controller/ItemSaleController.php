@@ -9,38 +9,29 @@ use App\Form\FormHiddenType;
 use App\Form\ItemSaleType;
 use App\Repository\ItemSaleRepository;
 use App\Repository\SaleRepository;
+use App\Service\EntityManager;
+use App\Service\Validate;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ItemSaleController extends AbstractController
 {
-    public function __construct(private EntityManagerInterface $em, private ItemSaleRepository $itemSaleRepository)
+    public function __construct(private ItemSaleRepository $itemSaleRepository)
     {
     }
 
-    #[Route(
-        '/sale/{saleId}/item',
-        'app_item_sale_list',
-        ['saleId' => '\d+']
-    )]
-    public function list(
-        Request $request,
-        SaleRepository $saleRepo,
-        int $saleId
-    ): Response {
+    #[Route('/sale/{saleId}/item', 'app_item_sale_list', ['saleId' => '\d+'])]
+    public function list(Request $request, SaleRepository $saleRepo, int $saleId): Response
+    {
         /** @var Sale $sale */
         $sale = $saleRepo->find($saleId);
         if (!$saleId) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
         }
 
         $query = $request->query;
@@ -68,34 +59,30 @@ class ItemSaleController extends AbstractController
         }
     }
 
-    #[Route(
-        '/sale/{saleId}/item/add',
-        'app_item_sale_add',
-        ['saleId' => '\d+']
-    )]
-    #[Route(
-        '/sale/item/{itemSaleId}/edit',
-        name: 'app_item_sale_edit',
-        requirements: ['itemSaleId' => '\d+']
-    )]
+    #[Route('/sale/{saleId}/item/add', 'app_item_sale_add', ['saleId' => '\d+'])]
+    #[Route('/sale/item/{itemSaleId}/edit', 'app_item_sale_edit', ['itemSaleId' => '\d+'])]
     public function addOrEdit(
         Request $request,
         SaleRepository $saleRepo,
+        EntityManager $em,
+        Validate $validate,
         ?int $saleId,
         ?int $itemSaleId
     ): Response {
         $itemSale = new ItemSale();
         if ($itemSaleId) {
+            /** @var ItemSale $itemSale */
             $itemSale = $this->itemSaleRepository->find($itemSaleId);
+            if (!$itemSale) {
+                return $this->json(['result' => false, 'L\'objet est introuvable.']);
+            }
             /** @var Sale $sale */
             $sale = $itemSale->getSale();
         } else {
             /** @var Sale $sale */
             $sale = $saleRepo->find($saleId);
             if (!$saleId) {
-                return $this->render('error/not_found.html.twig', [
-                    'message' => 'L\'achat est introuvable.'
-                ]);
+                return $this->json(['result' => false, 'L\'achat est introuvable.']);
             }
             $itemSale->setSale($sale);
         }
@@ -107,19 +94,27 @@ class ItemSaleController extends AbstractController
         )->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $result = ['result' => true];
             $new = false;
             if (!$itemSale->getId()) {
                 if ($itemSale->getSale()->isSend()) {
                     $itemSale->setSend(true);
                 }
-                $this->em->persist($itemSale);
+                $result = $em->persist($itemSale);
+                if (!$result['result']) {
+                    return $this->json($result);
+                }
                 $new = true;
             }
-            $this->em->flush();
+            $result = $em->flush();
+            if (!$result['result']) {
+                return $this->json($result);
+            }
 
             $sale->caclPrice();
-            $this->em->flush();
+            $em->flush();
+            if (!$result['result']) {
+                return $this->json($result);
+            }
 
             if ($new) {
                 $result['message'] = 'Objet ajouté avec succès.';
@@ -143,19 +138,14 @@ class ItemSaleController extends AbstractController
             }
             return $this->json($result);
         } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         } else {
             return $this->json(['result' => false]);
         }
     }
 
-    #[Route('/sale/item/{itemSaleId}/delete', name: 'app_item_sale_delete', requirements: ['itemSaleId' => '\d+'])]
-    public function delete(int $itemSaleId): Response
+    #[Route('/sale/item/{itemSaleId}/delete', 'app_item_sale_delete', ['itemSaleId' => '\d+'])]
+    public function delete(EntityManager $em, int $itemSaleId): Response
     {
         /** @var ItemSale $itemSale */
         $itemSale = $this->itemSaleRepository->find($itemSaleId);
@@ -164,10 +154,11 @@ class ItemSaleController extends AbstractController
             if (!$sale->isValid()) {
                 $sale->removeItemSale($itemSale);
                 $sale->caclPrice();
-                $this->em->remove($itemSale);
-                $this->em->flush();
-
-                return $this->json(['result' => true, 'message' => 'L\'objet a été retiré avec succès.']);
+                $result = $em->remove($itemSale);
+                if ($result['result']) {
+                    $result['message'] = 'L\'objet a été retiré avec succès.';
+                }
+                return $this->json($result);
             }
 
             return $this->json([
@@ -179,11 +170,7 @@ class ItemSaleController extends AbstractController
         }
     }
 
-    #[Route(
-        '/sale/item/{itemSaleId}/data',
-        'app_item_sale_data',
-        ['itemSaleId' => '\d+']
-    )]
+    #[Route('/sale/item/{itemSaleId}/data', 'app_item_sale_data', ['itemSaleId' => '\d+'])]
     public function data(int $itemSaleId): Response
     {
         /** @var ItemSale $itemSale */
@@ -192,23 +179,17 @@ class ItemSaleController extends AbstractController
             return $this->json(['result' => false, 'message' => 'L\'objet est introuvable.']);
         }
 
-        return $this->json([
-            'result' => true,
-            'data' => [
-                'itemQuality' => $itemSale->getItemQuality()->getId(),
-                'price' => $itemSale->getPrice()
-            ]
-        ]);
+        return $this->json(['result' => true, 'data' => [
+            'itemQuality' => $itemSale->getItemQuality()->getId(),
+            'price' => $itemSale->getPrice()
+        ]]);
     }
 
-    #[Route(
-        '/sale/item/{itemSaleId}/state',
-        'app_item_sale_state',
-        ['itemSaleId' => '\d+']
-    )]
+    #[Route('/sale/item/{itemSaleId}/state', 'app_item_sale_state', ['itemSaleId' => '\d+'])]
     public function state(
         Request $request,
-        ValidatorInterface $validator,
+        Validate $validate,
+        EntityManager $em,
         EventDispatcherInterface $dispatcher,
         int $itemSaleId
     ): Response {
@@ -241,13 +222,9 @@ class ItemSaleController extends AbstractController
 
         $itemSale->{$method}(true);
 
-        $violations = $validator->validate($itemSale);
-        if ($violations->count() > 0) {
-            $messages = [];
-            foreach ($violations as $violation) {
-                $messages[$violation->getPropertyPath()] = $violation->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+        $violations = $validate->validate($itemSale);
+        if (!empty($violations)) {
+            return $this->json(['result' => false, 'messages' => $violations]);
         }
 
         $event = new StateEvent(
@@ -258,8 +235,6 @@ class ItemSaleController extends AbstractController
         );
 
         $dispatcher->dispatch($event, 'state');
-        $this->em->flush();
-
-        return $this->json(['result' => true]);
+        return $this->json($em->flush());
     }
 }

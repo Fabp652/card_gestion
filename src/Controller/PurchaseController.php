@@ -6,8 +6,9 @@ use App\Entity\Purchase;
 use App\Event\StateEvent;
 use App\Form\PurchaseType;
 use App\Repository\PurchaseRepository;
+use App\Service\EntityManager;
+use App\Service\Validate;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -19,11 +20,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class PurchaseController extends AbstractController
 {
-    public function __construct(private PurchaseRepository $purchaseRepo, private EntityManagerInterface $em)
+    public function __construct(private PurchaseRepository $purchaseRepo)
     {
     }
 
-    #[Route('/purchase', name: 'app_purchase_list')]
+    #[Route('/purchase', 'app_purchase_list')]
     public function list(Request $request, PaginatorInterface $paginator): Response
     {
         $filters = $request->query->all('filter');
@@ -35,7 +36,6 @@ final class PurchaseController extends AbstractController
         );
 
         $purchases = $this->purchaseRepo->findByFilter($filters);
-
         $purchases = $paginator->paginate(
             $purchases,
             $request->query->get('page', 1),
@@ -49,8 +49,8 @@ final class PurchaseController extends AbstractController
         ]);
     }
 
-    #[Route('/purchase/add', name: 'app_purchase_add')]
-    public function form(Request $request): Response
+    #[Route('/purchase/add', 'app_purchase_add')]
+    public function form(Request $request, EntityManager $em, Validate $validate): Response
     {
         $purchase = new Purchase();
         $marketUrl = $this->generateUrl(
@@ -72,20 +72,13 @@ final class PurchaseController extends AbstractController
                 $purchase->setReceived(true);
             }
 
-            $this->em->persist($purchase);
-            $this->em->flush();
-
-            return $this->json([
-                'result' => true,
-                'redirect' => $this->generateUrl('app_purchase_edit', ['purchaseId' => $purchase->getId()])
-            ]);
-        } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
+            $result = $em->persist($purchase, true);
+            if ($result['result']) {
+                $result['redirect'] = $this->generateUrl('app_purchase_edit', ['purchaseId' => $purchase->getId()]);
             }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json($result);
+        } elseif ($form->isSubmitted()) {
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         $render = $this->render('purchase/form.html.twig', [
@@ -95,21 +88,14 @@ final class PurchaseController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route(
-        '/purchase/{purchaseId}/delete',
-        'app_purchase_delete',
-        ['purchaseId' => '\d+']
-    )]
-    public function delete(Request $request, int $purchaseId): Response
+    #[Route('/purchase/{purchaseId}/delete', 'app_purchase_delete', ['purchaseId' => '\d+'])]
+    public function delete(Request $request, EntityManager $em, int $purchaseId): Response
     {
         $purchase = $this->purchaseRepo->find($purchaseId);
         if ($purchase) {
             if (!$purchase->isValid()) {
-                $this->em->remove($purchase);
-                $this->em->flush();
-
-                $response = ['result' => true];
-                if (str_ends_with($request->headers->get('referer'), 'edit')) {
+                $result = $em->remove($purchase);
+                if ($result['result'] && str_ends_with($request->headers->get('referer'), 'edit')) {
                     $response['redirect'] = $this->generateUrl(
                         'app_purchase_list',
                         [],
@@ -127,12 +113,8 @@ final class PurchaseController extends AbstractController
         }
     }
 
-    #[Route(
-        '/purchase/{purchaseId}/edit',
-        'app_purchase_edit',
-        ['purchaseId' => '\d+']
-    )]
-    public function edit(Request $request, int $purchaseId): Response
+    #[Route('/purchase/{purchaseId}/edit', 'app_purchase_edit', ['purchaseId' => '\d+'])]
+    public function edit(Request $request, EntityManager $em, Validate $validate, int $purchaseId): Response
     {
         /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
@@ -154,14 +136,10 @@ final class PurchaseController extends AbstractController
         );
         $isOrder = $purchase->isOrder();
 
-        $form = $this->createForm(
-            PurchaseType::class,
-            $purchase,
-            [
-                'marketUrl' => $marketUrl,
-                'post' => $request->isMethod('POST')
-            ]
-        )->handleRequest($request);
+        $form = $this->createForm(PurchaseType::class, $purchase, [
+            'marketUrl' => $marketUrl,
+            'post' => $request->isMethod('POST')
+        ])->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if ($isOrder != $purchase->isOrder()) {
                 $purchase->setReceived(!$purchase->isOrder());
@@ -169,15 +147,13 @@ final class PurchaseController extends AbstractController
                     $itemPurchase->setReceived(!$purchase->isOrder());
                 }
             }
-            $this->em->flush();
-            return $this->json(['result' => true, 'message' => 'Achat modifié avec succès']);
-        } elseif ($form->isSubmitted()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
+            $result = $em->flush();
+            if ($result['result']) {
+                $result['message'] = 'Achat modifié avec succès';
             }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json($result);
+        } elseif ($form->isSubmitted()) {
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         return $this->render('purchase/edit_or_view.html.twig', [
@@ -186,12 +162,8 @@ final class PurchaseController extends AbstractController
         ]);
     }
 
-    #[Route(
-        '/purchase/{purchaseId}/validate',
-        'app_purchase_validate',
-        ['purchaseId' => '\d+']
-    )]
-    public function validatePurchase(EventDispatcherInterface $dispatcher, int $purchaseId): Response
+    #[Route('/purchase/{purchaseId}/validate', 'app_purchase_validate', ['purchaseId' => '\d+'])]
+    public function validatePurchase(EventDispatcherInterface $dispatcher, EntityManager $em, int $purchaseId): Response
     {
         /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
@@ -209,25 +181,19 @@ final class PurchaseController extends AbstractController
         $purchase->setIsValid(true);
         $purchase->setValidatedAt($dateTime);
 
-        $event = new StateEvent(
-            $purchase->getId(),
-            Purchase::class,
-            'validate',
-            true
-        );
+        $event = new StateEvent($purchase->getId(), Purchase::class, 'validate', true);
 
         $dispatcher->dispatch($event, 'state');
 
-        $this->em->flush();
+        $result = $em->flush();
+        if ($result['result']) {
+            return $this->json($result);
+        }
 
         return $this->redirectToRoute('app_purchase_view', ['purchaseId' => $purchaseId]);
     }
 
-    #[Route(
-        '/purchase/{purchaseId}/view',
-        'app_purchase_view',
-        ['purchaseId' => '\d+']
-    )]
+    #[Route('/purchase/{purchaseId}/view', 'app_purchase_view', ['purchaseId' => '\d+'])]
     public function view(int $purchaseId): Response
     {
         /** @var Purchase $purchase */
@@ -243,15 +209,12 @@ final class PurchaseController extends AbstractController
         ]);
     }
 
-    #[Route(
-        '/purchase/{purchaseId}/state',
-        'app_purchase_state',
-        ['purchaseId' => '\d+']
-    )]
+    #[Route('/purchase/{purchaseId}/state', 'app_purchase_state', ['purchaseId' => '\d+'])]
     public function state(
         Request $request,
-        ValidatorInterface $validator,
+        Validate $validate,
         EventDispatcherInterface $dispatcher,
+        EntityManager $em,
         int $purchaseId
     ): Response {
         /** @var Purchase $purchase */
@@ -285,25 +248,14 @@ final class PurchaseController extends AbstractController
 
         $purchase->{$method}(true);
 
-        $violations = $validator->validate($purchase);
-        if ($violations->count() > 0) {
-            $messages = [];
-            foreach ($violations as $violation) {
-                $messages[$violation->getPropertyPath()] = $violation->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+        $violations = $validate->validate($purchase);
+        if (!empty($violations)) {
+            return $this->json(['result' => false, 'messages' => $violations]);
         }
 
-        $event = new StateEvent(
-            $purchase->getId(),
-            Purchase::class,
-            $state,
-            true
-        );
-
+        $event = new StateEvent($purchase->getId(), Purchase::class, $state, true);
         $dispatcher->dispatch($event, 'state');
-        $this->em->flush();
 
-        return $this->json(['result' => true]);
+        return $this->json($em->flush());
     }
 }

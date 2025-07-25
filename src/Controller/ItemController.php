@@ -7,9 +7,9 @@ use App\Form\ItemType;
 use App\Repository\CategoryRepository;
 use App\Repository\CollectionsRepository;
 use App\Repository\ItemRepository;
-use App\Repository\RarityRepository;
+use App\Service\EntityManager;
 use App\Service\FileManager;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\Validate;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,27 +18,26 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ItemController extends AbstractController
 {
-    public function __construct(
-        private ItemRepository $itemRepo,
-        private RarityRepository $rRepo,
-        private CollectionsRepository $collectionRepo,
-        private EntityManagerInterface $em
-    ) {
+    private const FOLDER = 'item';
+
+    public function __construct(private ItemRepository $itemRepo)
+    {
     }
 
     #[Route(
         '/collection/{collectionId}/category/{categoryId}/item',
-        name: 'app_item_list',
-        requirements: ['collectionId' => '\d+', 'categoryId' => '\d+']
+        'app_item_list',
+        ['collectionId' => '\d+', 'categoryId' => '\d+']
     )]
     public function list(
         Request $request,
         PaginatorInterface $paginator,
         CategoryRepository $categoryRepo,
+        CollectionsRepository $collectionRepo,
         int $collectionId,
         int $categoryId
     ): Response {
-        $collection = $this->collectionRepo->find($collectionId);
+        $collection = $collectionRepo->find($collectionId);
         if (!$collection) {
             return $this->render('error/not_found.html.twig', [
                 'message' => 'La collection est introuvable.'
@@ -82,20 +81,19 @@ class ItemController extends AbstractController
 
 
     #[Route('/collection/{collectionId}/item/add', 'app_item_add', ['collectionId' => '\d+'])]
-    #[Route(
-        '/item/{itemId}/edit',
-        'app_item_edit',
-        ['itemId' => '\d+']
-    )]
+    #[Route('/item/{itemId}/edit', 'app_item_edit', ['itemId' => '\d+'])]
     public function form(
         Request $request,
         CategoryRepository $categoryRepo,
         FileManager $fileManager,
+        CollectionsRepository $collectionRepo,
+        EntityManager $em,
+        Validate $validate,
         ?int $collectionId,
         ?int $itemId
     ): Response {
         if ($collectionId) {
-            $collection = $this->collectionRepo->find($collectionId);
+            $collection = $collectionRepo->find($collectionId);
             if (!$collection) {
                 return $this->json(['result' => false, 'message' => 'Collection introuvable']);
             }
@@ -130,38 +128,35 @@ class ItemController extends AbstractController
                         ]);
                     }
 
-                    $this->em->remove($file);
+                    $result = $em->remove($file);
+                    if (!$result['result']) {
+                        return $this->json($result);
+                    }
                 }
             }
 
             if ($form->has('files')) {
                 foreach ($form->get('files')->getData() as $file) {
-                    $fileManagerEntity = $fileManager->upload('item', $item->getName(), $file);
+                    $result = $fileManager->addOrReplace($file, self::FOLDER, $item->getName());
 
-                    if (!$fileManagerEntity) {
-                        return $this->json([
-                            'result' => false,
-                            'message' => 'Une erreur est survenue pendant le téléchargement du fichier.'
-                        ]);
+                    if (!$result['result']) {
+                        return $this->json($result);
                     }
-                    $this->em->persist($fileManagerEntity);
+
+                    $fileManagerEntity = $result['newEntityFile'];
                     $item->addFile($fileManagerEntity);
+                    $em->persist($fileManagerEntity);
                 }
             }
 
             if (!$item->getId()) {
-                $this->em->persist($item);
+                $result = $em->persist($item, true);
+            } else {
+                $result = $em->flush();
             }
-            $this->em->flush();
-
-            return $this->json(['result' => true]);
+            return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         $render = $this->render('item/form.html.twig', [
@@ -174,16 +169,14 @@ class ItemController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/item/{id}/delete', name: 'app_item_delete', requirements: ['id' => '\d+'])]
-    public function delete(int $id): Response
+    #[Route('/item/{id}/delete', 'app_item_delete', ['id' => '\d+'])]
+    public function delete(EntityManager $em, int $id): Response
     {
         $item = $this->itemRepo->find($id);
         if ($item) {
             if ($item->getItemQualities()->isEmpty()) {
-                $this->em->remove($item);
-                $this->em->flush();
-
-                return $this->json(['result' => true]);
+                $result = $em->remove($item, true);
+                return $this->json($result);
             }
             return $this->json([
                 'result' => false,
@@ -194,21 +187,17 @@ class ItemController extends AbstractController
         }
     }
 
-    #[Route(
-        '/item/{id}',
-        name: 'app_item_view',
-        requirements: ['id' => '\d+']
-    )]
+    #[Route('/item/{id}', 'app_item_view', ['id' => '\d+'])]
     public function view(int $id): Response
     {
         $item = $this->itemRepo->find($id);
-
-        return $this->render('item/view.html.twig', [
-            'item' => $item
-        ]);
+        if (!$item) {
+            return $this->render('error/not_found.html.twig', ['message' => 'L\'objet n\'a pas été retrouvé.']);
+        }
+        return $this->render('item/view.html.twig', ['item' => $item]);
     }
 
-    #[Route('/item/search', name: 'app_item_search')]
+    #[Route('/item/search', 'app_item_search')]
     public function search(Request $request): Response
     {
         $search = $request->query->get('search', '');
@@ -233,12 +222,8 @@ class ItemController extends AbstractController
         }
     }
 
-    #[Route(
-        '/item/{itemId}/update',
-        name: 'app_item_update',
-        requirements: ['itemId' => '\d+']
-    )]
-    public function update(Request $request, int $itemId): Response
+    #[Route('/item/{itemId}/update', 'app_item_update', ['itemId' => '\d+'])]
+    public function update(Request $request, EntityManager $em, int $itemId): Response
     {
         $flush = false;
         $item = $this->itemRepo->find($itemId);
@@ -255,7 +240,7 @@ class ItemController extends AbstractController
         }
 
         if ($flush) {
-            $this->em->flush();
+            return $this->json($em->flush());
         }
         return $this->json(['result' => true]);
     }

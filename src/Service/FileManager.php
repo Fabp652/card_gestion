@@ -115,4 +115,45 @@ class FileManager
 
         return $result ? $fileManager : null;
     }
+
+    /**
+     * @param UploadedFile $file
+     * @param string $folder
+     * @param string $name
+     * @param EntityFileManager|null $entityFile
+     * @return EntityFileManager
+     */
+    public function addOrReplace(
+        UploadedFile $file,
+        string $folder,
+        string $name,
+        ?EntityFileManager $entityFile = null
+    ): array {
+        $errorMessage = 'Une erreur est survenue lors de l\'ajout du fichier.';
+        if ($entityFile) {
+            $result = $this->removeFile(
+                $entityFile->getName(),
+                $entityFile->getFolder()
+            );
+            if (!$result) {
+                return [
+                    'result' => false,
+                    'message' => $errorMessage
+                ];
+            }
+        }
+
+        $newEntityFile = $this->upload($folder, $name, $file);
+        if (!$newEntityFile) {
+            return [
+                'result' => false,
+                'message' => $errorMessage
+            ];
+        }
+
+        return [
+            'result' => true,
+            'newEntityFile' => $newEntityFile
+        ];
+    }
 }

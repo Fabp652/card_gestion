@@ -6,8 +6,9 @@ use App\Entity\Rarity;
 use App\Form\RarityType;
 use App\Repository\CollectionsRepository;
 use App\Repository\RarityRepository;
+use App\Service\EntityManager;
 use App\Service\FileManager;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\Validate;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,24 +18,17 @@ final class RarityController extends AbstractController
 {
     private const FOLDER = 'rarity';
 
-    public function __construct(private RarityRepository $rarityRepository, private EntityManagerInterface $em)
+    public function __construct(private RarityRepository $rarityRepository, private EntityManager $em)
     {
     }
 
-    #[Route(
-        '/collection/{collectionId}/rarity/add',
-        name: 'app_rarity_add',
-        requirements: ['collectionId' => '\d+']
-    )]
-    #[Route(
-        '/rarity/{rarityId}/edit',
-        name: 'app_rarity_edit',
-        requirements: ['rarityId' => '\d+']
-    )]
+    #[Route('/collection/{collectionId}/rarity/add', 'app_rarity_add', ['collectionId' => '\d+'])]
+    #[Route('/rarity/{rarityId}/edit', 'app_rarity_edit', ['rarityId' => '\d+'])]
     public function form(
         Request $request,
         CollectionsRepository $collectionsRepository,
         FileManager $fileManager,
+        Validate $validate,
         ?int $collectionId,
         ?int $rarityId
     ): Response {
@@ -53,42 +47,24 @@ final class RarityController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $file = $form->get('file')->getData();
             if ($file) {
+                $result = $fileManager->addOrReplace($file, self::FOLDER, $rarity->getName(), $rarity->getFile());
+                if (!$result['result']) {
+                    return $this->json($result);
+                }
                 if ($rarity->getFile()) {
-                    $result = $fileManager->removeFile(
-                        $rarity->getFile()->getName(),
-                        $rarity->getFile()->getFolder()
-                    );
-                    if (!$result) {
-                        return $this->json([
-                            'result' => false,
-                            'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
-                        ]);
-                    }
-
                     $this->em->remove($rarity->getFile());
                 }
 
-                $fileManagerEntity = $fileManager->upload(self::FOLDER, $rarity->getName(), $file);
-                if (!$fileManagerEntity) {
-                    return $this->json([
-                        'result' => false,
-                        'message' => 'Une erreur est survenue lors de l\'ajout du fichier.'
-                    ]);
-                }
+                $fileManagerEntity = $result['newEntityFile'];
                 $this->em->persist($fileManagerEntity);
+                if (!$result['result']) {
+                    return $this->json($result);
+                }
                 $rarity->setFile($fileManagerEntity);
             }
-            $this->em->persist($rarity);
-            $this->em->flush();
-
-            return $this->json(['result' => true]);
+            return $this->json($this->em->persist($rarity, true));
         } elseif ($form->isSubmitted() && !$form->isValid()) {
-            $messages = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $messages[$field] = $error->getMessage();
-            }
-            return $this->json(['result' => false, 'messages' => $messages]);
+            return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
 
         $render = $this->render('rarity/form.html.twig', [
@@ -97,23 +73,15 @@ final class RarityController extends AbstractController
             'collectionId' => $collectionId,
             'file' => $rarity->getFile()
         ]);
-
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route(
-        '/rarity/{rarityId}/delete',
-        name: 'app_rarity_delete',
-        requirements: ['rarityId' => '\d+']
-    )]
+    #[Route('/rarity/{rarityId}/delete', 'app_rarity_delete', ['rarityId' => '\d+'])]
     public function delete(int $rarityId): Response
     {
         $rarity = $this->rarityRepository->find($rarityId);
         if ($rarity) {
-            $this->em->remove($rarity);
-            $this->em->flush();
-
-            return $this->json(['result' => true]);
+            return $this->json($this->em->remove($rarity, true));
         } else {
             return $this->json(['result' => false, 'message' => 'La rarité est déjà supprimée']);
         }
