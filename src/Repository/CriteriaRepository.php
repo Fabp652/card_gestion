@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Criteria;
+use App\Repository\Trait\EntityRepositoryTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -17,6 +18,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CriteriaRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Criteria::class);
@@ -33,26 +36,18 @@ class CriteriaRepository extends ServiceEntityRepository
         foreach ($filters as $filterKey => $filterValue) {
             switch ($filterKey) {
                 case 'name':
-                    $qb->andWhere('c.' . $filterKey . ' LIKE :' . $filterKey)
-                        ->setParameter($filterKey, $filterValue . '%')
-                    ;
+                    $condition = 'c.' . $filterKey . ' LIKE :' . $filterKey;
                     break;
                 case 'category':
-                    $qb->join('c.categories', 'cat')
-                        ->join('cat.childs', 'child')
-                        ->andWhere('cat.id = :category OR child.id = :category')
-                        ->setParameter('category', $filterValue)
-                    ;
+                    $qb->join('c.categories', 'cat')->join('cat.childs', 'child');
+                    $condition = 'cat.id = :' . $filterKey . ' OR child.id = :' . $filterKey;
                     break;
                 default:
-                    if (is_numeric($filterValue)) {
-                        $filterValue = (int) $filterValue;
-                    }
-                    $qb->andWhere('c.' . $filterKey . ' = ' . ':' . $filterKey)
-                        ->setParameter($filterKey, $filterValue)
-                    ;
+                    $filterValue = $this->valueType($filterValue);
+                    $condition = 'c.' . $filterKey . ' = ' . ':' . $filterKey;
                     break;
             }
+            $this->addWhere($qb, $condition, $filterKey, $filterValue);
         }
 
         return $qb;

@@ -3,9 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Category;
+use App\Repository\Trait\EntityRepositoryTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Query\Expr\Join;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -18,6 +17,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CategoryRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Category::class);
@@ -53,13 +54,10 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function findWithoutActualCategory(Category $category): array
     {
-        return $this->createQueryBuilder('c')
-            ->where('c.parent = :parent AND c.id != :category')
-            ->setParameter('parent', $category->getParent())
-            ->setParameter('category', $category)
-            ->getQuery()
-            ->getResult()
-        ;
+        $qb = $this->createQueryBuilder('c');
+        $this->addWhere($qb, 'c.parent = :parent', 'parent', $category->getParent());
+        $this->addWhere($qb, 'c.id = :category', 'category', $category);
+        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -72,22 +70,16 @@ class CategoryRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('c')
             ->select('c.id', 'CONCAT(UPPER(SUBSTRING(c.name,1,1)),LOWER(SUBSTRING(c.name,2,LENGTH(c.name)))) AS text')
-            ->where('c.name LIKE :search')
-            ->setParameter('search', '%' . $search . '%')
         ;
+        $this->addWhere($qb, 'c.name LIKE :search', 'search', $search);
 
         if ($parentId) {
-            $qb->andWhere('c.parent = :parent')
-                ->setParameter('parent', $parentId)
-            ;
+            $this->addWhere($qb, 'c.parent = :parent', 'parent', $parentId);
         }
 
         if ($onlyParent) {
             $qb->andWhere('c.parent IS NULL');
         }
-
-        return $qb->getQuery()
-            ->getResult()
-        ;
+        return $qb->getQuery()->getResult();
     }
 }

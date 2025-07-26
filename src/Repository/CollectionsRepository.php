@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Collections;
+use App\Repository\Trait\EntityRepositoryTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,6 +17,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CollectionsRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Collections::class);
@@ -52,12 +55,8 @@ class CollectionsRepository extends ServiceEntityRepository
      */
     public function findCollectionsWithoutActual(int $collectionId): array
     {
-        return $this->createQueryBuilder('c')
-            ->select('c.id, c.name')
-            ->where('c.id != :collection')
-            ->setParameter('collection', $collectionId)
-            ->getQuery()
-            ->getResult()
-        ;
+        $qb = $this->createQueryBuilder('c')->select('c.id, c.name');
+        $this->addWhere($qb, 'c.id != :collection', 'collection', $collectionId);
+        return $qb->getQuery()->getResult();
     }
 }

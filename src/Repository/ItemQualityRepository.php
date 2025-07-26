@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\ItemQuality;
+use App\Repository\Trait\EntityRepositoryTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
@@ -18,6 +19,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ItemQualityRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ItemQuality::class);
@@ -30,49 +33,30 @@ class ItemQualityRepository extends ServiceEntityRepository
      */
     public function findByFilter(array $filters, ?int $storageId = null): QueryBuilder
     {
-        $qb = $this->createQueryBuilder('iq')
-            ->leftJoin('iq.item', 'i')
-        ;
-
+        $qb = $this->createQueryBuilder('iq')->leftJoin('iq.item', 'i');
         if ($storageId) {
-            $qb->join('iq.storage', 's', Join::WITH, 's.id = :storageId')
-                ->setParameter('storageId', $storageId)
-            ;
+            $qb->join('iq.storage', 's', Join::WITH, 's.id = :storageId')->setParameter('storageId', $storageId);
         }
 
         foreach ($filters as $filterKey => $filterValue) {
-            if (is_numeric($filterValue)) {
-                $filterValue = (int) $filterValue;
-            }
             if ($filterKey == 'name' || $filterKey == 'reference') {
-                $qb->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
-                    ->setParameter($filterKey, '%' . $filterValue . '%')
-                ;
+                $condition = 'i.' . $filterKey . ' LIKE :' . $filterKey;
             } elseif (str_contains($filterKey, 'min')) {
                 $filterKeyExplode = explode('_', $filterKey);
-                $qb->andWhere('i.' . $filterKeyExplode[1] . ' >= :min')
-                    ->setParameter('min', $filterValue)
-                ;
+                $condition = 'i.' . $filterKeyExplode[1] . ' >= :' . $filterKey;
             } elseif (str_contains($filterKey, 'max')) {
                 $filterKeyExplode = explode('_', $filterKey);
-                $qb->andWhere('i.' . $filterKeyExplode[1] . ' <= :max')
-                    ->setParameter('max', $filterValue)
-                ;
+                $condition = 'i.' . $filterKeyExplode[1] . ' <= :' . $filterKey;
             } elseif ($filterKey == 'storageId') {
-                $qb->andWhere('iq.storage != :storage OR iq.storage IS NULL')
-                    ->setParameter('storage', $storageId)
-                ;
+                $condition = 'iq.storage != :' . $filterKey . ' OR iq.storage IS NULL';
             } elseif ($filterKey == 'search') {
-                $qb->andWhere('i.name LIKE :search OR i.reference LIKE :search')
-                    ->setParameter('search', '%' . $filterValue . '%')
-                ;
+                $condition = 'i.name LIKE :' . $filterKey . ' OR i.reference LIKE :' . $filterKey;
             } else {
-                $qb->andWhere('iq.' . $filterKey . ' = ' . ':' . $filterKey)
-                    ->setParameter($filterKey, $filterValue)
-                ;
+                $filterValue = $this->valueType($filterValue);
+                $condition = 'iq.' . $filterKey . ' = ' . ':' . $filterKey;
             }
+            $this->addWhere($qb, $condition, $filterKey, $filterValue);
         }
-
         return $qb;
     }
 }

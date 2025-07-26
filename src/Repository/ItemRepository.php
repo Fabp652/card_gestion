@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Item;
+use App\Repository\Trait\EntityRepositoryTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
@@ -18,6 +19,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ItemRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     public function __construct(ManagerRegistry $registry, private ItemQualityRepository $itemQualityRepository)
     {
         parent::__construct($registry, Item::class);
@@ -30,14 +33,9 @@ class ItemRepository extends ServiceEntityRepository
      */
     public function getMinAndMaxPrice(?int $collectionId = null, ?int $storageId = null): array
     {
-        $qb = $this->createQueryBuilder('i')
-            ->select('MIN(i.price) AS minPrice, MAX(i.price) AS maxPrice')
-        ;
-
+        $qb = $this->createQueryBuilder('i')->select('MIN(i.price) AS minPrice, MAX(i.price) AS maxPrice');
         if ($collectionId) {
-            $qb->andWhere('i.collection = :collection')
-                ->setParameter('collection', $collectionId)
-            ;
+            $this->addWhere($qb, 'i.collection = :collection', 'collection', $collectionId);
         }
 
         if ($storageId) {
@@ -46,10 +44,7 @@ class ItemRepository extends ServiceEntityRepository
                 ->setParameter('storageId', $storageId)
             ;
         }
-
-        return $qb->getQuery()
-            ->getSingleResult()
-        ;
+        return $qb->getQuery()->getSingleResult();
     }
 
     /**
@@ -67,20 +62,13 @@ class ItemRepository extends ServiceEntityRepository
         ;
 
         if ($collectionId) {
-            $qb->andWhere('ime.collection = :collection')
-                ->setParameter('collection', $collectionId)
-            ;
+            $this->addWhere($qb, 'ime.collection = :collection', 'collection', $collectionId);
         }
 
         if ($categoryId) {
-            $qb->andWhere('ime.category = :category')
-                ->setParameter('category', $categoryId)
-            ;
+            $this->addWhere($qb, 'ime.category = :category', 'category', $categoryId);
         }
-
-        return $qb->getQuery()
-            ->getResult()
-        ;
+        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -90,42 +78,26 @@ class ItemRepository extends ServiceEntityRepository
      * @param int|null $storageId
      * @return QueryBuilder
      */
-    public function findByFilter(
-        array $filters,
-        ?int $collectionId = null,
-        ?int $categoryId = null
-    ): QueryBuilder {
-        $qb = $this->createQueryBuilder('i')
-            ->leftJoin('i.rarity', 'r')
-        ;
-
+    public function findByFilter(array $filters, ?int $collectionId = null, ?int $categoryId = null): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('i')->leftJoin('i.rarity', 'r');
         if ($collectionId) {
-            $qb->andWhere('i.collection = :collectionId')
-                ->setParameter('collectionId', $collectionId)
-            ;
+            $this->addWhere($qb, 'ime.collection = :collection', 'collection', $collectionId);
         }
 
         if ($categoryId) {
-            $qb->andWhere('i.category = :categoryId')
-                ->setParameter('categoryId', $categoryId)
-            ;
+            $this->addWhere($qb, 'ime.category = :category', 'category', $categoryId);
         }
 
         foreach ($filters as $filterKey => $filterValue) {
             if ($filterKey == 'name' || $filterKey == 'reference') {
-                $qb->andWhere('i.' . $filterKey . ' LIKE :' . $filterKey)
-                    ->setParameter($filterKey, '%' . $filterValue . '%')
-                ;
+                $condition = 'i.' . $filterKey . ' LIKE :' . $filterKey;
             } elseif (str_contains($filterKey, 'min')) {
                 $filterKeyExplode = explode('_', $filterKey);
-                $qb->andWhere('i.' . $filterKeyExplode[1] . ' >= :min')
-                    ->setParameter('min', $filterValue)
-                ;
+                $condition = 'i.' . $filterKeyExplode[1] . ' >= :' . $filterKey;
             } elseif (str_contains($filterKey, 'max')) {
                 $filterKeyExplode = explode('_', $filterKey);
-                $qb->andWhere('i.' . $filterKeyExplode[1] . ' <= :max')
-                    ->setParameter('max', $filterValue)
-                ;
+                $condition = 'i.' . $filterKeyExplode[1] . ' <= :' . $filterKey;
             } elseif ($filterKey == 'number') {
                 $comparator = $filterValue == 1 ? '>' : '=';
                 $qb->andWhere('i.number ' . $comparator . ' 1');
@@ -148,16 +120,13 @@ class ItemRepository extends ServiceEntityRepository
                         break;
                 }
             } elseif ($filterKey == 'search') {
-                $qb->andWhere('i.name LIKE :search OR i.reference LIKE :search')
-                    ->setParameter('search', '%' . $filterValue . '%')
-                ;
+                $condition = 'i.name LIKE :' . $filterKey . ' OR i.reference LIKE :' . $filterKey;
             } else {
-                if (is_numeric($filterValue)) {
-                    $filterValue = (int) $filterValue;
-                }
-                $qb->andWhere('i.' . $filterKey . ' = ' . ':' . $filterKey)
-                    ->setParameter($filterKey, $filterValue)
-                ;
+                $filterValue = $this->valueType($filterValue);
+                $condition = 'i.' . $filterKey . ' = ' . ':' . $filterKey;
+            }
+            if (isset($condition)) {
+                $this->addWhere($qb, $condition, $filterKey, $filterValue);
             }
         }
         return $qb;

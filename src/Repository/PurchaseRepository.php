@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Purchase;
+use App\Repository\Trait\EntityRepositoryTrait;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -14,6 +15,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PurchaseRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     private const STATES = [
         'Brouillon',
         'Non reçu',
@@ -36,28 +39,21 @@ class PurchaseRepository extends ServiceEntityRepository
     public function findByFilter(array $filters): QueryBuilder
     {
         $qb = $this->createQueryBuilder('p');
-
         foreach ($filters as $filterKey => $filterValue) {
             if ($filterKey == 'name') {
-                $qb->andWhere('p.name LIKE :name')
-                    ->setParameter($filterKey, $filterValue . '%')
-                ;
+                $condition = 'p.name LIKE :' . $filterKey;
             } elseif (str_contains($filterKey, 'min')) {
                 $filterKeyExplode = explode('_', $filterKey);
                 if ($filterKeyExplode[1] == 'buyAt') {
                     $filterValue = DateTime::createFromFormat('d/m/Y', $filterValue);
                 }
-                $qb->andWhere('p.' . $filterKeyExplode[1] . ' >= :min')
-                    ->setParameter('min', $filterValue)
-                ;
+                $condition = 'p.' . $filterKeyExplode[1] . ' >= :' . $filterKey;
             } elseif (str_contains($filterKey, 'max')) {
                 $filterKeyExplode = explode('_', $filterKey);
                 if ($filterKeyExplode[1] == 'buyAt') {
                     $filterValue = DateTime::createFromFormat('d/m/Y', $filterValue);
                 }
-                $qb->andWhere('p.' . $filterKeyExplode[1] . ' <= :max')
-                    ->setParameter('max', $filterValue)
-                ;
+                $condition = 'p.' . $filterKeyExplode[1] . ' <= :' . $filterKey;
             } elseif ($filterKey == 'state') {
                 $state = self::STATES[$filterValue];
                 switch ($state) {
@@ -152,15 +148,13 @@ class PurchaseRepository extends ServiceEntityRepository
                         break;
                 }
             } else {
-                if (is_numeric($filterValue)) {
-                    $filterValue = (int) $filterValue;
-                }
-                $qb->andWhere('p.' . $filterKey . ' = ' . ':' . $filterKey)
-                    ->setParameter($filterKey, $filterValue)
-                ;
+                $filterValue = $this->valueType($filterValue);
+                $condition = 'p.' . $filterKey . ' = ' . ':' . $filterKey;
+            }
+            if (isset($condition)) {
+                $this->addWhere($qb, $condition, $filterKey, $filterValue);
             }
         }
-
         return $qb;
     }
 

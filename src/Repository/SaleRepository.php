@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Sale;
+use App\Repository\Trait\EntityRepositoryTrait;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -14,6 +15,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class SaleRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     private const STATES = [
         'Brouillon',
         'En vente',
@@ -38,10 +41,10 @@ class SaleRepository extends ServiceEntityRepository
     public function findByFilter(array $filters): QueryBuilder
     {
         $qb = $this->createQueryBuilder('s');
-
         foreach ($filters as $filterKey => $filterValue) {
             if ($filterKey == 'name') {
-                $qb->andWhere('s.name LIKE :name')
+                $condition = 's.name LIKE :' . $filterKey;
+                $qb->andWhere('')
                     ->setParameter($filterKey, $filterValue . '%')
                 ;
             } elseif (str_contains($filterKey, 'min')) {
@@ -49,17 +52,13 @@ class SaleRepository extends ServiceEntityRepository
                 if ($filterKeyExplode[1] == 'buyAt') {
                     $filterValue = DateTime::createFromFormat('d/m/Y', $filterValue);
                 }
-                $qb->andWhere('s.' . $filterKeyExplode[1] . ' >= :min')
-                    ->setParameter('min', $filterValue)
-                ;
+                $condition = 's.' . $filterKeyExplode[1] . ' >= :' . $filterKey;
             } elseif (str_contains($filterKey, 'max')) {
                 $filterKeyExplode = explode('_', $filterKey);
                 if ($filterKeyExplode[1] == 'buyAt') {
                     $filterValue = DateTime::createFromFormat('d/m/Y', $filterValue);
                 }
-                $qb->andWhere('s.' . $filterKeyExplode[1] . ' <= :max')
-                    ->setParameter('max', $filterValue)
-                ;
+                $condition = 's.' . $filterKeyExplode[1] . ' <= :' . $filterKey;
             } elseif ($filterKey == 'state') {
                 $state = self::STATES[$filterValue];
                 switch ($state) {
@@ -162,6 +161,9 @@ class SaleRepository extends ServiceEntityRepository
                         $qb->andWhere('s.refundRequest = 0 AND s.isValid = 1 AND s.sold = 1');
                         break;
                 }
+            }
+            if (isset($condition)) {
+                $this->addWhere($qb, $condition, $filterKey, $filterValue);
             }
         }
         return $qb;

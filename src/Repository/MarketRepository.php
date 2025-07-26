@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Market;
+use App\Repository\Trait\EntityRepositoryTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -12,6 +13,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MarketRepository extends ServiceEntityRepository
 {
+    use EntityRepositoryTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Market::class);
@@ -24,19 +27,15 @@ class MarketRepository extends ServiceEntityRepository
     public function findByFilter(array $filters): QueryBuilder
     {
         $qb = $this->createQueryBuilder('m');
-
         foreach ($filters as $filterKey => $filterValue) {
             if ($filterKey == 'name' || $filterKey == 'search') {
-                $qb->andWhere('m.name LIKE :name')
-                    ->setParameter('name', '%' . $filterValue . '%')
-                ;
+                $filterKey = 'name';
+                $condition = 'm.' . $filterKey . ' LIKE :' . $filterKey;
             } else {
-                $qb->andWhere('m.' . $filterKey . ' = :' . $filterKey)
-                    ->setParameter($filterKey, $filterValue)
-                ;
+                $condition = 'm.' . $filterKey . ' = :' . $filterKey;
             }
+            $this->addWhere($qb, $condition, $filterKey, $filterValue);
         }
-
         return $qb;
     }
 }
