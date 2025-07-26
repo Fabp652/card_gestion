@@ -27,7 +27,6 @@ class CriteriaController extends AbstractController
         $filters = array_filter($filters);
 
         $criterias = $this->criteriaRepo->findByFilter($filters);
-
         $criterias = $paginator->paginate(
             $criterias,
             $request->query->get('page', 1),
@@ -47,10 +46,9 @@ class CriteriaController extends AbstractController
     #[Route('/criteria/{criteriaId}/edit', 'app_criteria_edit')]
     public function form(Request $request, EntityManager $em, Validate $validate, ?int $criteriaId): Response
     {
+        $criteria = new Criteria();
         if ($criteriaId) {
             $criteria = $this->criteriaRepo->find($criteriaId);
-        } else {
-            $criteria = new Criteria();
         }
 
         $form = $this->createForm(CriteriaType::class, $criteria)->handleRequest($request);
@@ -62,7 +60,17 @@ class CriteriaController extends AbstractController
                 }
             }
 
-            $result = $em->persist($criteria, true);
+            if (!$criteria->getId()) {
+                $addOrUpdateMessage = 'ajoutée';
+                $result = $em->persist($criteria, true);
+            } else {
+                $addOrUpdateMessage = 'modifiée';
+                $result = $em->flush();
+            }
+
+            if ($result['result']) {
+                $this->addFlash('success', 'Critère ' . $addOrUpdateMessage . ' avec succès.');
+            }
             return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             return $this->json(['result' => false, 'messages' => $validate]);

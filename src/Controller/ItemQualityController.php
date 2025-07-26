@@ -57,13 +57,9 @@ class ItemQualityController extends AbstractController
             $item = $itemRepo->find($itemId);
             $itemQuality = new ItemQuality();
         }
-        $options['category'] = $item->getCategory();
 
-        $form = $this->createForm(
-            ItemQualityType::class,
-            $itemQuality,
-            $options
-        )->handleRequest($request);
+        $options['category'] = $item->getCategory();
+        $form = $this->createForm(ItemQualityType::class, $itemQuality, $options)->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($request->get('perfect')) {
@@ -98,20 +94,38 @@ class ItemQualityController extends AbstractController
                     if (!$result['result']) {
                         return $this->json($result);
                     }
+                    $this->addFlash('success', 'Exemplaire supprimé avec succès.');
                 }
             }
 
             if ($form->has('files')) {
-                foreach ($form->get('files')->getData() as $file) {
+                $nbUploadErr = 0;
+                $files = $form->get('files')->getData();
+                foreach ($files as $file) {
                     $result = $fileManager->addOrReplace($file, self::FOLDER, $item->getName());
-
                     if (!$result['result']) {
-                        return $this->json($result);
+                        $nbUploadErr++;
                     }
 
                     $fileManagerEntity = $result['newEntityFile'];
                     $item->addFile($fileManagerEntity);
-                    $em->persist($fileManagerEntity);
+                    $result = $em->persist($fileManagerEntity);
+                    if (!$result['result']) {
+                        $nbUploadErr++;
+                    }
+                }
+
+                if ($nbUploadErr > 0) {
+                    if ($nbUploadErr == count($files)) {
+                        $this->addFlash('danger', 'Aucun fichier ajouté correctement veuillez réessayer');
+                    } else {
+                        $this->addFlash(
+                            'warning',
+                            $nbUploadErr . '/' . count($files) . ' fichiers non ajouté correctement veuillez réessayer.'
+                        );
+                    }
+                } else {
+                    $this->addFlash('success', 'Tous les fichiers ajouté avec succès.');
                 }
             }
 
@@ -119,7 +133,18 @@ class ItemQualityController extends AbstractController
                 $itemQuality->setSort($item->getItemQualities()->count() + 1);
             }
 
-            return $this->json($em->persist($itemQuality, true));
+            if (!$itemQuality->getId()) {
+                $addOrUpdateMessage = 'ajouté';
+                $result = $em->persist($itemQuality, true);
+            } else {
+                $addOrUpdateMessage = 'modifié';
+                $result = $em->flush();
+            }
+
+            if ($result['result']) {
+                $this->addFlash('success', 'Exemplaire ' . $addOrUpdateMessage . ' avec succès.');
+            }
+            return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }

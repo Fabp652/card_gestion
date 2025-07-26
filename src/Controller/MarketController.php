@@ -37,10 +37,7 @@ final class MarketController extends AbstractController
             $request->query->get('limit', 10)
         );
 
-        return $this->render('market/index.html.twig', [
-            'request' => $request,
-            'markets' => $markets
-        ]);
+        return $this->render('market/index.html.twig', ['request' => $request, 'markets' => $markets]);
     }
 
     #[Route('/market/search', 'app_market_search')]
@@ -73,10 +70,14 @@ final class MarketController extends AbstractController
         $form = $this->createForm(MarketType::class, $market)->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$market->getId()) {
-                $result = $em->persist($market);
+                $addOrUpdateMessage = 'ajoutée';
+                $result = $em->persist($market, true);
             } else {
+                $addOrUpdateMessage = 'modifiée';
                 $result = $em->flush();
             }
+
+            $this->addFlash('success', 'Boutique ' . $addOrUpdateMessage . ' avec succès.');
             return $this->json($result);
         } elseif ($form->isSubmitted()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
@@ -97,6 +98,11 @@ final class MarketController extends AbstractController
         if (!$market) {
             return $this->json(['result' => false, 'message' => 'La boutique est déjà supprimé.']);
         }
-        return $this->json($em->remove($market));
+
+        $result = $em->remove($market, true);
+        if ($result['result']) {
+            $this->addFlash('success', 'Boutique supprimé avec succès.');
+        }
+        return $this->json($result);
     }
 }

@@ -61,8 +61,22 @@ final class RarityController extends AbstractController
                     return $this->json($result);
                 }
                 $rarity->setFile($fileManagerEntity);
+
+                $this->addFlash('success', 'Fichier ajouté avec succès.');
             }
-            return $this->json($this->em->persist($rarity, true));
+
+            if (!$rarity->getId()) {
+                $addOrUpdateMessage = 'ajoutée';
+                $result = $this->em->persist($rarity, true);
+            } else {
+                $addOrUpdateMessage = 'modifiée';
+                $result = $this->em->flush();
+            }
+
+            if ($result['result']) {
+                $this->addFlash('success', 'Rareté ' . $addOrUpdateMessage . ' avec succès.');
+            }
+            return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
@@ -81,7 +95,11 @@ final class RarityController extends AbstractController
     {
         $rarity = $this->rarityRepository->find($rarityId);
         if ($rarity) {
-            return $this->json($this->em->remove($rarity, true));
+            $result = $this->em->remove($rarity, true);
+            if ($result['result']) {
+                $this->addFlash('success', 'Rareté supprimé avec succès.');
+            }
+            return $this->json($result);
         } else {
             return $this->json(['result' => false, 'message' => 'La rarité est déjà supprimée']);
         }

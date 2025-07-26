@@ -65,11 +65,7 @@ final class SaleController extends AbstractController
         } elseif ($form->isSubmitted()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
-
-        $render = $this->render('sale/form.html.twig', [
-            'form' => $form->createView()
-        ]);
-
+        $render = $this->render('sale/form.html.twig', ['form' => $form->createView()]);
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
@@ -81,20 +77,18 @@ final class SaleController extends AbstractController
         if (!$sale) {
             $message = 'L\'achat est introuvable.';
             if ($request->isMethod('GET')) {
-                return $this->render('error/not_found.html.twig', [
-                    'message' => $message
-                ]);
+                return $this->render('error/not_found.html.twig', ['message' => $message]);
             } else {
                 return $this->json(['result' => false, 'message' => $message]);
             }
         }
 
         $marketUrl = $this->generateUrl('app_market_search', ['forSale' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
-
         $form = $this->createForm(SaleType::class, $sale, [
             'marketUrl' => $marketUrl,
             'post' => $request->isMethod('POST')
         ])->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $result = $em->flush();
             $result['message'] = 'Achat modifié avec succès';
@@ -102,11 +96,7 @@ final class SaleController extends AbstractController
         } elseif ($form->isSubmitted()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
-
-        return $this->render('sale/edit_or_view.html.twig', [
-            'sale' => $sale,
-            'form' => $form
-        ]);
+        return $this->render('sale/edit_or_view.html.twig', ['sale' => $sale, 'form' => $form]);
     }
 
     #[Route('/sale/{saleId}/validate', 'app_sale_validate', ['saleId' => '\d+'])]
@@ -127,20 +117,16 @@ final class SaleController extends AbstractController
         $sale->setIsValid(true);
         $sale->setValidatedAt($dateTime);
 
-        $event = new StateEvent(
-            $sale->getId(),
-            Sale::class,
-            'validate',
-            true
-        );
-
+        $event = new StateEvent($sale->getId(), Sale::class, 'validate', true);
         $dispatcher->dispatch($event, 'state');
 
         $result = $em->flush();
         if (!$result['result']) {
+            $this->addFlash('danger', $result['message']);
             return $this->redirectToRoute('app_sale_edit', ['saleId' => $saleId]);
         }
 
+        $this->addFlash('success', 'La vente est validé avec succès.');
         return $this->redirectToRoute('app_sale_view', ['saleId' => $saleId]);
     }
 
@@ -150,14 +136,9 @@ final class SaleController extends AbstractController
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
         }
-
-        return $this->render('sale/edit_or_view.html.twig', [
-            'sale' => $sale
-        ]);
+        return $this->render('sale/edit_or_view.html.twig', ['sale' => $sale]);
     }
 
     #[Route('/sale/{saleId}/state', 'app_sale_state', ['saleId' => '\d+'])]
@@ -216,6 +197,7 @@ final class SaleController extends AbstractController
         if ($sale) {
             if (!$sale->isValid()) {
                 $result = $em->remove($sale, true);
+                $this->addFlash('success', 'Vente supprimée avec succès.');
                 if ($result['result'] && str_ends_with($request->headers->get('referer'), 'edit')) {
                     $response['redirect'] = $this->generateUrl(
                         'app_sale_list',

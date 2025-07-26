@@ -68,6 +68,9 @@ final class FileController extends AbstractController
             $entity->setFile($fileManagerEntity);
             $result = $em->persist($fileManagerEntity, true);
 
+            if ($result['result']) {
+                $this->addFlash('success', 'Fichier ajouté avec succès.');
+            }
             return $this->json($result);
         } elseif ($form->isSubmitted()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);

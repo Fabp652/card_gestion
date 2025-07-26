@@ -27,17 +27,12 @@ final class ItemPurchaseController extends AbstractController
     }
 
     #[Route('/purchase/{purchaseId}/item', 'app_item_purchase_list', ['purchaseId' => '\d+'])]
-    public function list(
-        Request $request,
-        PurchaseRepository $purchaseRepo,
-        int $purchaseId
-    ): Response {
+    public function list(Request $request, PurchaseRepository $purchaseRepo, int $purchaseId): Response
+    {
         /** @var Purchase $purchase */
         $purchase = $purchaseRepo->find($purchaseId);
         if (!$purchase) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
         }
 
         $query = $request->query;
@@ -84,18 +79,14 @@ final class ItemPurchaseController extends AbstractController
         } else {
             $purchase = $purchaseRepo->find($purchaseId);
             if (!$purchase) {
-                return $this->render('error/not_found.html.twig', [
-                    'message' => 'L\'achat est introuvable.'
-                ]);
+                return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
             }
             $itemPurchase->setPurchase($purchase);
         }
 
-        $form = $this->createForm(
-            ItemPurchaseType::class,
-            $itemPurchase,
-            ['itemId' => $request->request->all('item_purchase')['item']]
-        )->handleRequest($request);
+        $form = $this->createForm(ItemPurchaseType::class, $itemPurchase, [
+            'itemId' => $request->request->all('item_purchase')['item']
+        ])->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $new = false;

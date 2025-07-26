@@ -25,6 +25,9 @@ class StorageTypeController extends AbstractController
         $form = $this->createForm(StorageTypeType::class, $storageType)->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $result = $em->persist($storageType, true);
+            if ($result['result']) {
+                $this->addFlash('success', 'Type de rangement ajouté avec succès.');
+            }
             return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);

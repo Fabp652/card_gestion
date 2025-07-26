@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CategoryController extends AbstractController
 {
-    public function __construct(private CategoryRepository $categoryRepo, private ItemRepository $itemRepo)
+    public function __construct(private CategoryRepository $categoryRepo)
     {
     }
 
@@ -23,9 +23,7 @@ class CategoryController extends AbstractController
     public function list(): Response
     {
         $stats = $this->categoryRepo->stats();
-        return $this->render('category/index.html.twig', [
-            'stats' => $stats,
-        ]);
+        return $this->render('category/index.html.twig', ['stats' => $stats]);
     }
 
     #[Route(
@@ -43,7 +41,7 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/category/{categoryId}', 'app_category_view', ['categoryId' => '\d+'])]
-    public function view(int $categoryId): Response
+    public function view(ItemRepository $itemRepo, int $categoryId): Response
     {
         $category = $this->categoryRepo->find($categoryId);
         $childs = $category->getChilds();
@@ -51,7 +49,7 @@ class CategoryController extends AbstractController
         $mostExpensives = [];
         foreach ($category->getChilds() as $child) {
             $index = $child->getName() . '_' . $child->getId();
-            $mostExpensives[$index] = $this->itemRepo->findMostExpensives(null, $child->getId());
+            $mostExpensives[$index] = $itemRepo->findMostExpensives(null, $child->getId());
         }
 
         return $this->render('category/view.html.twig', [
@@ -84,9 +82,14 @@ class CategoryController extends AbstractController
             }
 
             if (!$category->getId()) {
+                $addOrUpdateMessage = 'ajoutée';
                 $result = $em->persist($category, true);
             } else {
+                $addOrUpdateMessage = 'modifiée';
                 $result = $em->flush();
+            }
+            if ($result['result']) {
+                $this->addFlash('success', 'Catégorie ' . $addOrUpdateMessage . ' avec succès.');
             }
             return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
@@ -98,7 +101,6 @@ class CategoryController extends AbstractController
             'categoryId' => $categoryId,
             'parentId' => $parentId
         ]);
-
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
@@ -108,6 +110,7 @@ class CategoryController extends AbstractController
         $collection = $this->categoryRepo->find($categoryId);
         if ($collection) {
             $result = $em->remove($collection, true);
+            $this->addFlash('success', 'Catégorie supprimée avec succès.');
             return $this->json($result);
         } else {
             return $this->json(['result' => false, 'message' => 'La catégorie est déjà supprimée']);

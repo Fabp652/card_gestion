@@ -20,34 +20,20 @@ class CollectionController extends AbstractController
 {
     private const FOLDER = 'collection';
 
-    public function __construct(
-        private CollectionsRepository $collectionRepo
-    ) {
+    public function __construct(private CollectionsRepository $collectionRepo)
+    {
     }
 
     #[Route(name: 'app_collection')]
     public function index(): Response
     {
         $stats = $this->collectionRepo->stats();
-
-        return $this->render(
-            'collection/index.html.twig',
-            [
-                'stats' => $stats
-            ]
-        );
+        return $this->render('collection/index.html.twig', ['stats' => $stats]);
     }
 
-    #[Route(
-        '/collection/{collectionId}',
-        'app_collection_view',
-        ['collectionId' => '\d+']
-    )]
-    public function view(
-        ItemRepository $itemRepo,
-        RarityRepository $rarityRepository,
-        int $collectionId
-    ): Response {
+    #[Route('/collection/{collectionId}', 'app_collection_view', ['collectionId' => '\d+'])]
+    public function view(ItemRepository $itemRepo, RarityRepository $rarityRepository, int $collectionId): Response
+    {
         $collection = $this->collectionRepo->find($collectionId);
         $categories = $collection->getCategory() ? $collection->getCategory()->getChilds() : [];
 
@@ -73,17 +59,11 @@ class CollectionController extends AbstractController
         ]);
     }
 
-    #[Route(
-        '/collection/{collectionId}/dropdown',
-        'app_collection_dropdown',
-        ['collectionId' => '\d+']
-    )]
+    #[Route('/collection/{collectionId}/dropdown', 'app_collection_dropdown', ['collectionId' => '\d+'])]
     public function dropdown(int $collectionId): Response
     {
         $actualCollection = $this->collectionRepo->find($collectionId);
-
         $collections = $this->collectionRepo->findCollectionsWithoutActual($collectionId);
-
         return $this->render('collection/partial/dropdown.html.twig', [
             'actualCollection' => $actualCollection,
             'collections' => $collections
@@ -99,17 +79,14 @@ class CollectionController extends AbstractController
         EntityManager $em,
         ?int $collectionId
     ): Response {
+        $collection = new Collections();
         if ($collectionId) {
             $collection = $this->collectionRepo->find($collectionId);
-        } else {
-            $collection = new Collections();
         }
 
-        $form = $this->createForm(
-            CollectionType::class,
-            $collection,
-            ['post' => $request->isMethod('POST')]
-        )->handleRequest($request);
+        $form = $this->createForm(CollectionType::class, $collection, ['post' => $request->isMethod('POST')])
+            ->handleRequest($request)
+        ;
 
         if ($form->isSubmitted()) {
             if (!$collection->getCategory() && $categoryData = $form->get('category')->getData()) {
@@ -128,6 +105,7 @@ class CollectionController extends AbstractController
                 if (!$result['result']) {
                     return $this->json($result);
                 }
+                $this->addFlash('success', 'Catégorie ajouté avec succès.');
                 $collection->setCategory($category);
             } elseif (!$form->isValid()) {
                 $messages = $validate->getFormErrors($form);
@@ -159,7 +137,7 @@ class CollectionController extends AbstractController
                 if (!$result['result']) {
                     return $this->json($result);
                 }
-
+                $this->addFlash('success', 'Fichier ajouté avec succès.');
                 $collection->setFile($fileManagerEntity);
             }
 
@@ -169,13 +147,16 @@ class CollectionController extends AbstractController
             }
 
             if (!$collection->getId()) {
-                $result = $em->persist($collection);
-                if (!$result['result']) {
-                    return $this->json($result);
-                }
+                $addOrUpdateMessage = 'ajoutée';
+                $result = $em->persist($collection, true);
+            } else {
+                $addOrUpdateMessage = 'modifiée';
+                $result = $em->flush();
             }
-            $result = $em->flush();
 
+            if ($result['result']) {
+                $this->addFlash('success', 'Collection ' . $addOrUpdateMessage . ' avec succès.');
+            }
             return $this->json($result);
         }
 
@@ -195,6 +176,7 @@ class CollectionController extends AbstractController
         if ($collection) {
             if ($collection->getItems()->isEmpty()) {
                 $result = $em->remove($collection, true);
+                $this->addFlash('success', 'Collection supprimée avec succès.');
                 return $this->json($result);
             }
             return $this->json([
@@ -230,7 +212,6 @@ class CollectionController extends AbstractController
                 return $this->json($result);
             }
         }
-
         return $this->json(['result' => true, 'message' => 'Mis à jour avec succès']);
     }
 }

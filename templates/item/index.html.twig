@@ -13,6 +13,7 @@
 {% block body %}
 {{ parent() }}
 <div class="mx-4 container-fluid mt-container">
+    {% include "partial/flash.html.twig" %}
     <div class="row">
         <div class="card">
             <div class="card-header border-bottom-0 bg-white pb-0 text-center" style="height:120px;">

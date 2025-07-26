@@ -43,9 +43,15 @@ class StorageController extends AbstractController
             }
 
             if (!$storage->getId()) {
+                $addOrUpdateMessage = 'ajouté';
                 $result = $em->persist($storage);
             } else {
+                $addOrUpdateMessage = 'modifié';
                 $result = $em->flush();
+            }
+
+            if ($result['result']) {
+                $this->addFlash('success', 'Rangement ' . $addOrUpdateMessage . ' avec succès.');
             }
             return $this->json($result);
         } elseif ($form->isSubmitted()) {
@@ -61,7 +67,11 @@ class StorageController extends AbstractController
     {
         $storage = $this->storageRepository->find($storageId);
         if ($storage) {
-            return $this->json($em->remove($storage));
+            $result = $em->remove($storage, true);
+            if ($result['result']) {
+                $this->addFlash('success', 'Rangement supprimé avec succès.');
+            }
+            return $this->json($result);
         } else {
             return $this->json(['result' => false, 'message' => 'Le rangement est déjà supprimé']);
         }

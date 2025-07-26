@@ -96,5 +96,32 @@ export default class extends Controller {
                 }
             });
         });
+
+        async function launchFlash(flashes) {
+            for (const flash of flashes) {
+                let type = $(flash).attr('data-type');
+                let toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    width: '400px',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-0 text-bg-' + type
+                    },
+                    iconColor: '#fff'
+                });
+                await toast.fire({
+                    icon: type == 'danger' ? 'error' : type,
+                    title: $(flash).attr('data-message')
+                });
+            }
+        }
+
+        let flashes = $('.flash');
+        if (flashes.length > 0) {
+            launchFlash(flashes);
+        }
     }
 }

@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class PurchaseController extends AbstractController
 {
@@ -53,19 +52,11 @@ final class PurchaseController extends AbstractController
     public function form(Request $request, EntityManager $em, Validate $validate): Response
     {
         $purchase = new Purchase();
-        $marketUrl = $this->generateUrl(
-            'app_market_search',
-            ['forBuy' => 1],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
-        $form = $this->createForm(
-            PurchaseType::class,
-            $purchase,
-            [
-                'marketUrl' => $marketUrl,
-                'post' => $request->isMethod('POST')
-            ]
-        )->handleRequest($request);
+        $marketUrl = $this->generateUrl('app_market_search', ['forBuy' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
+        $form = $this->createForm(PurchaseType::class, $purchase, [
+            'marketUrl' => $marketUrl,
+            'post' => $request->isMethod('POST')
+        ])->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$purchase->isOrder()) {
@@ -95,14 +86,18 @@ final class PurchaseController extends AbstractController
         if ($purchase) {
             if (!$purchase->isValid()) {
                 $result = $em->remove($purchase);
-                if ($result['result'] && str_ends_with($request->headers->get('referer'), 'edit')) {
-                    $response['redirect'] = $this->generateUrl(
-                        'app_purchase_list',
-                        [],
-                        UrlGeneratorInterface::ABSOLUTE_URL
-                    );
+                if ($result['result']) {
+                    if ($result['result'] && str_ends_with($request->headers->get('referer'), 'edit')) {
+                        $result['redirect'] = $this->generateUrl(
+                            'app_purchase_list',
+                            [],
+                            UrlGeneratorInterface::ABSOLUTE_URL
+                        );
+                    }
+
+                    $this->addFlash('success', 'Achat supprimé avec succès.');
                 }
-                return $this->json($response);
+                return $this->json($result);
             }
             return $this->json([
                 'result' => false,

@@ -39,9 +39,7 @@ class ItemController extends AbstractController
     ): Response {
         $collection = $collectionRepo->find($collectionId);
         if (!$collection) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'La collection est introuvable.'
-            ]);
+            return $this->render('error/not_found.html.twig', ['message' => 'La collection est introuvable.']);
         }
 
         if ($categoryId) {
@@ -132,28 +130,51 @@ class ItemController extends AbstractController
                     if (!$result['result']) {
                         return $this->json($result);
                     }
+                    $this->addFlash('success', 'Fichier retiré avec succès.');
                 }
             }
 
             if ($form->has('files')) {
-                foreach ($form->get('files')->getData() as $file) {
+                $nbUploadErr = 0;
+                $files = $form->get('files')->getData();
+                foreach ($files as $file) {
                     $result = $fileManager->addOrReplace($file, self::FOLDER, $item->getName());
-
                     if (!$result['result']) {
-                        return $this->json($result);
+                        $nbUploadErr++;
                     }
 
                     $fileManagerEntity = $result['newEntityFile'];
                     $item->addFile($fileManagerEntity);
-                    $em->persist($fileManagerEntity);
+
+                    $result = $em->persist($fileManagerEntity);
+                    if (!$result['result']) {
+                        $nbUploadErr++;
+                    }
+                }
+
+                if ($nbUploadErr > 0) {
+                    if ($nbUploadErr == count($files)) {
+                        $this->addFlash('danger', 'Aucun fichier ajouté correctement veuillez réessayer');
+                    } else {
+                        $this->addFlash(
+                            'warning',
+                            $nbUploadErr . '/' . count($files) . ' fichiers non ajouté correctement veuillez réessayer.'
+                        );
+                    }
+                } else {
+                    $this->addFlash('success', 'Tous les fichiers ajouté avec succès.');
                 }
             }
 
             if (!$item->getId()) {
+                $addOrUpdateMessage = 'ajouté';
                 $result = $em->persist($item, true);
             } else {
+                $addOrUpdateMessage = 'modifé';
                 $result = $em->flush();
             }
+
+            $this->addFlash('success', 'Objet ' . $addOrUpdateMessage . ' avec succès.');
             return $this->json($result);
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
@@ -176,6 +197,7 @@ class ItemController extends AbstractController
         if ($item) {
             if ($item->getItemQualities()->isEmpty()) {
                 $result = $em->remove($item, true);
+                $this->addFlash('success', 'Objet supprimé avec succès.');
                 return $this->json($result);
             }
             return $this->json([
