@@ -59,7 +59,7 @@
                                 </tr>
                                 <tr>
                                     <form data-controller="filter" id="formFilter" action="{{ absolute_url(path('app_storage_view', {storageId: storage.id})) }}" method="get">
-                                        {% set filterQuery = request.query.all('filter') %}
+                                        {% set filterQuery = app.request.query.all('filter') %}
                                         <th></th>
                                         <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
                                         <th><input id="referenceFilter" name="filter[reference]" class="form-control input-table" type="text" value="{{ filterQuery.reference ?? '' }}"></th>

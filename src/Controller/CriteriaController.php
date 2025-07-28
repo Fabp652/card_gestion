@@ -32,11 +32,7 @@ class CriteriaController extends AbstractController
         $criterias = $paginator->paginate($criterias, $query->get('page', 1), $query->get('limit', 10));
         $categories = $categoryRepo->findAll();
 
-        return $this->render('criteria/index.html.twig', [
-            'criterias' => $criterias,
-            'request' => $request,
-            'categories' => $categories
-        ]);
+        return $this->render('criteria/index.html.twig', ['criterias' => $criterias, 'categories' => $categories]);
     }
 
     #[Route('/add', 'app_criteria_add')]

@@ -32,7 +32,7 @@ final class MarketController extends AbstractController
         $markets = $this->marketRepo->findByFilter($filters);
         $markets = $paginator->paginate($markets, $query->get('page', 1), $query->get('limit', 10));
 
-        return $this->render('market/index.html.twig', ['request' => $request, 'markets' => $markets]);
+        return $this->render('market/index.html.twig', ['markets' => $markets]);
     }
 
     #[Route('/search', 'app_market_search')]

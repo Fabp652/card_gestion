@@ -38,11 +38,7 @@ final class SaleController extends AbstractController
         $sales = $this->saleRepo->findByFilter($filters);
         $sales = $paginator->paginate($sales, $query->get('page', 1), $query->get('limit', 10));
 
-        return $this->render('sale/index.html.twig', [
-            'request' => $request,
-            'sales' => $sales,
-            'states' => $this->saleRepo->getStates()
-        ]);
+        return $this->render('sale/index.html.twig', ['sales' => $sales, 'states' => $this->saleRepo->getStates()]);
     }
 
     #[Route('/add', 'app_sale_add')]

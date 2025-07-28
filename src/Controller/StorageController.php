@@ -127,11 +127,7 @@ class StorageController extends AbstractController
         $itemQualities = $itemQualityRepository->findByFilter($filters, $storageId);
         $itemQualities = $paginator->paginate($itemQualities, $query->get('page', 1), $query->get('limit', 10));
 
-        return $this->render('storage/view.html.twig', [
-            'itemQualities' => $itemQualities,
-            'storage' => $storage,
-            'request' => $request
-        ]);
+        return $this->render('storage/view.html.twig', ['itemQualities' => $itemQualities, 'storage' => $storage]);
     }
 
     #[Route('/{storageId}/update', 'app_storage_update', ['storageId' => '\d+'])]

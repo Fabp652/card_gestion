@@ -70,7 +70,6 @@ class ItemController extends AbstractController
         return $this->render('item/index.html.twig', [
             'items' => $items,
             'collection' => $collection,
-            'request' => $request,
             'category' => $category ?? null,
             'categories' => $categories ?? null
         ]);

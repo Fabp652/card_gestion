@@ -46,7 +46,7 @@
                                 </tr>
                                 <tr>
                                     <form data-controller="filter" id="formFilter" action="{{ absolute_url(path('app_criteria_list')) }}" method="get">
-                                        {% set filterQuery = request.query.all('filter') %}
+                                        {% set filterQuery = app.request.query.all('filter') %}
                                         <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
                                         <th></th>
                                         <th><input id="pointFilter" name="filter[point]" class="form-control input-table" type="number" value="{{ filterQuery.point ?? '' }}"></th>

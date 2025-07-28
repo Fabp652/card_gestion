@@ -37,7 +37,6 @@ final class PurchaseController extends AbstractController
         $purchases = $paginator->paginate($purchases, $query->get('page', 1), $query->get('limit', 10));
 
         return $this->render('purchase/index.html.twig', [
-            'request' => $request,
             'purchases' => $purchases,
             'states' => $this->purchaseRepo->getStates()
         ]);

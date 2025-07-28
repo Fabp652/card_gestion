@@ -49,7 +49,7 @@
                                 </tr>
                                 <tr>
                                     <form data-controller="filter" id="formFilter" action="{{ absolute_url(path('app_sale_list')) }}" method="get">
-                                        {% set filterQuery = request.query.all('filter') %}
+                                        {% set filterQuery = app.request.query.all('filter') %}
                                         <th><input id="nameFilter" name="filter[name]" class="form-control input-table" type="text" value="{{ filterQuery.name ?? '' }}"></th>
                                         <th class="input-group">
                                             <input type="number" id="minPriceFilter" name="filter[min_price]" class="form-control input-table" placeholder="Min" value="{{ filterQuery.min_price ?? '' }}">
