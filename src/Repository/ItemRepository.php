@@ -65,9 +65,7 @@ class ItemRepository extends ServiceEntityRepository
             $this->addWhere($qb, 'ime.collection = :collection', 'collection', $collectionId);
         }
 
-        if ($categoryId) {
-            $this->addWhere($qb, 'ime.category = :category', 'category', $categoryId);
-        }
+        $this->addWhere($qb, 'ime.category = :category', 'category', $categoryId);
         return $qb->getQuery()->getResult();
     }
 
@@ -82,11 +80,11 @@ class ItemRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('i')->leftJoin('i.rarity', 'r');
         if ($collectionId) {
-            $this->addWhere($qb, 'ime.collection = :collection', 'collection', $collectionId);
+            $this->addWhere($qb, 'i.collection = :collection', 'collection', $collectionId);
         }
 
         if ($categoryId) {
-            $this->addWhere($qb, 'ime.category = :category', 'category', $categoryId);
+            $this->addWhere($qb, 'i.category = :category', 'category', $categoryId);
         }
 
         foreach ($filters as $filterKey => $filterValue) {
@@ -144,9 +142,8 @@ class ItemRepository extends ServiceEntityRepository
             ->setParameter('collection', $collectionId)
             ->andWhere('i.category IS NULL')
             ->getQuery()
-            ->getOneOrNullResult()
+            ->getSingleScalarResult()
         ;
-
         return $result > 0;
     }
 }

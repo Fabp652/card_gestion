@@ -56,7 +56,7 @@ class CategoryRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('c');
         $this->addWhere($qb, 'c.parent = :parent', 'parent', $category->getParent());
-        $this->addWhere($qb, 'c.id = :category', 'category', $category);
+        $this->addWhere($qb, 'c.id != :category', 'category', $category);
         return $qb->getQuery()->getResult();
     }
 

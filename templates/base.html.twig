@@ -8,7 +8,6 @@
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
             {% if collection is defined and collection %}
-                {{ encore_entry_link_tags('canvas') }}
                 {{ encore_entry_link_tags('dropdown') }}
             {% endif %}
         {% endblock %}
@@ -22,18 +21,6 @@
         {% block body %}
                 <nav class="navbar bg-light px-2 fixed-top justify-content-center" data-controller="global">
                     {% if collection is defined and collection %}
-                        <button class="navbar-toggler rounded-0 ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-                            <div class="offcanvas-header border-bottom bg-black bg-gradient" data-bs-theme="dark">
-                                <h5 class="offcanvas-title fw-bold color-title" id="offcanvasNavbarLabel">CATÉGORIES</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                            </div>
-                            {# <div class="offcanvas-body px-0">
-                                {{ render(path('app_category_nav', {collectionId: collection.id, categoryId: collection.category.id})) }}
-                            </div> #}
-                        </div>
                         {{ render(path('app_collection_dropdown', {collectionId: collection.id})) }}
                     {% endif %}
                     <form id="searchForm" class="w-50 d-flex justify-content-center" role="search" action="{{ path('app_item_search', {searchBar: 1}) }}" method="GET">
