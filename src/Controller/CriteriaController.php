@@ -14,25 +14,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/criteria')]
 class CriteriaController extends AbstractController
 {
     public function __construct(private CriteriaRepository $criteriaRepo,)
     {
     }
 
-    #[Route('/criteria', 'app_criteria_list')]
+    #[Route(name: 'app_criteria_list')]
     public function list(Request $request, PaginatorInterface $paginator, CategoryRepository $categoryRepo): Response
     {
-        $filters = $request->query->all('filter');
+        $query = $request->query;
+        $filters = $query->all('filter');
         $filters = array_filter($filters);
 
         $criterias = $this->criteriaRepo->findByFilter($filters);
-        $criterias = $paginator->paginate(
-            $criterias,
-            $request->query->get('page', 1),
-            $request->query->get('limit', 10)
-        );
-
+        $criterias = $paginator->paginate($criterias, $query->get('page', 1), $query->get('limit', 10));
         $categories = $categoryRepo->findAll();
 
         return $this->render('criteria/index.html.twig', [
@@ -42,8 +39,8 @@ class CriteriaController extends AbstractController
         ]);
     }
 
-    #[Route('/criteria/add', 'app_criteria_add')]
-    #[Route('/criteria/{criteriaId}/edit', 'app_criteria_edit')]
+    #[Route('/add', 'app_criteria_add')]
+    #[Route('/{criteriaId}/edit', 'app_criteria_edit')]
     public function form(Request $request, EntityManager $em, Validate $validate, ?int $criteriaId): Response
     {
         $criteria = new Criteria();
@@ -84,7 +81,7 @@ class CriteriaController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/criteria/{criteriaId}/delete', 'app_criteria_delete', ['criteriaId' => '\d+'])]
+    #[Route('/{criteriaId}/delete', 'app_criteria_delete', ['criteriaId' => '\d+'])]
     public function delete(EntityManager $em, int $criteriaId): Response
     {
         $item = $this->criteriaRepo->find($criteriaId);

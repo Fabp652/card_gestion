@@ -19,6 +19,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class ItemController extends AbstractController
 {
     private const FOLDER = 'item';
+    private const ITEM_NOT_FOUND = 'L\'objet est introuvable.';
+    private const COLLECTION_NOT_FOUND = 'La collection est introuvable.';
 
     public function __construct(private ItemRepository $itemRepo)
     {
@@ -39,7 +41,8 @@ class ItemController extends AbstractController
     ): Response {
         $collection = $collectionRepo->find($collectionId);
         if (!$collection) {
-            return $this->render('error/not_found.html.twig', ['message' => 'La collection est introuvable.']);
+            $this->addFlash('danger', self::COLLECTION_NOT_FOUND);
+            return $this->redirectToRoute('app_collection_list');
         }
 
         if ($categoryId) {
@@ -52,7 +55,8 @@ class ItemController extends AbstractController
             $categories = $categoryRepo->findBy(['parent' => $collectionCategory]);
         }
 
-        $filters = $request->query->all('filter');
+        $query = $request->query;
+        $filters = $query->all('filter');
         $filters = array_filter(
             $filters,
             function ($filter) {
@@ -61,12 +65,7 @@ class ItemController extends AbstractController
         );
 
         $items = $this->itemRepo->findByFilter($filters, $collectionId, $categoryId);
-
-        $items = $paginator->paginate(
-            $items,
-            $request->query->get('page', 1),
-            $request->query->get('limit', 10)
-        );
+        $items = $paginator->paginate($items, $query->get('page', 1), $query->get('limit', 10));
 
         return $this->render('item/index.html.twig', [
             'items' => $items,
@@ -93,14 +92,14 @@ class ItemController extends AbstractController
         if ($collectionId) {
             $collection = $collectionRepo->find($collectionId);
             if (!$collection) {
-                return $this->json(['result' => false, 'message' => 'Collection introuvable']);
+                return $this->json(['result' => false, 'message' => self::COLLECTION_NOT_FOUND]);
             }
         }
 
         if ($itemId) {
             $item = $this->itemRepo->find($itemId);
             if (!$item) {
-                return $this->json(['result' => false, 'message' => 'Objet introuvable']);
+                return $this->json(['result' => false, 'message' => self::ITEM_NOT_FOUND]);
             }
             $collection = $item->getCollection();
         } else {
@@ -210,11 +209,12 @@ class ItemController extends AbstractController
     }
 
     #[Route('/item/{id}', 'app_item_view', ['id' => '\d+'])]
-    public function view(int $id): Response
+    public function view(Request $request, int $id): Response
     {
         $item = $this->itemRepo->find($id);
         if (!$item) {
-            return $this->render('error/not_found.html.twig', ['message' => 'L\'objet n\'a pas été retrouvé.']);
+            $this->addFlash('danger', self::ITEM_NOT_FOUND);
+            return $this->redirect($request->headers->get('referer'));
         }
         return $this->render('item/view.html.twig', ['item' => $item]);
     }

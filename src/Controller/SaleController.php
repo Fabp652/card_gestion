@@ -17,22 +17,26 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Route('/sale')]
 final class SaleController extends AbstractController
 {
+    private const NOT_FOUND = 'La vente est introuvable.';
+
     public function __construct(private SaleRepository $saleRepo)
     {
     }
 
-    #[Route('/sale', name: 'app_sale_list')]
+    #[Route(name: 'app_sale_list')]
     public function index(Request $request, PaginatorInterface $paginator): Response
     {
-        $filters = $request->query->all('filter');
+        $query = $request->query;
+        $filters = $query->all('filter');
         $filters = array_filter($filters, function ($filter) {
             return !empty($filter) || $filter == 0;
         });
 
         $sales = $this->saleRepo->findByFilter($filters);
-        $sales = $paginator->paginate($sales, $request->query->get('page', 1), $request->query->get('limit', 10));
+        $sales = $paginator->paginate($sales, $query->get('page', 1), $query->get('limit', 10));
 
         return $this->render('sale/index.html.twig', [
             'request' => $request,
@@ -41,7 +45,7 @@ final class SaleController extends AbstractController
         ]);
     }
 
-    #[Route('/sale/add', 'app_sale_add')]
+    #[Route('/add', 'app_sale_add')]
     public function add(Request $request, EntityManager $em, Validate $validate): Response
     {
         $sale = new Sale();
@@ -69,17 +73,17 @@ final class SaleController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/sale/{saleId}/edit', 'app_sale_edit', ['saleId' => '\d+'])]
+    #[Route('/{saleId}/edit', 'app_sale_edit', ['saleId' => '\d+'])]
     public function edit(Request $request, EntityManager $em, Validate $validate, int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
-            $message = 'L\'achat est introuvable.';
             if ($request->isMethod('GET')) {
-                return $this->render('error/not_found.html.twig', ['message' => $message]);
+                $this->addFlash('danger', self::NOT_FOUND);
+                return $this->redirectToRoute('app_sale_list');
             } else {
-                return $this->json(['result' => false, 'message' => $message]);
+                return $this->json(['result' => false, 'message' => self::NOT_FOUND]);
             }
         }
 
@@ -99,13 +103,14 @@ final class SaleController extends AbstractController
         return $this->render('sale/edit_or_view.html.twig', ['sale' => $sale, 'form' => $form]);
     }
 
-    #[Route('/sale/{saleId}/validate', 'app_sale_validate', ['saleId' => '\d+'])]
+    #[Route('/{saleId}/validate', 'app_sale_validate', ['saleId' => '\d+'])]
     public function validateSale(EventDispatcherInterface $dispatcher, EntityManager $em, int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
-            return $this->render('error/not_found.html.twig', ['message' => 'La vente est introuvable.']);
+            $this->addFlash('danger', self::NOT_FOUND);
+            return $this->redirectToRoute('app_sale_list');
         }
 
         if ($sale->getItemSales()->isEmpty()) {
@@ -130,18 +135,19 @@ final class SaleController extends AbstractController
         return $this->redirectToRoute('app_sale_view', ['saleId' => $saleId]);
     }
 
-    #[Route('/sale/{saleId}/view', 'app_sale_view', ['saleId' => '\d+'])]
+    #[Route('/{saleId}/view', 'app_sale_view', ['saleId' => '\d+'])]
     public function view(int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
-            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
+            $this->addFlash('danger', self::NOT_FOUND);
+            return $this->redirectToRoute('app_sale_edit', ['saleId' => $saleId]);
         }
         return $this->render('sale/edit_or_view.html.twig', ['sale' => $sale]);
     }
 
-    #[Route('/sale/{saleId}/state', 'app_sale_state', ['saleId' => '\d+'])]
+    #[Route('/{saleId}/state', 'app_sale_state', ['saleId' => '\d+'])]
     public function state(
         Request $request,
         Validate $validate,
@@ -152,7 +158,7 @@ final class SaleController extends AbstractController
         /** @var Sale $sale */
         $sale = $this->saleRepo->find($saleId);
         if (!$sale) {
-            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
+            return $this->json(['result' => false, 'message' => self::NOT_FOUND]);
         }
 
         $data = $request->request->all();
@@ -189,7 +195,7 @@ final class SaleController extends AbstractController
         return $this->json($em->flush());
     }
 
-    #[Route('/sale/{saleId}/delete', 'app_sale_delete', ['saleId' => '\d+'])]
+    #[Route('/{saleId}/delete', 'app_sale_delete', ['saleId' => '\d+'])]
     public function delete(Request $request, EntityManager $em, int $saleId): Response
     {
         /** @var Sale $sale */

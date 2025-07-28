@@ -17,29 +17,24 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Route('/purchase')]
 final class PurchaseController extends AbstractController
 {
     public function __construct(private PurchaseRepository $purchaseRepo)
     {
     }
 
-    #[Route('/purchase', 'app_purchase_list')]
+    #[Route(name: 'app_purchase_list')]
     public function list(Request $request, PaginatorInterface $paginator): Response
     {
-        $filters = $request->query->all('filter');
-        $filters = array_filter(
-            $filters,
-            function ($filter) {
-                return !empty($filter) || $filter == 0;
-            }
-        );
+        $query = $request->query;
+        $filters = $query->all('filter');
+        $filters = array_filter($filters, function ($filter) {
+            return !empty($filter) || $filter == 0;
+        });
 
         $purchases = $this->purchaseRepo->findByFilter($filters);
-        $purchases = $paginator->paginate(
-            $purchases,
-            $request->query->get('page', 1),
-            $request->query->get('limit', 10)
-        );
+        $purchases = $paginator->paginate($purchases, $query->get('page', 1), $query->get('limit', 10));
 
         return $this->render('purchase/index.html.twig', [
             'request' => $request,
@@ -48,7 +43,7 @@ final class PurchaseController extends AbstractController
         ]);
     }
 
-    #[Route('/purchase/add', 'app_purchase_add')]
+    #[Route('/add', 'app_purchase_add')]
     public function form(Request $request, EntityManager $em, Validate $validate): Response
     {
         $purchase = new Purchase();
@@ -79,7 +74,7 @@ final class PurchaseController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/purchase/{purchaseId}/delete', 'app_purchase_delete', ['purchaseId' => '\d+'])]
+    #[Route('/{purchaseId}/delete', 'app_purchase_delete', ['purchaseId' => '\d+'])]
     public function delete(Request $request, EntityManager $em, int $purchaseId): Response
     {
         $purchase = $this->purchaseRepo->find($purchaseId);
@@ -108,7 +103,7 @@ final class PurchaseController extends AbstractController
         }
     }
 
-    #[Route('/purchase/{purchaseId}/edit', 'app_purchase_edit', ['purchaseId' => '\d+'])]
+    #[Route('/{purchaseId}/edit', 'app_purchase_edit', ['purchaseId' => '\d+'])]
     public function edit(Request $request, EntityManager $em, Validate $validate, int $purchaseId): Response
     {
         /** @var Purchase $purchase */
@@ -116,19 +111,14 @@ final class PurchaseController extends AbstractController
         if (!$purchase) {
             $message = 'L\'achat est introuvable.';
             if ($request->isMethod('GET')) {
-                return $this->render('error/not_found.html.twig', [
-                    'message' => $message
-                ]);
+                $this->addFlash('danger', 'L\'achat est introuvable.');
+                return $this->redirectToRoute('app_purchase_list');
             } else {
                 return $this->json(['result' => false, 'message' => $message]);
             }
         }
 
-        $marketUrl = $this->generateUrl(
-            'app_market_search',
-            ['forBuy' => 1],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
+        $marketUrl = $this->generateUrl('app_market_search', ['forBuy' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
         $isOrder = $purchase->isOrder();
 
         $form = $this->createForm(PurchaseType::class, $purchase, [
@@ -150,22 +140,17 @@ final class PurchaseController extends AbstractController
         } elseif ($form->isSubmitted()) {
             return $this->json(['result' => false, 'messages' => $validate->getFormErrors($form)]);
         }
-
-        return $this->render('purchase/edit_or_view.html.twig', [
-            'purchase' => $purchase,
-            'form' => $form
-        ]);
+        return $this->render('purchase/edit_or_view.html.twig', ['purchase' => $purchase, 'form' => $form]);
     }
 
-    #[Route('/purchase/{purchaseId}/validate', 'app_purchase_validate', ['purchaseId' => '\d+'])]
+    #[Route('/{purchaseId}/validate', 'app_purchase_validate', ['purchaseId' => '\d+'])]
     public function validatePurchase(EventDispatcherInterface $dispatcher, EntityManager $em, int $purchaseId): Response
     {
         /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
         if (!$purchase) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            $this->addFlash('danger', 'L\'achat est introuvable.');
+            return $this->redirectToRoute('app_purchase_list');
         }
 
         if ($purchase->getItemsPurchase()->isEmpty()) {
@@ -177,34 +162,28 @@ final class PurchaseController extends AbstractController
         $purchase->setValidatedAt($dateTime);
 
         $event = new StateEvent($purchase->getId(), Purchase::class, 'validate', true);
-
         $dispatcher->dispatch($event, 'state');
 
         $result = $em->flush();
         if ($result['result']) {
             return $this->json($result);
         }
-
         return $this->redirectToRoute('app_purchase_view', ['purchaseId' => $purchaseId]);
     }
 
-    #[Route('/purchase/{purchaseId}/view', 'app_purchase_view', ['purchaseId' => '\d+'])]
+    #[Route('/{purchaseId}/view', 'app_purchase_view', ['purchaseId' => '\d+'])]
     public function view(int $purchaseId): Response
     {
         /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
         if (!$purchase) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            $this->addFlash('danger', 'L\'achat est introuvable.');
+            return $this->redirectToRoute('app_purchase_list');
         }
-
-        return $this->render('purchase/edit_or_view.html.twig', [
-            'purchase' => $purchase
-        ]);
+        return $this->render('purchase/edit_or_view.html.twig', ['purchase' => $purchase]);
     }
 
-    #[Route('/purchase/{purchaseId}/state', 'app_purchase_state', ['purchaseId' => '\d+'])]
+    #[Route('/{purchaseId}/state', 'app_purchase_state', ['purchaseId' => '\d+'])]
     public function state(
         Request $request,
         Validate $validate,
@@ -215,9 +194,7 @@ final class PurchaseController extends AbstractController
         /** @var Purchase $purchase */
         $purchase = $this->purchaseRepo->find($purchaseId);
         if (!$purchase) {
-            return $this->render('error/not_found.html.twig', [
-                'message' => 'L\'achat est introuvable.'
-            ]);
+            return $this->json(['result' => false, 'message' => 'L\'achat est introuvable.']);
         }
 
         $data = $request->request->all();

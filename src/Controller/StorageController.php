@@ -14,21 +14,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/storage')]
 class StorageController extends AbstractController
 {
     public function __construct(private StorageRepository $storageRepository)
     {
     }
 
-    #[Route('/storage', 'app_storage_list')]
+    #[Route(name: 'app_storage_list')]
     public function list(): Response
     {
         $stats = $this->storageRepository->stats();
         return $this->render('storage/index.html.twig', ['stats' => $stats]);
     }
 
-    #[Route('/storage/add', 'app_storage_add')]
-    #[Route('/storage/{storageId}/edit', 'app_storage_edit', ['storageId' => '\d+'])]
+    #[Route('/add', 'app_storage_add')]
+    #[Route('/{storageId}/edit', 'app_storage_edit', ['storageId' => '\d+'])]
     public function form(Request $request, EntityManager $em, Validate $validate, ?int $storageId): Response
     {
         $storage = new Storage();
@@ -62,7 +63,7 @@ class StorageController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/storage/{storageId}/delete', 'app_storage_delete', ['storageId' => '\d+'])]
+    #[Route('/{storageId}/delete', 'app_storage_delete', ['storageId' => '\d+'])]
     public function delete(EntityManager $em, int $storageId): Response
     {
         $storage = $this->storageRepository->find($storageId);
@@ -77,8 +78,9 @@ class StorageController extends AbstractController
         }
     }
 
-    #[Route('/storage/{storageId}/item/{itemQualityId}/remove', 'app_storage_remove', [
-        'storageId' => '\d+', 'itemQualityId' => '\d+'
+    #[Route('/{storageId}/item/{itemQualityId}/remove', 'app_storage_remove', [
+        'storageId' => '\d+',
+        'itemQualityId' => '\d+'
     ])]
     public function removeItem(
         ItemQualityRepository $itemQualityRepository,
@@ -107,7 +109,7 @@ class StorageController extends AbstractController
         }
     }
 
-    #[Route('/storage/{storageId}', 'app_storage_view', ['storageId' => '\d+'])]
+    #[Route('/{storageId}', 'app_storage_view', ['storageId' => '\d+'])]
     public function view(
         Request $request,
         PaginatorInterface $paginator,
@@ -118,12 +120,9 @@ class StorageController extends AbstractController
         $query = $request->query;
 
         $filters = $query->all('filter');
-        $filters = array_filter(
-            $filters,
-            function ($filter) {
-                return !empty($filter) || $filter == 0;
-            }
-        );
+        $filters = array_filter($filters, function ($filter) {
+            return !empty($filter) || $filter == 0;
+        });
 
         $itemQualities = $itemQualityRepository->findByFilter($filters, $storageId);
         $itemQualities = $paginator->paginate($itemQualities, $query->get('page', 1), $query->get('limit', 10));
@@ -135,7 +134,7 @@ class StorageController extends AbstractController
         ]);
     }
 
-    #[Route('/storage/{storageId}/update', 'app_storage_update', ['storageId' => '\d+'])]
+    #[Route('/{storageId}/update', 'app_storage_update', ['storageId' => '\d+'])]
     public function update(Request $request, ItemQualityRepository $iqRepo, EntityManager $em, int $storageId): Response
     {
         $flush = false;

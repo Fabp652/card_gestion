@@ -20,20 +20,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+ #[Route('/purchase')]
 final class ItemPurchaseController extends AbstractController
 {
     public function __construct(private ItemPurchaseRepository $iPRepo)
     {
     }
 
-    #[Route('/purchase/{purchaseId}/item', 'app_item_purchase_list', ['purchaseId' => '\d+'])]
+    #[Route('/{purchaseId}/item', 'app_item_purchase_list', ['purchaseId' => '\d+'])]
     public function list(Request $request, PurchaseRepository $purchaseRepo, int $purchaseId): Response
     {
         /** @var Purchase $purchase */
         $purchase = $purchaseRepo->find($purchaseId);
-        if (!$purchase) {
-            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
-        }
 
         $query = $request->query;
         if ($query->has('form') && $query->get('form') == 1) {
@@ -62,8 +60,8 @@ final class ItemPurchaseController extends AbstractController
         }
     }
 
-    #[Route('/purchase/{purchaseId}/item/add', 'app_item_purchase_add', ['purchaseId' => '\d+'])]
-    #[Route('/purchase/item/{itemPurchaseId}/edit', 'app_item_purchase_edit', ['itemPurchaseId' => '\d+'])]
+    #[Route('/{purchaseId}/item/add', 'app_item_purchase_add', ['purchaseId' => '\d+'])]
+    #[Route('/item/{itemPurchaseId}/edit', 'app_item_purchase_edit', ['itemPurchaseId' => '\d+'])]
     public function addOrEdit(
         Request $request,
         PurchaseRepository $purchaseRepo,
@@ -79,7 +77,7 @@ final class ItemPurchaseController extends AbstractController
         } else {
             $purchase = $purchaseRepo->find($purchaseId);
             if (!$purchase) {
-                return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
+                return $this->json(['result' => false, 'message' => 'une erreur est survenue.']);
             }
             $itemPurchase->setPurchase($purchase);
         }
@@ -139,7 +137,7 @@ final class ItemPurchaseController extends AbstractController
         }
     }
 
-    #[Route('/purchase/item/{itemPurchaseId}/delete', 'app_item_purchase_delete', ['itemPurchaseId' => '\d+'])]
+    #[Route('/item/{itemPurchaseId}/delete', 'app_item_purchase_delete', ['itemPurchaseId' => '\d+'])]
     public function delete(EntityManager $em, int $itemPurchaseId): Response
     {
         /** @var ItemPurchase $itemPurchase */
@@ -152,7 +150,12 @@ final class ItemPurchaseController extends AbstractController
         if (!$purchase->isValid()) {
             $purchase->removeItemsPurchase($itemPurchase);
             $purchase->caclPrice();
-            return $this->json($em->remove($itemPurchase, true));
+
+            $result = $em->remove($itemPurchase, true);
+            if ($result['result']) {
+                $this->addFlash('success', 'L\'objet est retiré avec succès.');
+            }
+            return $this->json($result);
         }
 
         return $this->json([
@@ -161,7 +164,7 @@ final class ItemPurchaseController extends AbstractController
         ]);
     }
 
-    #[Route('/purchase/item/{itemPurchaseId}/data', 'app_item_purchase_data', ['itemPurchaseId' => '\d+'])]
+    #[Route('/item/{itemPurchaseId}/data', 'app_item_purchase_data', ['itemPurchaseId' => '\d+'])]
     public function data(int $itemPurchaseId): Response
     {
         /** @var ItemPurchase $itemPurchase */
@@ -178,7 +181,7 @@ final class ItemPurchaseController extends AbstractController
         ]]);
     }
 
-    #[Route('/purchase/item/{itemPurchaseId}/state', 'app_item_purchase_state', ['itemPurchaseId' => '\d+'])]
+    #[Route('/item/{itemPurchaseId}/state', 'app_item_purchase_state', ['itemPurchaseId' => '\d+'])]
     public function state(
         Request $request,
         Validate $validate,

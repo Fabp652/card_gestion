@@ -19,20 +19,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Route('/sale')]
 class ItemSaleController extends AbstractController
 {
     public function __construct(private ItemSaleRepository $itemSaleRepository)
     {
     }
 
-    #[Route('/sale/{saleId}/item', 'app_item_sale_list', ['saleId' => '\d+'])]
+    #[Route('/{saleId}/item', 'app_item_sale_list', ['saleId' => '\d+'])]
     public function list(Request $request, SaleRepository $saleRepo, int $saleId): Response
     {
         /** @var Sale $sale */
         $sale = $saleRepo->find($saleId);
-        if (!$saleId) {
-            return $this->render('error/not_found.html.twig', ['message' => 'L\'achat est introuvable.']);
-        }
 
         $query = $request->query;
         if ($query->has('form') && $query->get('form') == 1) {
@@ -59,8 +57,8 @@ class ItemSaleController extends AbstractController
         }
     }
 
-    #[Route('/sale/{saleId}/item/add', 'app_item_sale_add', ['saleId' => '\d+'])]
-    #[Route('/sale/item/{itemSaleId}/edit', 'app_item_sale_edit', ['itemSaleId' => '\d+'])]
+    #[Route('/{saleId}/item/add', 'app_item_sale_add', ['saleId' => '\d+'])]
+    #[Route('/item/{itemSaleId}/edit', 'app_item_sale_edit', ['itemSaleId' => '\d+'])]
     public function addOrEdit(
         Request $request,
         SaleRepository $saleRepo,
@@ -87,11 +85,9 @@ class ItemSaleController extends AbstractController
             $itemSale->setSale($sale);
         }
 
-        $form = $this->createForm(
-            ItemSaleType::class,
-            $itemSale,
-            ['itemQualityId' => $request->request->all('item_sale')['itemQuality']]
-        )->handleRequest($request);
+        $form = $this->createForm(ItemSaleType::class, $itemSale, [
+            'itemQualityId' => $request->request->all('item_sale')['itemQuality']
+        ])->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $new = false;
@@ -144,7 +140,7 @@ class ItemSaleController extends AbstractController
         }
     }
 
-    #[Route('/sale/item/{itemSaleId}/delete', 'app_item_sale_delete', ['itemSaleId' => '\d+'])]
+    #[Route('/item/{itemSaleId}/delete', 'app_item_sale_delete', ['itemSaleId' => '\d+'])]
     public function delete(EntityManager $em, int $itemSaleId): Response
     {
         /** @var ItemSale $itemSale */
@@ -170,7 +166,7 @@ class ItemSaleController extends AbstractController
         }
     }
 
-    #[Route('/sale/item/{itemSaleId}/data', 'app_item_sale_data', ['itemSaleId' => '\d+'])]
+    #[Route('/item/{itemSaleId}/data', 'app_item_sale_data', ['itemSaleId' => '\d+'])]
     public function data(int $itemSaleId): Response
     {
         /** @var ItemSale $itemSale */
@@ -185,7 +181,7 @@ class ItemSaleController extends AbstractController
         ]]);
     }
 
-    #[Route('/sale/item/{itemSaleId}/state', 'app_item_sale_state', ['itemSaleId' => '\d+'])]
+    #[Route('/item/{itemSaleId}/state', 'app_item_sale_state', ['itemSaleId' => '\d+'])]
     public function state(
         Request $request,
         Validate $validate,
@@ -227,13 +223,7 @@ class ItemSaleController extends AbstractController
             return $this->json(['result' => false, 'messages' => $violations]);
         }
 
-        $event = new StateEvent(
-            $itemSale->getId(),
-            ItemSale::class,
-            $state,
-            true
-        );
-
+        $event = new StateEvent($itemSale->getId(), ItemSale::class, $state, true);
         $dispatcher->dispatch($event, 'state');
         return $this->json($em->flush());
     }

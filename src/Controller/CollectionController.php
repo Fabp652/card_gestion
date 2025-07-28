@@ -16,9 +16,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/collection')]
 class CollectionController extends AbstractController
 {
     private const FOLDER = 'collection';
+    private const NOT_FOUND = 'La collection est introuvable.';
 
     public function __construct(private CollectionsRepository $collectionRepo)
     {
@@ -31,14 +33,17 @@ class CollectionController extends AbstractController
         return $this->render('collection/index.html.twig', ['stats' => $stats]);
     }
 
-    #[Route('/collection/{collectionId}', 'app_collection_view', ['collectionId' => '\d+'])]
-    public function view(ItemRepository $itemRepo, RarityRepository $rarityRepository, int $collectionId): Response
+    #[Route('/{collectionId}', 'app_collection_view', ['collectionId' => '\d+'])]
+    public function view(ItemRepository $itemRepo, RarityRepository $rarityRepo, int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
+        if (!$collection) {
+            $this->addFlash('danger', self::NOT_FOUND);
+        }
         $categories = $collection->getCategory() ? $collection->getCategory()->getChilds() : [];
 
         if ($collection->hasRarities()) {
-            $statRarities = $rarityRepository->stats($collectionId);
+            $statRarities = $rarityRepo->stats($collectionId);
         }
 
         $mostExpensives = [];
@@ -59,7 +64,7 @@ class CollectionController extends AbstractController
         ]);
     }
 
-    #[Route('/collection/{collectionId}/dropdown', 'app_collection_dropdown', ['collectionId' => '\d+'])]
+    #[Route('/{collectionId}/dropdown', 'app_collection_dropdown', ['collectionId' => '\d+'])]
     public function dropdown(int $collectionId): Response
     {
         $actualCollection = $this->collectionRepo->find($collectionId);
@@ -70,8 +75,8 @@ class CollectionController extends AbstractController
         ]);
     }
 
-    #[Route('/collection/add', 'app_collection_add')]
-    #[Route('/collection/{collectionId}/edit', 'app_collection_edit', ['collectionId' => '\d+'])]
+    #[Route('/add', 'app_collection_add')]
+    #[Route('/{collectionId}/edit', 'app_collection_edit', ['collectionId' => '\d+'])]
     public function form(
         Request $request,
         FileManager $fileManager,
@@ -169,7 +174,7 @@ class CollectionController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/collection/{collectionId}/delete', 'app_collection_delete', ['collectionId' => '\d+'])]
+    #[Route('/{collectionId}/delete', 'app_collection_delete', ['collectionId' => '\d+'])]
     public function delete(EntityManager $em, int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
@@ -188,13 +193,13 @@ class CollectionController extends AbstractController
         }
     }
 
-    #[Route('/collection/{collectionId}/complete', 'app_collection_complete', ['collectionId' => '\d+'])]
+    #[Route('/{collectionId}/complete', 'app_collection_complete', ['collectionId' => '\d+'])]
     public function complete(Request $request, EntityManager $em, int $collectionId): Response
     {
         /** @var Collections $collection */
         $collection = $this->collectionRepo->find($collectionId);
         if (!$collection) {
-            return $this->json(['result' => false, 'message' => 'Une erreur est survenue.']);
+            return $this->json(['result' => false, 'message' => self::NOT_FOUND]);
         }
 
         $flush = false;

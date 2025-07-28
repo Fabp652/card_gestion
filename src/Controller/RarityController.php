@@ -32,10 +32,9 @@ final class RarityController extends AbstractController
         ?int $collectionId,
         ?int $rarityId
     ): Response {
+        $rarity = new Rarity();
         if ($rarityId) {
             $rarity = $this->rarityRepository->find($rarityId);
-        } else {
-            $rarity = new Rarity();
         }
 
         if ($collectionId) {

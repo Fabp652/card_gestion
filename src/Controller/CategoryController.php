@@ -13,37 +13,35 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/category')]
 class CategoryController extends AbstractController
 {
     public function __construct(private CategoryRepository $categoryRepo)
     {
     }
 
-    #[Route('/category', 'app_category_list')]
+    #[Route(name: 'app_category_list')]
     public function list(): Response
     {
         $stats = $this->categoryRepo->stats();
         return $this->render('category/index.html.twig', ['stats' => $stats]);
     }
 
-    #[Route(
-        'collection/{collectionId}/category/{categoryId}/nav',
-        'app_category_nav',
-        ['categoryId' => '\d+', 'collectionId' => '\d+']
-    )]
-    public function nav(int $collectionId, int $categoryId): Response
+    #[Route('/{categoryId}/nav', 'app_category_nav', ['categoryId' => '\d+'])]
+    public function nav(int $categoryId): Response
     {
         $categories = $this->categoryRepo->findBy(['parent' => $categoryId]);
-        return $this->render('category/partial/nav.html.twig', [
-            'categories' => $categories,
-            'collectionId' => $collectionId
-        ]);
+        return $this->render('category/partial/nav.html.twig', ['categories' => $categories]);
     }
 
-    #[Route('/category/{categoryId}', 'app_category_view', ['categoryId' => '\d+'])]
+    #[Route('/{categoryId}', 'app_category_view', ['categoryId' => '\d+'])]
     public function view(ItemRepository $itemRepo, int $categoryId): Response
     {
         $category = $this->categoryRepo->find($categoryId);
+        if (!$category) {
+            $this->addFlash('danger', 'La catégorie est introuvable.');
+            return $this->redirectToRoute('app_category_list');
+        }
         $childs = $category->getChilds();
 
         $mostExpensives = [];
@@ -59,9 +57,9 @@ class CategoryController extends AbstractController
         ]);
     }
 
-    #[Route('/category/add', 'app_category_add')]
-    #[Route('/category/{categoryId}/edit', 'app_category_edit', ['categoryId' => '\d+'])]
-    #[Route('/category/{parentId}/child/add', 'app_category_add_child', ['parentId' => '\d+'])]
+    #[Route('/add', 'app_category_add')]
+    #[Route('/{categoryId}/edit', 'app_category_edit', ['categoryId' => '\d+'])]
+    #[Route('/{parentId}/child/add', 'app_category_add_child', ['parentId' => '\d+'])]
     public function form(
         Request $request,
         Validate $validate,
@@ -74,6 +72,7 @@ class CategoryController extends AbstractController
         } else {
             $category = new Category();
         }
+
         $form = $this->createForm(CategoryType::class, $category)->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if ($parentId) {
@@ -104,12 +103,12 @@ class CategoryController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/category/{categoryId}/delete', 'app_category_delete', ['categoryId' => '\d+'])]
+    #[Route('/{categoryId}/delete', 'app_category_delete', ['categoryId' => '\d+'])]
     public function delete(EntityManager $em, int $categoryId): Response
     {
-        $collection = $this->categoryRepo->find($categoryId);
-        if ($collection) {
-            $result = $em->remove($collection, true);
+        $category = $this->categoryRepo->find($categoryId);
+        if ($category) {
+            $result = $em->remove($category, true);
             $this->addFlash('success', 'Catégorie supprimée avec succès.');
             return $this->json($result);
         } else {
