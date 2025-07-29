@@ -27,11 +27,13 @@ class CategoryController extends AbstractController
         return $this->render('category/index.html.twig', ['stats' => $stats]);
     }
 
-    #[Route('/{categoryId}/nav', 'app_category_nav', ['categoryId' => '\d+'])]
-    public function nav(int $categoryId): Response
+    #[Route('/nav', 'app_category_nav')]
+    public function nav(Request $request): Response
     {
-        $categories = $this->categoryRepo->findBy(['parent' => $categoryId]);
-        return $this->render('category/partial/nav.html.twig', ['categories' => $categories]);
+        return $this->render('category/partial/nav.html.twig', [
+            'categories' => $this->categoryRepo->findBy(['parent' => null]),
+            'categoryId' => $request->query->get('categoryId')
+        ]);
     }
 
     #[Route('/{categoryId}', 'app_category_view', ['categoryId' => '\d+'])]

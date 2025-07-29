@@ -123,5 +123,27 @@ export default class extends Controller {
         if (flashes.length > 0) {
             launchFlash(flashes);
         }
+
+        $('#showContent').on('click', function (e) {
+            let content = $('#content');
+            let deg = -180;
+
+            if (content.is(':hidden')) {
+                deg = 0;
+            }
+
+            content.toggle('display');
+            $(this).find('.iconRotate').animate(
+                {
+                    deg: deg
+                },
+                {
+                    duration: 250,
+                    step: function(now) {
+                        $(this).css({ transform: 'rotate(' + now + 'deg)' });
+                    }
+                }
+            );
+        });
     }
 }

@@ -172,4 +172,13 @@ class StorageController extends AbstractController
         }
         return $this->json(['result' => true]);
     }
+
+    #[Route('/nav', 'app_storage_nav')]
+    public function nav(Request $request): Response
+    {
+        return $this->render('storage/partial/nav.html.twig', [
+            'storages' => $this->storageRepository->findAll(),
+            'storageId' => $request->query->get('storageId')
+        ]);
+    }
 }

@@ -1,8 +1,13 @@
-<ul class="navbar-nav justify-content-end flex-grow-1">
+<ul class="navbar-nav ps-2 text-capitalize sub-nav" id="content">
     {% for category in categories %}
         <li class="nav-item category-nav">
-            <a class="nav-link text-uppercase fw-bold category-link ps-2" href="{{ absolute_url(path('app_item_list', {categoryId: category.id}))}}">{{ category.name }}</a>
-            <div class="category-border-hover"></div>
+            <a 
+                class="nav-link{{ categoryId and categoryId == category.id ? ' disabled navbar-active' : ' navbar-link' }}"
+                href="{{ absolute_url(path('app_category_view', {categoryId: category.id}))}}"
+            >
+                <i class="fa-solid fa-angle-right"></i> {{ category.name }}
+            </a>
+            <div class="{{ categoryId and categoryId == category.id ? 'navbar-border-active' : 'navbar-border-hover' }}"></div>
         </li>
     {% endfor %}
 </ul>

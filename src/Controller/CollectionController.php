@@ -16,8 +16,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('')]
-#[Route('/collection')]
 class CollectionController extends AbstractController
 {
     private const FOLDER = 'collection';
@@ -27,14 +25,14 @@ class CollectionController extends AbstractController
     {
     }
 
-    #[Route(name: 'app_collection')]
+    #[Route('', 'app_collection')]
     public function index(): Response
     {
         $stats = $this->collectionRepo->stats();
         return $this->render('collection/index.html.twig', ['stats' => $stats]);
     }
 
-    #[Route('/{collectionId}', 'app_collection_view', ['collectionId' => '\d+'])]
+    #[Route('/collection/{collectionId}', 'app_collection_view', ['collectionId' => '\d+'])]
     public function view(ItemRepository $itemRepo, RarityRepository $rarityRepo, int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
@@ -65,19 +63,8 @@ class CollectionController extends AbstractController
         ]);
     }
 
-    #[Route('/{collectionId}/dropdown', 'app_collection_dropdown', ['collectionId' => '\d+'])]
-    public function dropdown(int $collectionId): Response
-    {
-        $actualCollection = $this->collectionRepo->find($collectionId);
-        $collections = $this->collectionRepo->findCollectionsWithoutActual($collectionId);
-        return $this->render('collection/partial/dropdown.html.twig', [
-            'actualCollection' => $actualCollection,
-            'collections' => $collections
-        ]);
-    }
-
-    #[Route('/add', 'app_collection_add')]
-    #[Route('/{collectionId}/edit', 'app_collection_edit', ['collectionId' => '\d+'])]
+    #[Route('/collection/add', 'app_collection_add')]
+    #[Route('/collection/{collectionId}/edit', 'app_collection_edit', ['collectionId' => '\d+'])]
     public function form(
         Request $request,
         FileManager $fileManager,
@@ -175,7 +162,7 @@ class CollectionController extends AbstractController
         return $this->json(['result' => true, 'content' => $render->getContent()]);
     }
 
-    #[Route('/{collectionId}/delete', 'app_collection_delete', ['collectionId' => '\d+'])]
+    #[Route('/collection/{collectionId}/delete', 'app_collection_delete', ['collectionId' => '\d+'])]
     public function delete(EntityManager $em, int $collectionId): Response
     {
         $collection = $this->collectionRepo->find($collectionId);
@@ -194,7 +181,7 @@ class CollectionController extends AbstractController
         }
     }
 
-    #[Route('/{collectionId}/complete', 'app_collection_complete', ['collectionId' => '\d+'])]
+    #[Route('/collection/{collectionId}/complete', 'app_collection_complete', ['collectionId' => '\d+'])]
     public function complete(Request $request, EntityManager $em, int $collectionId): Response
     {
         /** @var Collections $collection */
@@ -219,5 +206,14 @@ class CollectionController extends AbstractController
             }
         }
         return $this->json(['result' => true, 'message' => 'Mis à jour avec succès']);
+    }
+
+    #[Route('/collection/nav', 'app_collection_nav')]
+    public function nav(Request $request): Response
+    {
+        return $this->render('collection/partial/nav.html.twig', [
+            'collections' => $this->collectionRepo->findAll(),
+            'collectionId' => $request->query->get('collectionId')
+        ]);
     }
 }

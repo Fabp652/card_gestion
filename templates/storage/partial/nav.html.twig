@@ -1,0 +1,12 @@
+<ul class="navbar-nav ps-2 text-capitalize sub-nav" id="content">
+    {% for storage in storages %}
+        <li class="nav-item">
+            <a
+                class="nav-link{{ storageId and storageId == storage.id ? ' disabled navbar-active' : ' navbar-link' }}"
+                href="{{ absolute_url(path('app_storage_view', {storageId: storage.id}))}}">
+                <i class="fa-solid fa-angle-right"></i> {{ storage.name }}
+            </a>
+            <div class="{{ storageId and storageId == storage.id ? 'navbar-border-active' : 'navbar-border-hover' }}"></div>
+        </li>
+    {% endfor %}
+</ul>

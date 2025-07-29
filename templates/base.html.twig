@@ -20,9 +20,6 @@
     <body class="bg-light d-flex min-vh-100">
         {% block body %}
                 <nav class="navbar bg-light px-2 fixed-top justify-content-center" data-controller="global">
-                    {% if collection is defined and collection %}
-                        {{ render(path('app_collection_dropdown', {collectionId: collection.id})) }}
-                    {% endif %}
                     <form id="searchForm" class="w-50 d-flex justify-content-center" role="search" action="{{ path('app_item_search', {searchBar: 1}) }}" method="GET">
                         <div class="w-75 position-relative">
                             <input id="search" class="form-control" type="search" name="search" placeholder="Rechercher" aria-label="Rechercher" style="--bs-focus-ring-color: rgba(var(--bs-black-rgb), .25)">
@@ -38,46 +35,83 @@
                     <h3 class="d-flex align-items-center pb-3 mb-3 border-bottom">Collectors</h3>
                     <ul class="navbar-nav text-uppercase fw-semibold flex-column">
                         <li class="nav-item">
-                            <a class="nav-link{{ pathInfo == '/' ? ' disabled navbar-active' : ' navbar-link' }}" href="{{ path('app_collection') }}">
-                                <i class="fa-solid fa-gem"></i> Collections
-                            </a>
-                            <div class="{{ pathInfo == '/' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                            {% set activeCollection  = pathInfo == '/' or pathInfo starts with '/collection' or pathInfo starts with '/item' %}
+                            {% if activeCollection %}
+                                <div id="showContent" class="nav-link navbar-active position-relative">
+                                    <i class="fa-solid fa-gem"></i> Collections
+                                    <i class="fa-solid fa-angle-up position-absolute end-0 my-1 iconRotate"></i>
+                                </div>
+                                <div class="navbar-border-active"></div>
+                                {{ render(path('app_collection_nav', {collectionId: collection is defined ? collection.id : null})) }}
+                            {% else %}
+                                <a class="nav-link navbar-link position-relative" href="{{ path('app_collection') }}">
+                                    <i class="fa-solid fa-gem"></i> Collections
+                                    <i class="fa-solid fa-angle-down position-absolute end-0 my-1"></i>
+                                </a>
+                                <div class="navbar-border-hover"></div>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link{{ pathInfo == '/storage' ? ' disabled navbar-active' : ' navbar-link' }}" href="{{ path('app_storage_list') }}">
-                                <i class="fa-solid fa-boxes-stacked"></i> Rangements
-                            </a>
-                            <div class="{{ pathInfo == '/storage' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                            {% set activeStorage  = pathInfo starts with '/storage' %}
+                            {% if activeStorage %}
+                                <div id="showContent" class="nav-link navbar-active position-relative">
+                                    <i class="fa-solid fa-gem"></i> Rangements
+                                    <i class="fa-solid fa-angle-up position-absolute end-0 my-1 iconRotate"></i>
+                                </div>
+                                <div class="navbar-border-active"></div>
+                                {{ render(path('app_storage_nav', {storageId: storage is defined ? storage.id : null})) }}
+                            {% else %}
+                                <a class="nav-link navbar-link position-relative" href="{{ path('app_storage_list') }}">
+                                    <i class="fa-solid fa-gem"></i> Rangements
+                                    <i class="fa-solid fa-angle-down position-absolute end-0 my-1"></i>
+                                </a>
+                                <div class="navbar-border-hover"></div>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
-                            <a href="{{ path('app_category_list') }}" class="nav-link{{ pathInfo == '/category' ? ' disabled navbar-active' : ' navbar-link' }}">
-                                <i class="fa-solid fa-tags"></i> Catégories
-                            </a>
-                            <div class="{{ pathInfo == '/category' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                            {% set activeCategory  = pathInfo starts with '/category' %}
+                            {% if activeCategory %}
+                                <div id="showContent" class="nav-link navbar-active position-relative">
+                                    <i class="fa-solid fa-gem"></i> Catégories
+                                    <i class="fa-solid fa-angle-up position-absolute end-0 my-1 iconRotate"></i>
+                                </div>
+                                <div class="navbar-border-active"></div>
+                                {{ render(path('app_category_nav', {categoryId: category is defined ? category.id : null})) }}
+                            {% else %}
+                                <a class="nav-link navbar-link position-relative" href="{{ path('app_category_list') }}">
+                                    <i class="fa-solid fa-gem"></i> Catégories
+                                    <i class="fa-solid fa-angle-down position-absolute end-0 my-1"></i>
+                                </a>
+                                <div class="navbar-border-hover"></div>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
-                            <a href="{{ path('app_criteria_list') }}" class="nav-link{{ pathInfo == '/criteria' ? ' disabled navbar-active' : ' navbar-link' }}">
+                            {% set activeCriteria  = pathInfo starts with '/criteria' %}
+                            <a href="{{ path('app_criteria_list') }}" class="nav-link{{ activeCriteria ? ' disabled navbar-active' : ' navbar-link' }}">
                                 <i class="fa-solid fa-list-check"></i> Critères
                             </a>
-                            <div class="{{ pathInfo == '/criteria' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                            <div class="{{ activeCriteria ? 'navbar-border-active' : 'navbar-border-hover' }}"></div>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ path('app_sale_list') }}" class="nav-link{{ pathInfo == '/item/sale' ? ' disabled navbar-active' : ' navbar-link' }}">
+                            {% set activeSale  = pathInfo starts with '/sale' %}
+                            <a href="{{ path('app_sale_list') }}" class="nav-link{{ activeSale ? ' disabled navbar-active' : ' navbar-link' }}">
                                 <i class="fa-solid fa-coins"></i> Ventes
                             </a>
-                            <div class="{{ pathInfo == '/item/sale' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                            <div class="{{ activeSale ? 'navbar-border-active' : 'navbar-border-hover' }}"></div>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ path('app_purchase_list') }}" class="nav-link{{ pathInfo == '/purchase' ? ' disabled navbar-active' : ' navbar-link' }}">
+                            {% set activePurchase  = pathInfo starts with '/purchase' %}
+                            <a href="{{ path('app_purchase_list') }}" class="nav-link{{ activePurchase ? ' disabled navbar-active' : ' navbar-link' }}">
                                 <i class="fa-solid fa-cart-shopping"></i> Achats
                             </a>
-                            <div class="{{ pathInfo == '/purchase' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                            <div class="{{ activePurchase ? 'navbar-border-active' : 'navbar-border-hover' }}"></div>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ path('app_market_list') }}" class="nav-link{{ pathInfo == '/market' ? ' disabled navbar-active' : ' navbar-link' }}">
+                            {% set activeMarket  = pathInfo starts with '/market' %}
+                            <a href="{{ path('app_market_list') }}" class="nav-link{{ activeMarket ? ' disabled navbar-active' : ' navbar-link' }}">
                                 <i class="fa-solid fa-shop"></i> Boutiques/Marchés
                             </a>
-                            <div class="{{ pathInfo == '/market' ? 'navbar-border-active' : 'navbar-border-hover mx-auto' }}"></div>
+                            <div class="{{ activeMarket ? 'navbar-border-active' : 'navbar-border-hover' }}"></div>
                         </li>
                     </ul>
                 </div>

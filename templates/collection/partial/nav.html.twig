@@ -1,0 +1,12 @@
+<ul class="navbar-nav ps-2 text-capitalize sub-nav" id="content">
+    {% for collection in collections %}
+        <li class="nav-item">
+            <a
+                class="nav-link{{ collectionId and collectionId == collection.id ? ' disabled navbar-active' : ' navbar-link' }}"
+                href="{{ absolute_url(path('app_collection_view', {collectionId: collection.id}))}}">
+                <i class="fa-solid fa-angle-right"></i> {{ collection.name }}
+            </a>
+            <div class="{{ collectionId and collectionId == collection.id ? 'navbar-border-active' : 'navbar-border-hover' }}"></div>
+        </li>
+    {% endfor %}
+</ul>
